@@ -23,7 +23,7 @@ def timef_to_spikes_1D(fs, f):
 
 def timef_to_spikes(fs, f):
     """
-    Convert time functions to a list of spike events.
+    Convert time functions to a list of spike trains.
     """
     fs = float(fs)
 
