@@ -4,20 +4,21 @@ import numpy as np
 
 def timef_to_spikes_1D(fs, f):
     """
-    Convert time function (np.array) into spike events (list). 1D version.
+    Convert time function 1D array into spike events array.
     """
     f = np.asarray(f).astype(int)
 
     fs = float(fs)
-    spikes = []
 
-    non_empty = np.where(f > 0)[0]
+    # non_empty = np.where(f > 0)[0]
 
-    for time_idx in non_empty:
-        time_samp = f[time_idx]
-        spikes.extend([1000 * time_idx/fs for each in range(time_samp)]) # ms
+    # for time_idx in non_empty:
+    #     time_samp = f[time_idx]
+    #     spikes.extend([1000 * time_idx/fs for each in range(time_samp)]) # ms
 
-    return np.asarray(spikes)
+    spikes = [ [i*fs]*n for i,n in enumerate(f) ]
+
+    return np.concatenate(spikes)
 
 
 def timef_to_spikes(fs, f):
@@ -37,6 +38,7 @@ def timef_to_spikes(fs, f):
         assert False
 
     return spike_trains
+
 
 
 def spikes_to_timef_1D(fs, spikes, tmax=None):
