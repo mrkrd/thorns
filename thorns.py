@@ -1,8 +1,8 @@
-# thorns: spike analysis toolbox
+# Thorns:  spike analysis software
 
 import numpy as np
 
-def timef_to_spikes_1D(fs, f):
+def signal_to_spikes_1D(fs, f):
     """
     Convert time function 1D array into spike events array.
     """
@@ -10,18 +10,16 @@ def timef_to_spikes_1D(fs, f):
 
     fs = float(fs)
 
-    # non_empty = np.where(f > 0)[0]
+    non_empty = np.where(f > 0)[0]
+    spikes = []
+    for time_idx in non_empty:
+        time_samp = f[time_idx]
+        spikes.extend([1000 * time_idx/fs for each in range(time_samp)]) # ms
 
-    # for time_idx in non_empty:
-    #     time_samp = f[time_idx]
-    #     spikes.extend([1000 * time_idx/fs for each in range(time_samp)]) # ms
-
-    spikes = [ [i*fs]*n for i,n in enumerate(f) ]
-
-    return np.concatenate(spikes)
+    return np.array(spikes)
 
 
-def timef_to_spikes(fs, f):
+def signal_to_spikes(fs, f):
     """
     Convert time functions to a list of spike trains.
     """
@@ -30,10 +28,10 @@ def timef_to_spikes(fs, f):
     spike_trains = []
 
     if f.ndim == 1:
-        spike_trains.append(timef_to_spikes_1D(fs, f))
+        spike_trains.append(signal_to_spikes_1D(fs, f))
     elif f.ndim == 2:
-        for f_1D in f:
-            spike_trains.append(timef_to_spikes_1D(fs, f_1D))
+        for f_1D in f.T:
+            spike_trains.append(signal_to_spikes_1D(fs, f_1D))
     else:
         assert False
 
@@ -41,12 +39,14 @@ def timef_to_spikes(fs, f):
 
 
 
-def spikes_to_timef_1D(fs, spikes, tmax=None):
+def spikes_to_signal_1D(fs, spikes, tmax=None):
     """
     Convert spike train to its time function. 1D version.
     """
     # Test if all elements are floats (1D case)
     #assert np.all([isinstance(each, float) for each in spikes])
+
+    # TODO: implement with np.histogram
 
     if tmax == None:
         tmax = max(spikes)
@@ -61,7 +61,7 @@ def spikes_to_timef_1D(fs, spikes, tmax=None):
     return f
 
 
-def spikes_to_timef(fs, spikes):
+def spikes_to_signal(fs, spikes):
     """
     Convert spike trains to theirs time functions.
     """
@@ -70,7 +70,7 @@ def spikes_to_timef(fs, spikes):
 
         f_list = []
         for train in spikes:
-            f1d = spikes_to_timef_1D(fs, train)
+            f1d = spikes_to_signal_1D(fs, train)
             f_list.append(f1d)
 
         # Adjust length of each time function to the maximum
@@ -85,7 +85,7 @@ def spikes_to_timef(fs, spikes):
 
 
     else:
-        f = spikes_to_timef_1D(fs, spikes)
+        f = spikes_to_signal_1D(fs, spikes)
 
     return f
 
@@ -143,46 +143,37 @@ def plot_psth(spikes, bin_size=1, ax=None, tmax=None):
 
 
 
-def calc_SI(fs, fstim, psth):
+def synchronization_index(Fstim, spikes):
     """
-    Computes Syncronization Index.
+    Calculate Synchronization Index.
 
-    fs: sampling frequency
-    fstim: stimulus frequency (sine wave)
-    spieks: clean (without padding) PST histogram
+    Fstim: stimulus frequency in Hz
+    spikes: list of arrays of spiking times
 
-    return: syncronization index
+    return: synchronization index
     """
-    fs = float(fs)
-    fstim = float(fstim)
+    Fstim = float(Fstim)
+    Fstim = Fstim / 1000        # Hz -> kHz
 
-    signal_samp = len(psth)
-    signal_sec = len(psth) / fs   # s
+    all_spikes = np.concatenate(tuple(spikes))
 
-    period_samp = np.floor(fs / fstim)
-    period_sec = 1 / fstim         # s
+    # TODO: remove here spikes from the beginning and the end
 
-    # number of periods
-    period_num = np.floor(signal_sec / period_sec)
+    all_spikes = all_spikes - all_spikes.min()
 
-    start_sec = np.arange(0, period_num * period_sec, period_sec)
-    start_samp = np.floor(start_sec * fs)
+    #bins = 360                  # number of bins per Fstim period
+    # hist_range = (0, 1/Fstim)
+    # ph = np.zeros(bins)
+    # period_num = np.floor(all_spikes.max() * Fstim) + 1
 
-    # Generate index
-    # [[ t1   t2   t3 ]
-    #  [t1+1 t2+1 t3+1]
-    #  [t1+2 t2+2 t3+2]
-    #  [t1+3 t2+3 t3+3]
-    #  [t1+4 t2+4 t3+4]]
-    # where t1, t2, t3 are initial indexes of each stimulus period
-    idx = np.repeat([start_samp], period_samp, axis=0)
-    range_sqr = np.repeat([np.arange(period_samp)], len(start_samp), axis=0).T
-    idx = idx + range_sqr
+    # for i in range(period_num):
+    #     lo = i / Fstim
+    #     hi = lo + 1/Fstim
+    #     current_spikes = all_spikes[(all_spikes >= lo) & (all_spikes < hi)]
+    #     ph += np.histogram(current_spikes-lo, bins=bins, range=hist_range)[0]
 
-    psth_fold = psth[idx.astype(int)]
-
-    ph = np.sum(psth_fold, axis=1)
-
+    folded = np.fmod(all_spikes, 1/Fstim)
+    ph = np.histogram(folded, bins=180)[0]
 
     # indexing trick is necessary, because the sample at 2*pi belongs
     # to the next cycle
@@ -197,34 +188,24 @@ def calc_SI(fs, fstim, psth):
     return r
 
 
-def test_calc_SI():
-    fs = 100000.0
-    fstim = 800.0
 
-    test0 = np.ones(fs)        # 1 s
-    print "test0 SI: ", calc_SI(fs, fstim, test0)
+def test_synchronization_index():
+    fs = 36000.0
+    Fstim = 100.0
 
-    test1 = np.zeros(fs)
-    test1[np.round(fs/2)] = 30
-    print "test1 SI: ", calc_SI(fs, fstim, test1)
+    test0 = [np.arange(0, 0.1, 1/fs)*1000, np.arange(0, 0.1, 1/fs)*1000]
+    si0 = synchronization_index(Fstim, test0)
+    print "test0 SI: ", si0,
+    assert si0 < 1e-4
+    print "OK"
 
-
-
-
-def set_dB_SPL(dB, signal):
-    p0 = 2e-5                   # Pa
-    squared = signal**2
-    rms = np.sqrt( np.sum(squared) / len(signal) )
-
-    if rms == 0:
-        r = 0
-    else:
-        r = 10**(dB / 20.0) * p0 / rms;
-
-
-    return signal * r * 1e6     # uPa
+    test1 = [np.zeros(fs)]
+    si1 = synchronization_index(Fstim, test1)
+    print "test1 SI: ", si1,
+    assert si1 == 1
+    print "OK"
 
 
 
 if __name__ == "__main__":
-    test_calc_SI()
+    test_synchronization_index()

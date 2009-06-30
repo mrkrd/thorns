@@ -11,8 +11,6 @@ def test_timef_to_spikes_1D():
 
     out = th.timef_to_spikes_1D(fs, f)
 
-    print f, out
-
     assert np.all(expectation == out)
     print "OK"
 
@@ -20,7 +18,7 @@ def test_timef_to_spikes_1D():
 def test_timef_to_spikes():
     print "Testing timef_to_spikes...",
     f = np.array([[0, 0, 3, 2, 0, 1, 0],
-                  [0, 0, 2, 2, 0, 1, 0]])
+                  [0, 0, 2, 2, 0, 1, 0]]).T
     fs = 1
 
     expectation = [np.array([2, 2, 2, 3, 3, 5]),
