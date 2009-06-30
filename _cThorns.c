@@ -13,8 +13,8 @@ _c_signal_to_spikes(PyObject* self, PyObject* args)
 
      /* Output spikes */
      PyObject *spikes;
-     int nd = 1;
-     npy_intp dims[1];
+     int spikes_nd = 1;
+     npy_intp spikes_dims[1];
      double *spikes_data;
 
      /* Temp array */
@@ -28,18 +28,29 @@ _c_signal_to_spikes(PyObject* self, PyObject* args)
      signal_arr = PyArray_FROM_OTF(signal_arg, NPY_DOUBLE, NPY_IN_ARRAY);
      if (signal_arr == NULL) return NULL;
 
+
      /* Generate output array */
      spikes_len = 0;
      for (i = 0; i < signal_len; i++) {
 	  spikes_len += signal_data[i];
      }
      dims[0] = spikes_len;
-     spikes_arr = PyArray_SimpleNew(nd, dims, NPY_DOUBLE);
-     spikes_data =
+     spikes_arr = PyArray_SimpleNew(spikes_nd, spikes_dims, NPY_DOUBLE);
+     spikes_data = PyArray_DATA(spikes_arr);
 
 
+     spikes_idx = 0;
+     /* Convert signal to events */
+     for (i = 0; i < signal_len; i++) {
+	  for (j = 0; j < signal_data[i]; j++) {
+	       spikes_data[spikes_idx] = i;
+	       spikes_idx++;
+	  }
+     }
 
-     Py_RETURN_NONE;
+
+     Py_DECREF(signal_arr);
+     return spikes_arr;
 }
 
 
