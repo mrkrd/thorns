@@ -1,5 +1,7 @@
 # Mixed functions
 
+import numpy as np
+
 def set_dB_SPL(dB, signal):
     p0 = 2e-5                   # Pa
     squared = signal**2
