@@ -128,14 +128,15 @@ def plot_raster(spikes):
     plt.show()
 
 
-def plot_psth(spikes, bin_size=1, ax=None, tmax=None):
+def plot_psth(spikes, bin_size=1, axis=None, tmax=None, **kwargs):
     """
     Plots PSTH from spikes (list of arrays of spike timings)
 
     bin_size: bin size in ms
-    ax: axis to draw on
+    axis: axis to draw on
     """
     import matplotlib.pyplot as plt
+
 
     # Assert list of arrays as input
     #assert np.all([isinstance(each, np.ndarray) for each in spikes])
@@ -152,14 +153,12 @@ def plot_psth(spikes, bin_size=1, ax=None, tmax=None):
         # bin size = 1ms
         nbins = np.floor((max(all_spikes) - min(all_spikes)) / float(bin_size))
 
-        if ax == None:
-        #plt.hist(all_spikes, nbins)
-            plt.hist(all_spikes, nbins)
+        if axis == None:
+            axis = plt.gca()
+            axis.hist(all_spikes, nbins, **kwargs)
             plt.show()
         else:
-        #ax.hist(all_spikes, nbins)
-            n, bins = np.histogram(all_spikes, nbins)
-            ax.plot(bins[0:-1], n)
+            axis.hist(all_spikes, nbins, **kwargs)
 
 
 
