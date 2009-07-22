@@ -1,6 +1,7 @@
 # Thorns:  spike analysis software
 
 import numpy as np
+from numpy.random import shuffle
 
 def signal_to_spikes_1D(fs, f):
     """
@@ -240,13 +241,13 @@ def test_c_signal_to_spikes():
 
 
 
-def _unnormalized_correlation_index(spike_trains, window_len=0.05):
+def raw_correlation_index(spike_trains, window_len=0.05):
     """
     Computes unnormalized correlation index. (Joris et al. 2006)
 
 
     >>> trains = [np.array([1, 2]), np.array([1.03, 2, 3])]
-    >>> _unnormalized_correlation_index(trains)
+    >>> raw_correlation_index(trains)
     3
     """
     all_spikes = np.concatenate(tuple(spike_trains))
@@ -256,9 +257,63 @@ def _unnormalized_correlation_index(spike_trains, window_len=0.05):
     for spike in all_spikes:
         hits = all_spikes[(all_spikes >= spike) &
                           (all_spikes <= spike+window_len)]
-        Nc += len(hits) - 1     # current spike included therefore -1
+        Nc += len(hits) - 1
 
     return Nc
+
+
+def shuffle_spikes(spike_trains):
+    """
+    Get input spikes.  Randomly permute inter spikes intervals.
+    Return new spike trains.
+    """
+    new_train_list = []
+    for train in spike_trains:
+        isi = np.diff(np.append(0, train)) # Append 0 in order to vary
+                                           # the onset
+        shuffle(isi)
+        shuffled_train = np.cumsum(isi)
+        new_train_list.append(shuffled_train)
+
+    return new_train_list
+
+
+def test_shuffle_spikes():
+    spikes = [np.array([2, 3, 4]),
+              np.array([1, 3, 6])]
+
+    print spikes
+    print shuffle_spikes(spikes)
+
+
+
+def avarage_firing_rate(spike_trains, stimulus_duration=None):
+    all_spikes = np.concatenate(tuple(spike_trains))
+    if stimulus_duration == None:
+        stimulus_duration = all_spikes.max() - all_spikes.min()
+    trial_num = len(spike_trains)
+    r = all_spikes.size / (stimulus_duration * trial_num)
+    return r
+
+
+def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=None):
+    """
+    Comput correlation index (Joris 2006)
+    """
+    if stimulus_duration == None:
+        all_spikes = np.concatenate(tuple(spike_trains))
+        stimulus_duration = all_spikes.max() - all_spikes.min()
+
+    firing_rate = avarage_firing_rate(spike_trains, stimulus_duration)
+
+    trial_num = len(spike_trains)
+
+    ci = (raw_correlation_index(spike_trains) /
+          ( trial_num*(trial_num-1) * firing_rate**2 * window_len * stimulus_duration))
+
+    return ci
+
+
 
 
 if __name__ == "__main__":
@@ -269,3 +324,5 @@ if __name__ == "__main__":
     # test_synchronization_index()
 
     doctest.testmod()
+
+    test_shuffle_spikes()
