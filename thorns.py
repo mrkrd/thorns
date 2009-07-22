@@ -308,12 +308,53 @@ def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=N
 
     trial_num = len(spike_trains)
 
+    # Compute raw CI and normalize it
     ci = (raw_correlation_index(spike_trains) /
-          ( trial_num*(trial_num-1) * firing_rate**2 * window_len * stimulus_duration))
+          ( trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * stimulus_duration))
 
     return ci
 
 
+def shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_window=5,
+                             stimulus_duration=None):
+    """
+    Calculate Shuffled Autocorrelogram (Joris 2006)
+
+    >>> a = [np.array([1, 2, 3]), np.array([1, 2.01, 2.5])]
+    >>> shuffled_autocorrelation(a)
+    """
+    if stimulus_duration == None:
+        all_spikes = np.concatenate(tuple(spike_trains))
+        stimulus_duration = all_spikes.max() - all_spikes.min()
+    firing_rate = avarage_firing_rate(spike_trains, stimulus_duration)
+    trial_num = len(spike_trains)
+
+    cum = []
+    for i in range(len(spike_trains)):
+        other_trains = list(spike_trains)
+        train = other_trains.pop(i)
+        almost_all_spikes = np.concatenate(tuple(other_trains))
+
+        for spike in train:
+            centered = almost_all_spikes - spike
+            trimmed = centered[(centered > -analysis_window) & (centered < analysis_window)]
+            cum.append(trimmed)
+
+    cum = np.concatenate(tuple(cum))
+    hist, bin_edges = np.histogram(cum,
+                                   bins=np.ceil(2*analysis_window/coincidence_window),
+                                   range=(-analysis_window, analysis_window))
+    sac = (hist /
+           ( trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * stimulus_duration))
+
+    t = bin_edges[0:-1] + (bin_edges[1] - bin_edges[0])
+
+    return t, sac
+
+
+
+
+sac = shuffled_autocorrelation
 
 
 if __name__ == "__main__":
@@ -325,4 +366,4 @@ if __name__ == "__main__":
 
     doctest.testmod()
 
-    test_shuffle_spikes()
+    # test_shuffle_spikes()
