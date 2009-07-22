@@ -26,8 +26,17 @@ def test_ci():
     print th.correlation_index(spikes)
 
 def test_sac():
-    a = [np.array([1, 2, 3]), np.array([1, 2.01, 4])]
-    t, sac = th.shuffled_autocorrelation(a)
+    # a = [np.array([1, 2, 3]), np.array([1, 2.01, 4])]
+    # t, sac = th.shuffled_autocorrelation(a)
+
+
+    b = np.arange(1,2,0.05)
+    c = np.arange(1,2,0.05)
+    spikes = [b, np.array([1])]
+    t, sac = th.shuffled_autocorrelation(spikes, coincidence_window=0.05)
+    plt.plot(t, sac)
+    plt.show()
+
 
     fs = 100000.0               # Hz
     bf = 500.0                  # Hz
@@ -51,5 +60,5 @@ def test_sac():
 
 
 if __name__ == "__main__":
-    test_ci()
+    # test_ci()
     test_sac()

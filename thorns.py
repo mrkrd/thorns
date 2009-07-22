@@ -1,6 +1,7 @@
 # Thorns:  spike analysis software
 
 import numpy as np
+import matplotlib.pyplot as plt
 from numpy.random import shuffle
 
 def signal_to_spikes_1D(fs, f):
@@ -114,7 +115,6 @@ def spikes_to_signal(fs, spikes):
 
 
 def plot_raster(spikes):
-    import matplotlib.pyplot as plt
 
     # Assert list of arrays as input
     assert np.all([isinstance(each, np.ndarray) for each in spikes])
@@ -136,8 +136,6 @@ def plot_psth(spikes, bin_size=1, axis=None, tmax=None, **kwargs):
     bin_size: bin size in ms
     axis: axis to draw on
     """
-    import matplotlib.pyplot as plt
-
 
     # Assert list of arrays as input
     #assert np.all([isinstance(each, np.ndarray) for each in spikes])
@@ -341,8 +339,9 @@ def shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_win
             cum.append(trimmed)
 
     cum = np.concatenate(tuple(cum))
+
     hist, bin_edges = np.histogram(cum,
-                                   bins=np.ceil(2*analysis_window/coincidence_window),
+                                   bins=np.floor(2*analysis_window/coincidence_window)+1,
                                    range=(-analysis_window, analysis_window))
     sac = (hist /
            ( trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * stimulus_duration))
