@@ -1,4 +1,7 @@
-# Thorns:  spike analysis software
+# Author: Marek Rudnicki
+# Time-stamp: <2009-07-29 12:10:31 marek>
+#
+# Description: Thorns: Spike analysis software
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -114,38 +117,48 @@ def spikes_to_signal(fs, spikes):
     return f
 
 
-def plot_raster(spikes):
-
-    # Assert list of arrays as input
-    assert np.all([isinstance(each, np.ndarray) for each in spikes])
+def plot_raster(spike_trains, axis=None, **kwargs):
+    """
+    Plot raster plot.
+    """
 
     n = []
     s = []
-    for i,train in enumerate(spikes):
+    for i,train in enumerate(spike_trains):
         s.extend(train)                 # flatten spikes
         n.extend([i for each in train]) # trial number
 
-    plt.plot(s, n, 'o')
-    plt.show()
+    if axis == None:
+        axis = plt.gca()
+        axis.plot(s, n, ',', **kwargs)
+        axis.set_xlabel("Time [ms]")
+        axis.set_ylabel("Trial #")
+        plt.show()
+    else:
+        axis.plot(s, n, ',', **kwargs)
+        axis.set_xlabel("Time [ms]")
+        axis.set_ylabel("Trial #")
 
 
-def plot_psth(spikes, bin_size=1, axis=None, tmax=None, **kwargs):
+def plot_psth(spikes, bin_size=1, axis=None, **kwargs):
     """
     Plots PSTH from spikes (list of arrays of spike timings)
 
     bin_size: bin size in ms
     axis: axis to draw on
+
+    **kwargs: plt.hist arguments
     """
 
     # Assert list of arrays as input
     #assert np.all([isinstance(each, np.ndarray) for each in spikes])
 
-    all_spikes = np.concatenate(tuple(spikes))
+    if len(spikes) > 0:
+        all_spikes = np.concatenate(tuple(spikes))
+    else:
+        print "No spikes!"
+        return
 
-
-    # Remove entries greater than tmax
-    if tmax != None:
-        all_spikes = np.delete(all_spikes, np.where(np.asarray(all_spikes) > tmax)[0])
 
     if len(all_spikes) != 0:
 
@@ -319,7 +332,8 @@ def shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_win
     Calculate Shuffled Autocorrelogram (Joris 2006)
 
     >>> a = [np.array([1, 2, 3]), np.array([1, 2.01, 2.5])]
-    >>> shuffled_autocorrelation(a)
+    >>> shuffled_autocorrelation(a, coincidence_window=1, analysis_window=2)
+    (array([-1.2, -0.4,  0.4,  1.2,  2. ]), array([ 0.11111111,  0.55555556,  0.44444444,  0.55555556,  0.11111111]))
     """
     if stimulus_duration == None:
         all_spikes = np.concatenate(tuple(spike_trains))
@@ -352,9 +366,56 @@ def shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_win
 
 
 
-
 sac = shuffled_autocorrelation
 
+
+def plot_sac(spike_trains, coincidence_window=0.05, analysis_window=5,
+             stimulus_duration=None, axis=None, **kwargs):
+    """
+    Plot shuffled autocorrelogram (SAC) (Joris 2006)
+    """
+
+    t, sac = shuffled_autocorrelation(spike_trains, coincidence_window,
+                                      analysis_window, stimulus_duration)
+
+    if axis == None:
+        axis = plt.gca()
+        axis.plot(t, sac, **kwargs)
+        axis.set_xlabel("Delay [ms]")
+        axis.set_ylabel("Normalized # coincidences")
+        plt.show()
+    else:
+        axis.plot(t, sac, **kwargs)
+        axis.set_xlabel("Delay [ms]")
+        axis.set_ylabel("Normalized # coincidences")
+
+
+
+def split_trains(spike_trains, idx):
+    """
+    Returns two spike trains created by spliting the input spike_train
+    at index `idx'.
+    """
+    left = spike_trains[0:idx]
+    right = spike_trains[idx:]
+
+    return left, right
+
+
+def trim_spikes(spike_trains, start, stop):
+    """
+    Return spike trains with that are between `start' and `stop'.
+
+    >>> spikes = [np.array([1,2,3,4]), np.array([3,4,5,6])]
+    >>> trim_spikes(spikes, 2, 4)
+    [array([2, 3, 4]), array([3, 4])]
+    """
+    output_trains = []
+    for train in spike_trains:
+        trimmed = train[(train >= start) & (train <= stop)]
+        output_trains.append(trimmed)
+
+    return output_trains
 
 if __name__ == "__main__":
     import doctest
@@ -363,6 +424,8 @@ if __name__ == "__main__":
     # test_signal_to_spikes()
     # test_synchronization_index()
 
+    print "Doctest start:"
     doctest.testmod()
+    print "done."
 
     # test_shuffle_spikes()
