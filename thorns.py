@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-07-31 01:05:15 marek>
+# Time-stamp: <2009-09-28 10:56:31 marek>
 #
 # Description: Thorns: Spike analysis software
 
@@ -190,6 +190,9 @@ def synchronization_index(Fstim, spikes):
 
     # TODO: remove here spikes from the beginning and the end
 
+    if len(all_spikes) == 0:
+        return 0
+
     all_spikes = all_spikes - all_spikes.min()
 
     #bins = 360                  # number of bins per Fstim period
@@ -219,6 +222,7 @@ def synchronization_index(Fstim, spikes):
     return r
 
 
+si = synchronization_index
 
 def test_synchronization_index():
     fs = 36000.0
