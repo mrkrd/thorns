@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-10-08 16:31:05 marek>
+# Time-stamp: <2009-10-08 16:32:24 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -229,13 +229,13 @@ def test_synchronization_index():
 
 
 
-def raw_correlation_index(spike_trains, window_len=0.05):
+def _raw_correlation_index(spike_trains, window_len=0.05):
     """
     Computes unnormalized correlation index. (Joris et al. 2006)
 
 
     >>> trains = [np.array([1, 2]), np.array([1.03, 2, 3])]
-    >>> raw_correlation_index(trains)
+    >>> _raw_correlation_index(trains)
     3
     """
     all_spikes = np.concatenate(tuple(spike_trains))
