@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-10-08 16:28:31 marek>
+# Time-stamp: <2009-10-08 16:30:21 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -401,9 +401,7 @@ def trim_spikes(spike_trains, start, stop):
 
     return output_trains
 
-def hello():
-    print "hello"
-    print "***"
+
 
 if __name__ == "__main__":
     import doctest
