@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-10-08 16:37:28 marek>
+# Time-stamp: <2009-10-08 16:39:18 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -254,6 +254,7 @@ def shuffle_spikes(spike_trains):
 
 
 def test_shuffle_spikes():
+    print "test_shuffle_spikes():"
     spikes = [np.array([2, 3, 4]),
               np.array([1, 3, 6])]
 
