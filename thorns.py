@@ -1,32 +1,28 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-09-28 10:56:31 marek>
+# Time-stamp: <2009-10-08 16:28:31 marek>
 #
-# Description: Thorns: Spike analysis software
+# Description: pyThorns -- spike analysis software for Python
+
+from __future__ import division
 
 import numpy as np
 import matplotlib.pyplot as plt
 from numpy.random import shuffle
 
-def signal_to_spikes_1D(fs, f):
+
+def signal_to_spikes_1D(fs, signal):
     """
-    Convert time function 1D array into spike events array.
+    Convert 1D time function array into array of spike timings.
+
+    [0,2,0,0,1,0]@10Hz => [1, 1, 4] * 1000 / 10Hz
     """
-    import _cThorns
-    # TODO: catch import error and use python implementation instead
+    assert signal.ndim == 1
+    assert (np.mod(signal, 1) == 0).all()
 
-    assert f.ndim == 1
+    signal = signal.astype(int)
 
-    f = np.asarray(f).astype(int)
-    fs = float(fs)
-
-    spikes = _cThorns.c_signal_to_spikes(f) * 1000 / fs
-
-    # non_empty = np.where(f > 0)[0]
-    # spikes = []
-    # for time_idx in non_empty:
-    #     time_samp = f[time_idx]
-    #     spikes.extend([1000 * time_idx/fs for each in range(time_samp)]) # ms
-    # spikes = np.asarray(spikes)
+    t = np.arange(len(signal))
+    spikes = np.repeat(t, signal) * 1000 / fs
 
     return spikes
 
@@ -34,9 +30,12 @@ def signal_to_spikes_1D(fs, f):
 def signal_to_spikes(fs, f):
     """
     Convert time functions to a list of spike trains.
-    """
-    fs = float(fs)
 
+    >>> fs = 1000
+    >>> s = np.array([[0,0,0,1,0,0], [0,2,1,0,0,0]]).T
+    >>> signal_to_spikes(fs, s)
+    [array([ 3.]), array([ 1.,  1.,  2.])]
+    """
     spike_trains = []
 
     if f.ndim == 1:
@@ -50,19 +49,6 @@ def signal_to_spikes(fs, f):
     return spike_trains
 
 
-
-def test_signal_to_spikes():
-    print "signal_to_spikes: ",
-    fs = 1000
-    a = np.array([[0,0,0,1,0,0],
-                  [0,2,1,0,0,0]]).T
-    expected = [np.array([3]),
-                np.array([1,1,2])]
-
-    out = signal_to_spikes(fs, a)
-    for i in range(len(out)):
-        assert np.all(expected[i] == out[i])
-    print "OK"
 
 
 
@@ -163,7 +149,7 @@ def plot_psth(spikes, bin_size=1, axis=None, **kwargs):
     if len(all_spikes) != 0:
 
         # bin size = 1ms
-        nbins = np.floor((max(all_spikes) - min(all_spikes)) / float(bin_size))
+        nbins = np.floor((max(all_spikes) - min(all_spikes)) / bin_size)
 
         if axis == None:
             axis = plt.gca()
@@ -183,7 +169,6 @@ def synchronization_index(Fstim, spikes):
 
     return: synchronization index
     """
-    Fstim = float(Fstim)
     Fstim = Fstim / 1000        # Hz -> kHz
 
     all_spikes = np.concatenate(tuple(spikes))
@@ -242,18 +227,6 @@ def test_synchronization_index():
 
 
 
-def test_c_signal_to_spikes():
-    print "cThorns: ",
-    import _cThorns
-
-    a = np.array([0,0,1,2,0,1])
-    expected = np.array([2,3,3,5])
-
-    result = _cThorns.c_signal_to_spikes(a)
-    assert np.all(result == expected)
-    print "OK"
-
-
 
 
 def raw_correlation_index(spike_trains, window_len=0.05):
@@ -302,13 +275,20 @@ def test_shuffle_spikes():
 
 
 
-def avarage_firing_rate(spike_trains, stimulus_duration=None):
+def average_firing_rate(spike_trains, stimulus_duration=None):
+    """
+    Calculates average firing rate.
+    """
     all_spikes = np.concatenate(tuple(spike_trains))
     if stimulus_duration == None:
         stimulus_duration = all_spikes.max() - all_spikes.min()
     trial_num = len(spike_trains)
     r = all_spikes.size / (stimulus_duration * trial_num)
     return r
+
+
+firing_rate = average_firing_rate
+
 
 
 def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=None):
@@ -319,7 +299,7 @@ def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=N
         all_spikes = np.concatenate(tuple(spike_trains))
         stimulus_duration = all_spikes.max() - all_spikes.min()
 
-    firing_rate = avarage_firing_rate(spike_trains, stimulus_duration)
+    firing_rate = average_firing_rate(spike_trains, stimulus_duration)
 
     trial_num = len(spike_trains)
 
@@ -342,7 +322,7 @@ def shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_win
     if stimulus_duration == None:
         all_spikes = np.concatenate(tuple(spike_trains))
         stimulus_duration = all_spikes.max() - all_spikes.min()
-    firing_rate = avarage_firing_rate(spike_trains, stimulus_duration)
+    firing_rate = average_firing_rate(spike_trains, stimulus_duration)
     trial_num = len(spike_trains)
 
     cum = []
@@ -427,10 +407,6 @@ def hello():
 
 if __name__ == "__main__":
     import doctest
-
-    # test_c_signal_to_spikes()
-    # test_signal_to_spikes()
-    # test_synchronization_index()
 
     print "Doctest start:"
     doctest.testmod()
