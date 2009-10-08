@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-10-08 16:32:24 marek>
+# Time-stamp: <2009-10-08 16:37:28 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -168,28 +168,31 @@ def synchronization_index(Fstim, spikes):
     spikes: list of arrays of spiking times
 
     return: synchronization index
+
+    Doctest:
+    >>> fs = 36000.0
+    >>> Fstim = 100.0
+
+    >>> test0 = [np.arange(0, 0.1, 1/fs)*1000, np.arange(0, 0.1, 1/fs)*1000]
+    >>> si0 = synchronization_index(Fstim, test0)
+    >>> print si0 < 1e-4   # numerical errors
+    True
+
+    >>> test1 = [np.zeros(fs)]
+    >>> si1 = synchronization_index(Fstim, test1)
+    >>> print si1 == 1
+    True
     """
     Fstim = Fstim / 1000        # Hz -> kHz
 
     all_spikes = np.concatenate(tuple(spikes))
 
-    # TODO: remove here spikes from the beginning and the end
+    # TODO: remove spikes from the beginning and the end
 
     if len(all_spikes) == 0:
         return 0
 
     all_spikes = all_spikes - all_spikes.min()
-
-    #bins = 360                  # number of bins per Fstim period
-    # hist_range = (0, 1/Fstim)
-    # ph = np.zeros(bins)
-    # period_num = np.floor(all_spikes.max() * Fstim) + 1
-
-    # for i in range(period_num):
-    #     lo = i / Fstim
-    #     hi = lo + 1/Fstim
-    #     current_spikes = all_spikes[(all_spikes >= lo) & (all_spikes < hi)]
-    #     ph += np.histogram(current_spikes-lo, bins=bins, range=hist_range)[0]
 
     folded = np.fmod(all_spikes, 1/Fstim)
     ph = np.histogram(folded, bins=180)[0]
@@ -208,22 +211,6 @@ def synchronization_index(Fstim, spikes):
 
 
 si = synchronization_index
-
-def test_synchronization_index():
-    fs = 36000.0
-    Fstim = 100.0
-
-    test0 = [np.arange(0, 0.1, 1/fs)*1000, np.arange(0, 0.1, 1/fs)*1000]
-    si0 = synchronization_index(Fstim, test0)
-    print "test0 SI: ", si0,
-    assert si0 < 1e-4
-    print "OK"
-
-    test1 = [np.zeros(fs)]
-    si1 = synchronization_index(Fstim, test1)
-    print "test1 SI: ", si1,
-    assert si1 == 1
-    print "OK"
 
 
 
