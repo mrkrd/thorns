@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-10-08 16:30:21 marek>
+# Time-stamp: <2009-10-08 16:31:05 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -308,6 +308,9 @@ def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=N
           ( trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * stimulus_duration))
 
     return ci
+
+
+ci = correlation_index
 
 
 def shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_window=5,
