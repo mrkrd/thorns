@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-10-09 08:53:14 marek>
+# Time-stamp: <2009-10-09 10:15:27 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -125,21 +125,17 @@ def plot_raster(spike_trains, axis=None, **kwargs):
         axis.set_ylabel("Trial #")
 
 
-def plot_psth(spikes, bin_size=1, axis=None, **kwargs):
+def plot_psth(spike_trains, bin_size=1, axis=None, **kwargs):
     """
-    Plots PSTH from spikes (list of arrays of spike timings)
+    Plots PSTH of spike_trains.
 
     bin_size: bin size in ms
     axis: axis to draw on
 
     **kwargs: plt.hist arguments
     """
-
-    # Assert list of arrays as input
-    #assert np.all([isinstance(each, np.ndarray) for each in spikes])
-
-    if len(spikes) > 0:
-        all_spikes = np.concatenate(tuple(spikes))
+    if len(spike_trains) > 0:
+        all_spikes = np.concatenate(tuple(spike_trains))
     else:
         print "No spikes!"
         return
@@ -160,12 +156,12 @@ def plot_psth(spikes, bin_size=1, axis=None, **kwargs):
 
 
 
-def synchronization_index(Fstim, spikes, min_max=(None, None)):
+def synchronization_index(Fstim, spike_trains, min_max=(None, None)):
     """
     Calculate Synchronization Index.
 
     Fstim: stimulus frequency in Hz
-    spikes: list of arrays of spiking times
+    spike_trains: list of arrays of spiking times
     min_max: range for SI calculation
 
     return: synchronization index
@@ -186,7 +182,7 @@ def synchronization_index(Fstim, spikes, min_max=(None, None)):
     """
     Fstim = Fstim / 1000        # Hz -> kHz; s -> ms
 
-    all_spikes = np.concatenate(tuple(spikes))
+    all_spikes = np.concatenate(tuple(spike_trains))
 
     # Trimming spikes out of min_max range
     tmin = min_max[0]
