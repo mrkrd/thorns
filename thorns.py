@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-10-08 16:39:18 marek>
+# Time-stamp: <2009-10-09 08:29:01 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -31,10 +31,10 @@ def signal_to_spikes(fs, f):
     """
     Convert time functions to a list of spike trains.
 
-    >>> fs = 1000
+    >>> fs = 10
     >>> s = np.array([[0,0,0,1,0,0], [0,2,1,0,0,0]]).T
     >>> signal_to_spikes(fs, s)
-    [array([ 3.]), array([ 1.,  1.,  2.])]
+    [array([ 300.]), array([ 100.,  100.,  200.])]
     """
     spike_trains = []
 
@@ -55,23 +55,22 @@ def signal_to_spikes(fs, f):
 def spikes_to_signal_1D(fs, spikes, tmax=None):
     """
     Convert spike train to its time function. 1D version.
+
+    >>> fs = 10
+    >>> spikes = np.array([100, 500, 1000, 1000])
+    >>> spikes_to_signal_1D(fs, spikes)
+    array([0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2])
     """
     # Test if all elements are floats (1D case)
     #assert np.all([isinstance(each, float) for each in spikes])
 
-    # TODO: implement with np.histogram
-
     if tmax == None:
         tmax = max(spikes)
 
-    f = np.zeros(np.floor(tmax * fs) + 1)
+    bins = np.ceil(tmax*fs/1000) + 1
+    signal, bin_edges = np.histogram(spikes, bins=bins, range=(0,tmax))
 
-    # TODO: vecotorize
-    # f[np.floor(spikes * fs).astype(int)] += 1
-    for spike in spikes:
-        f[int(np.floor(spike*fs))] += 1
-
-    return f
+    return signal
 
 
 def spikes_to_signal(fs, spikes):
@@ -94,9 +93,6 @@ def spikes_to_signal(fs, spikes):
 
         for i,f1d in enumerate(f_list):
             f[0:len(f1d), i] = f1d
-
-
-
     else:
         f = spikes_to_signal_1D(fs, spikes)
 
@@ -145,27 +141,28 @@ def plot_psth(spikes, bin_size=1, axis=None, **kwargs):
         print "No spikes!"
         return
 
+    nbins = np.floor((max(all_spikes) - min(all_spikes)) / bin_size)
 
-    if len(all_spikes) != 0:
-
-        # bin size = 1ms
-        nbins = np.floor((max(all_spikes) - min(all_spikes)) / bin_size)
-
-        if axis == None:
-            axis = plt.gca()
-            axis.hist(all_spikes, nbins, **kwargs)
-            plt.show()
-        else:
-            axis.hist(all_spikes, nbins, **kwargs)
-
+    if axis == None:
+        axis = plt.gca()
+        axis.hist(all_spikes, nbins, **kwargs)
+        axis.set_xlabel("Time [ms]")
+        axis.set_ylabel("Spike #")
+        plt.show()
+    else:
+        axis.hist(all_spikes, nbins, **kwargs)
+        axis.set_xlabel("Time [ms]")
+        axis.set_ylabel("Spike #")
 
 
-def synchronization_index(Fstim, spikes):
+
+def synchronization_index(Fstim, spikes, min_max=(None, None)):
     """
     Calculate Synchronization Index.
 
     Fstim: stimulus frequency in Hz
     spikes: list of arrays of spiking times
+    min_max: range for SI calculation
 
     return: synchronization index
 
@@ -175,19 +172,26 @@ def synchronization_index(Fstim, spikes):
 
     >>> test0 = [np.arange(0, 0.1, 1/fs)*1000, np.arange(0, 0.1, 1/fs)*1000]
     >>> si0 = synchronization_index(Fstim, test0)
-    >>> print si0 < 1e-4   # numerical errors
+    >>> si0 < 1e-4   # numerical errors
     True
 
     >>> test1 = [np.zeros(fs)]
     >>> si1 = synchronization_index(Fstim, test1)
-    >>> print si1 == 1
+    >>> si1 == 1
     True
     """
-    Fstim = Fstim / 1000        # Hz -> kHz
+    Fstim = Fstim / 1000        # Hz -> kHz; s -> ms
 
     all_spikes = np.concatenate(tuple(spikes))
 
-    # TODO: remove spikes from the beginning and the end
+    # Trimming spikes out of min_max range
+    tmin = min_max[0]
+    tmax = min_max[1]
+    if tmin != None:
+        all_spikes = all_spikes[all_spikes>tmin]
+    if tmax != None:
+        all_spikes = all_spikes[all_spikes<tmax]
+
 
     if len(all_spikes) == 0:
         return 0
@@ -211,8 +215,8 @@ def synchronization_index(Fstim, spikes):
 
 
 si = synchronization_index
-
-
+vector_strength = synchronization_index
+vs = synchronization_index
 
 
 
