@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-10-09 08:29:01 marek>
+# Time-stamp: <2009-10-09 08:53:14 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -104,11 +104,14 @@ def plot_raster(spike_trains, axis=None, **kwargs):
     Plot raster plot.
     """
 
-    n = []
-    s = []
-    for i,train in enumerate(spike_trains):
-        s.extend(train)                 # flatten spikes
-        n.extend([i for each in train]) # trial number
+    # Compute trial number
+    L = [len(train) for train in spike_trains]
+    r = np.arange(len(spike_trains))
+    n = np.repeat(r, L)
+
+    # Spike timings
+    s = np.concatenate(tuple(spike_trains))
+
 
     if axis == None:
         axis = plt.gca()
@@ -143,6 +146,7 @@ def plot_psth(spikes, bin_size=1, axis=None, **kwargs):
 
     nbins = np.floor((max(all_spikes) - min(all_spikes)) / bin_size)
 
+    # TODO: normalize for spikes per second
     if axis == None:
         axis = plt.gca()
         axis.hist(all_spikes, nbins, **kwargs)
