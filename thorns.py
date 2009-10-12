@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-10-09 10:15:27 marek>
+# Time-stamp: <2009-10-11 21:40:24 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -287,6 +287,9 @@ def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=N
     """
     Comput correlation index (Joris 2006)
     """
+    if len(spike_trains) == 0:
+        return 0
+
     if stimulus_duration == None:
         all_spikes = np.concatenate(tuple(spike_trains))
         stimulus_duration = all_spikes.max() - all_spikes.min()
@@ -296,7 +299,7 @@ def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=N
     trial_num = len(spike_trains)
 
     # Compute raw CI and normalize it
-    ci = (raw_correlation_index(spike_trains) /
+    ci = (_raw_correlation_index(spike_trains) /
           ( trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * stimulus_duration))
 
     return ci
