@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-10-11 21:40:24 marek>
+# Time-stamp: <2009-11-08 21:35:58 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -14,7 +14,15 @@ def signal_to_spikes_1D(fs, signal):
     """
     Convert 1D time function array into array of spike timings.
 
-    [0,2,0,0,1,0]@10Hz => [1, 1, 4] * 1000 / 10Hz
+    fs: sampling frequency in Hz
+    signal: input signal
+
+    return: spike timings in ms
+
+    >>> fs = 10
+    >>> signal = np.array([0,2,0,0,1,0])
+    >>> signal_to_spikes_1D(fs, signal)
+    array([ 100.,  100.,  400.])
     """
     assert signal.ndim == 1
     assert (np.mod(signal, 1) == 0).all()
@@ -27,9 +35,14 @@ def signal_to_spikes_1D(fs, signal):
     return spikes
 
 
-def signal_to_spikes(fs, f):
+def signal_to_spikes(fs, signals):
     """
     Convert time functions to a list of spike trains.
+
+    fs: samping frequency in Hz
+    signals: input signals
+
+    return: spike trains with spike timings
 
     >>> fs = 10
     >>> s = np.array([[0,0,0,1,0,0], [0,2,1,0,0,0]]).T
@@ -38,11 +51,11 @@ def signal_to_spikes(fs, f):
     """
     spike_trains = []
 
-    if f.ndim == 1:
-        spike_trains.append(signal_to_spikes_1D(fs, f))
-    elif f.ndim == 2:
-        for f_1D in f.T:
-            spike_trains.append(signal_to_spikes_1D(fs, f_1D))
+    if signals.ndim == 1:
+        spike_trains.append(signal_to_spikes_1D(fs, signals))
+    elif signals.ndim == 2:
+        for signal in signals.T:
+            spike_trains.append(signal_to_spikes_1D(fs, signal))
     else:
         assert False
 
@@ -61,9 +74,6 @@ def spikes_to_signal_1D(fs, spikes, tmax=None):
     >>> spikes_to_signal_1D(fs, spikes)
     array([0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2])
     """
-    # Test if all elements are floats (1D case)
-    #assert np.all([isinstance(each, float) for each in spikes])
-
     if tmax == None:
         tmax = max(spikes)
 
@@ -73,31 +83,37 @@ def spikes_to_signal_1D(fs, spikes, tmax=None):
     return signal
 
 
-def spikes_to_signal(fs, spikes):
+
+def spikes_to_signal(fs, spike_trains, tmax=None):
     """
     Convert spike trains to theirs time functions.
+
+    fs: sampling frequency (Hz)
+    spike_trains: trains of spikes to be converted (ms)
+    tmax: length of the output signal (ms)
+
+    return: time signal
+
+    >>> spikes_to_signal(10, [np.array([100]), np.array([200, 300])])
+    array([[ 0.,  0.],
+           [ 1.,  0.],
+           [ 0.,  1.],
+           [ 0.,  1.]])
     """
-    # All elements are list (2D case)
-    if np.all([isinstance(each, np.ndarray) for each in spikes]):
+    if tmax == None:
+        tmax = max( [max(train) for train in spike_trains] )
 
-        f_list = []
-        for train in spikes:
-            f1d = spikes_to_signal_1D(fs, train)
-            f_list.append(f1d)
+    max_len = np.ceil( tmax * fs / 1000 ) + 1
+    signals = np.zeros( (max_len, len(spike_trains)) )
 
-        # Adjust length of each time function to the maximum
-        max_len = max([len(f1d) for f1d in f_list])
+    for i,train in enumerate(spike_trains):
+        s = spikes_to_signal_1D(fs, train, tmax)
+        signals[:,i] = s
 
-        # Construct output
-        f = np.zeros( (max_len, len(f_list)) )
+    return signals
 
-        for i,f1d in enumerate(f_list):
-            f[0:len(f1d), i] = f1d
-    else:
-        f = spikes_to_signal_1D(fs, spikes)
 
-    return f
-
+# TODO: def is_spike_train()
 
 def plot_raster(spike_trains, axis=None, **kwargs):
     """
@@ -115,17 +131,17 @@ def plot_raster(spike_trains, axis=None, **kwargs):
 
     if axis == None:
         axis = plt.gca()
-        axis.plot(s, n, ',', **kwargs)
+        axis.plot(s, n, 'k,', **kwargs)
         axis.set_xlabel("Time [ms]")
         axis.set_ylabel("Trial #")
         plt.show()
     else:
-        axis.plot(s, n, ',', **kwargs)
+        axis.plot(s, n, 'k,', **kwargs)
         axis.set_xlabel("Time [ms]")
         axis.set_ylabel("Trial #")
 
 
-def plot_psth(spike_trains, bin_size=1, axis=None, **kwargs):
+def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None, **kwargs):
     """
     Plots PSTH of spike_trains.
 
@@ -134,29 +150,35 @@ def plot_psth(spike_trains, bin_size=1, axis=None, **kwargs):
 
     **kwargs: plt.hist arguments
     """
-    if len(spike_trains) > 0:
-        all_spikes = np.concatenate(tuple(spike_trains))
-    else:
-        print "No spikes!"
-        return
+    all_spikes = np.concatenate(tuple(spike_trains))
 
     nbins = np.floor((max(all_spikes) - min(all_spikes)) / bin_size)
 
-    # TODO: normalize for spikes per second
+    values, bins = np.histogram(all_spikes, nbins)
+
+    # Normalize values for spikes per second
+    if trial_num == None:
+        trial_num = len(spike_trains)
+    values = 1000 * values  / bin_size / trial_num
+
     if axis == None:
         axis = plt.gca()
-        axis.hist(all_spikes, nbins, **kwargs)
+        axis.bar(bins[:-1], values, width=bin_size, **kwargs)
         axis.set_xlabel("Time [ms]")
-        axis.set_ylabel("Spike #")
+        axis.set_ylabel("Spikes per second")
         plt.show()
     else:
-        axis.hist(all_spikes, nbins, **kwargs)
+        axis.bar(bins[:-1], values, width=bin_size, **kwargs)
         axis.set_xlabel("Time [ms]")
-        axis.set_ylabel("Spike #")
+        axis.set_ylabel("Spikes per second")
 
 
 
-def synchronization_index(Fstim, spike_trains, min_max=(None, None)):
+def plot_isih():
+    pass
+
+
+def synchronization_index(Fstim, spike_trains):
     """
     Calculate Synchronization Index.
 
@@ -183,15 +205,6 @@ def synchronization_index(Fstim, spike_trains, min_max=(None, None)):
     Fstim = Fstim / 1000        # Hz -> kHz; s -> ms
 
     all_spikes = np.concatenate(tuple(spike_trains))
-
-    # Trimming spikes out of min_max range
-    tmin = min_max[0]
-    tmax = min_max[1]
-    if tmin != None:
-        all_spikes = all_spikes[all_spikes>tmin]
-    if tmax != None:
-        all_spikes = all_spikes[all_spikes<tmax]
-
 
     if len(all_spikes) == 0:
         return 0
@@ -270,12 +283,22 @@ def test_shuffle_spikes():
 def average_firing_rate(spike_trains, stimulus_duration=None):
     """
     Calculates average firing rate.
+
+    spike_trains: trains of spikes
+    stimulus_duration: in ms, if None, then calculated from spike timeings
+
+    return: average firing rate in spikes per second (Hz)
+
+    >>> spike_trains = [range(20), range(10)]
+    >>> average_firing_rate(spike_trains, 1000)
+    15.0
     """
     all_spikes = np.concatenate(tuple(spike_trains))
     if stimulus_duration == None:
         stimulus_duration = all_spikes.max() - all_spikes.min()
     trial_num = len(spike_trains)
     r = all_spikes.size / (stimulus_duration * trial_num)
+    r = r * 1000                # kHz -> Hz
     return r
 
 
@@ -295,6 +318,9 @@ def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=N
         stimulus_duration = all_spikes.max() - all_spikes.min()
 
     firing_rate = average_firing_rate(spike_trains, stimulus_duration)
+    firing_rate = firing_rate / 1000
+    # average_firing_rate() takes input in ms and output in sp/s, threfore:
+    # Hz -> kHz
 
     trial_num = len(spike_trains)
 
@@ -321,6 +347,10 @@ def shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_win
         all_spikes = np.concatenate(tuple(spike_trains))
         stimulus_duration = all_spikes.max() - all_spikes.min()
     firing_rate = average_firing_rate(spike_trains, stimulus_duration)
+    firing_rate = firing_rate / 1000
+    # average_firing_rate() takes input in ms and output in sp/s, threfore:
+    # Hz -> kHz
+
     trial_num = len(spike_trains)
 
     cum = []
@@ -398,6 +428,9 @@ def trim_spikes(spike_trains, start, stop):
         output_trains.append(trimmed)
 
     return output_trains
+
+trim = trim_spikes
+
 
 
 
