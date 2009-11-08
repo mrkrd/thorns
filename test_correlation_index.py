@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 
 import thorns as th
 import cochlea
-import stuff
+
 
 def test_ci():
     a = [np.array([1, 2, 4, 6]),
@@ -16,7 +16,7 @@ def test_ci():
     ear = cochlea.Sumner2002(hsr=1, msr=0, lsr=0, freq=bf)
     t = np.arange(0, 0.1, 1/fs)
     s = np.sin(2 * np.pi * t * bf)
-    s = stuff.set_dB_SPL(60, s)
+    s = cochlea.set_dB_SPL(60, s)
     hsr, msr, lsr = ear.run(fs, s, times=200)
 
     spikes = hsr['spikes']
@@ -43,7 +43,7 @@ def test_sac():
     ear = cochlea.Sumner2002(hsr=0, msr=0, lsr=1, freq=bf)
     t = np.arange(0, 0.1, 1/fs)
     s = np.sin(2 * np.pi * t * bf)
-    s = stuff.set_dB_SPL(60, s)
+    s = cochlea.set_dB_SPL(60, s)
     hsr, msr, lsr = ear.run(fs, s, times=200)
     spikes = lsr['spikes']
 
