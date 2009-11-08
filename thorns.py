@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-11-08 21:55:40 marek>
+# Time-stamp: <2009-11-08 22:14:02 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -443,6 +443,17 @@ def split_trains(spike_trains, idx):
     right = spike_trains[idx:]
 
     return left, right
+
+
+def pop_trains(spike_trains, num):
+    """
+    Pop `num' of trains from `spike_trains'.
+    """
+    popped = [ spike_trains.pop() for each in range(num) ]
+
+    popped.reverse()
+
+    return popped
 
 
 def trim_spikes(spike_trains, start, stop):
