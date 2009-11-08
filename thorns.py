@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-11-08 21:35:58 marek>
+# Time-stamp: <2009-11-08 21:55:40 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -152,7 +152,7 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None, **kwargs):
     """
     all_spikes = np.concatenate(tuple(spike_trains))
 
-    nbins = np.floor((max(all_spikes) - min(all_spikes)) / bin_size)
+    nbins = np.ceil((max(all_spikes) - min(all_spikes)) / bin_size)
 
     values, bins = np.histogram(all_spikes, nbins)
 
@@ -174,8 +174,40 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None, **kwargs):
 
 
 
-def plot_isih():
-    pass
+def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None, **kwargs):
+    """
+    Plot inter-spike interval histogram.
+    """
+    isi_trains = []
+    for train in spike_trains:
+        isi = np.diff(train)
+        isi_trains.append( isi )
+
+    all_isi = np.concatenate( isi_trains )
+
+    nbins = np.ceil((max(all_isi) - min(all_isi)) / bin_size)
+
+    values, bins = np.histogram(all_isi, nbins)
+
+    # Normalize values for spikes per second
+    if trial_num == None:
+        trial_num = len(spike_trains)
+    # values = values / bin_size / trial_num
+    values = values / trial_num
+
+    if axis == None:
+        axis = plt.gca()
+        axis.bar(bins[:-1], values, width=bin_size, **kwargs)
+        axis.set_xlabel("Inter-Spike Interval [ms]")
+        axis.set_ylabel("Interval #")
+        plt.show()
+    else:
+        axis.bar(bins[:-1], values, width=bin_size, **kwargs)
+        axis.set_xlabel("Inter-Spike Interval [ms]")
+        axis.set_ylabel("Interval #")
+
+
+
 
 
 def synchronization_index(Fstim, spike_trains):
@@ -188,7 +220,6 @@ def synchronization_index(Fstim, spike_trains):
 
     return: synchronization index
 
-    Doctest:
     >>> fs = 36000.0
     >>> Fstim = 100.0
 
