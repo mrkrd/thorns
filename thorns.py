@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-11-08 22:14:02 marek>
+# Time-stamp: <2009-11-09 00:27:36 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -52,10 +52,10 @@ def signal_to_spikes(fs, signals):
     spike_trains = []
 
     if signals.ndim == 1:
-        spike_trains.append(signal_to_spikes_1D(fs, signals))
+        spike_trains = [ signal_to_spikes_1D(fs, signals) ]
     elif signals.ndim == 2:
-        for signal in signals.T:
-            spike_trains.append(signal_to_spikes_1D(fs, signal))
+        spike_trains = [ signal_to_spikes_1D(fs, signal)
+                         for signal in signals.T ]
     else:
         assert False
 
@@ -121,7 +121,7 @@ def plot_raster(spike_trains, axis=None, **kwargs):
     """
 
     # Compute trial number
-    L = [len(train) for train in spike_trains]
+    L = [ len(train) for train in spike_trains ]
     r = np.arange(len(spike_trains))
     n = np.repeat(r, L)
 
@@ -178,10 +178,7 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None, **kwargs):
     """
     Plot inter-spike interval histogram.
     """
-    isi_trains = []
-    for train in spike_trains:
-        isi = np.diff(train)
-        isi_trains.append( isi )
+    isi_trains = [ np.diff(train) for train in spike_trains ]
 
     all_isi = np.concatenate( isi_trains )
 
@@ -290,15 +287,15 @@ def shuffle_spikes(spike_trains):
     Get input spikes.  Randomly permute inter spikes intervals.
     Return new spike trains.
     """
-    new_train_list = []
+    new_trains = []
     for train in spike_trains:
         isi = np.diff(np.append(0, train)) # Append 0 in order to vary
                                            # the onset
         shuffle(isi)
         shuffled_train = np.cumsum(isi)
-        new_train_list.append(shuffled_train)
+        new_trains.append(shuffled_train)
 
-    return new_train_list
+    return new_trains
 
 
 def test_shuffle_spikes():
@@ -464,12 +461,10 @@ def trim_spikes(spike_trains, start, stop):
     >>> trim_spikes(spikes, 2, 4)
     [array([2, 3, 4]), array([3, 4])]
     """
-    output_trains = []
-    for train in spike_trains:
-        trimmed = train[(train >= start) & (train <= stop)]
-        output_trains.append(trimmed)
+    trimmed = [ train[(train >= start) & (train <= stop)]
+                for train in spike_trains ]
 
-    return output_trains
+    return trimmed
 
 trim = trim_spikes
 
