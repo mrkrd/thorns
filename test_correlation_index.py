@@ -47,8 +47,8 @@ def test_sac():
     hsr, msr, lsr = ear.run(fs, s, times=200)
     spikes = lsr['spikes']
 
-    th.plot_psth(spikes, bin_size=2, trial_num=200)
-    th.plot_isih(spikes, trial_num=200)
+    th.plot_psth(spikes, bin_size=0.2, trial_num=200)
+    th.plot_isih(spikes, bin_size=0.1, trial_num=200)
 
     print "Computing SAC:"
     t, sac = th.shuffled_autocorrelation(spikes, coincidence_window=0.05)
