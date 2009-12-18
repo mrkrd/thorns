@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2009-11-09 00:27:36 marek>
+# Time-stamp: <2009-12-18 00:32:12 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -9,6 +9,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numpy.random import shuffle
 
+import waves
 
 def signal_to_spikes_1D(fs, signal):
     """
@@ -142,13 +143,13 @@ def plot_raster(spike_trains, axis=None, **kwargs):
 
 
 def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None, **kwargs):
-    """
-    Plots PSTH of spike_trains.
+    """ Plots PSTH of spike_trains.
 
+    spike_trains: list of spike trains
     bin_size: bin size in ms
+    trial_num: total number of trials
     axis: axis to draw on
-
-    **kwargs: plt.hist arguments
+    **kwargs: plt.plot arguments
     """
     all_spikes = np.concatenate(tuple(spike_trains))
 
@@ -159,16 +160,16 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None, **kwargs):
     # Normalize values for spikes per second
     if trial_num == None:
         trial_num = len(spike_trains)
-    values = 1000 * values  / bin_size / trial_num
+    values = 1000 * values / bin_size / trial_num
 
     if axis == None:
         axis = plt.gca()
-        axis.bar(bins[:-1], values, width=bin_size, **kwargs)
+        axis.plot(bins[:-1], values, **kwargs)
         axis.set_xlabel("Time [ms]")
         axis.set_ylabel("Spikes per second")
         plt.show()
     else:
-        axis.bar(bins[:-1], values, width=bin_size, **kwargs)
+        axis.plot(bins[:-1], values, **kwargs)
         axis.set_xlabel("Time [ms]")
         axis.set_ylabel("Spikes per second")
 
@@ -186,7 +187,7 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None, **kwargs):
 
     values, bins = np.histogram(all_isi, nbins)
 
-    # Normalize values for spikes per second
+    # Normalize values
     if trial_num == None:
         trial_num = len(spike_trains)
     # values = values / bin_size / trial_num
@@ -194,12 +195,12 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None, **kwargs):
 
     if axis == None:
         axis = plt.gca()
-        axis.bar(bins[:-1], values, width=bin_size, **kwargs)
+        axis.plot(bins[:-1], values, **kwargs)
         axis.set_xlabel("Inter-Spike Interval [ms]")
         axis.set_ylabel("Interval #")
         plt.show()
     else:
-        axis.bar(bins[:-1], values, width=bin_size, **kwargs)
+        axis.plot(bins[:-1], values, **kwargs)
         axis.set_xlabel("Inter-Spike Interval [ms]")
         axis.set_ylabel("Interval #")
 
@@ -334,6 +335,13 @@ firing_rate = average_firing_rate
 
 
 
+def count_spikes(spike_trains):
+    all_spikes = np.concatenate(tuple(spike_trains))
+    return len(all_spikes)
+
+count = count_spikes
+
+
 def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=None):
     """
     Comput correlation index (Joris 2006)
@@ -453,6 +461,7 @@ def pop_trains(spike_trains, num):
     return popped
 
 
+
 def trim_spikes(spike_trains, start, stop):
     """
     Return spike trains with that are between `start' and `stop'.
@@ -470,6 +479,40 @@ trim = trim_spikes
 
 
 
+def concat_and_fold(spike_trains, period):
+    all_spikes = np.concatenate( tuple(spike_trains) )
+    return [ np.fmod(all_spikes, period) ]
+
+
+
+def fold_spikes(spike_trains, period):
+    """
+    Fold each of the spike trains.
+
+    >>> spike_trains = [np.array([1,2,3,4]), np.array([3,4,5,6])]
+    >>> fold_spikes(spike_trains, 2)
+    [array([1]), array([0, 1]), array([1]), array([0, 1])]
+    """
+    folded = []
+    for train in spike_trains:
+        period_num = int( np.ceil(train.max() / period) )
+        for idx in range( period_num ):
+            lo = idx * period
+            hi = (idx+1) * period
+            sec = train[(train>=lo) & (train<hi)]
+            if len(sec) > 0:
+                sec = np.fmod(sec, period)
+                folded.append( sec )
+    return folded
+fold = fold_spikes
+
+
+
+def concatenate_spikes(spike_trains):
+    return [np.concatenate( tuple(spike_trains) )]
+
+concatenate = concatenate_spikes
+concat = concatenate_spikes
 
 if __name__ == "__main__":
     import doctest
