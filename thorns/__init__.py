@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2010-02-23 09:35:55 marek>
+# Time-stamp: <2010-02-23 09:47:59 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -156,8 +156,9 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None,
 
     values, bins = np.histogram(all_spikes, nbins)
 
-    values = np.append(0, values)
-    bins = np.append(bins[0]-bin_size, bins)
+    if bins[0]-bin_size > 0:
+        values = np.append(0, values)
+        bins = np.append(bins[0]-bin_size, bins)
 
     # Normalize values for spikes per second
     if trial_num == None:
