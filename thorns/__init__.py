@@ -1,5 +1,5 @@
 # Author: Marek Rudnicki
-# Time-stamp: <2010-02-23 09:47:59 marek>
+# Time-stamp: <2010-02-26 16:34:32 marek>
 #
 # Description: pyThorns -- spike analysis software for Python
 
@@ -141,7 +141,7 @@ def plot_raster(spike_trains, axis=None, style='k,', **kwargs):
 
 
 def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None,
-              style='k', drawstyle='steps-mid', **kwargs):
+              style='', **kwargs):
     """ Plots PSTH of spike_trains.
 
     spike_trains: list of spike trains
@@ -171,7 +171,7 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None,
     else:
         do_show = False
 
-    axis.plot(bins[:-1], values, style, drawstyle=drawstyle, **kwargs)
+    axis.plot(bins[:-1], values, style, **kwargs)
     axis.set_xlabel("Time [ms]")
     axis.set_ylabel("Spikes per second")
 
@@ -181,7 +181,7 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None,
 
 
 def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None,
-              style='k', drawstyle='steps-mid', **kwargs):
+              style='', **kwargs):
     """ Plot inter-spike interval histogram. """
     isi_trains = [ np.diff(train) for train in spike_trains ]
 
@@ -206,7 +206,7 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None,
     else:
         do_show = False
 
-    axis.plot(bins[:-1], values, style, drawstyle=drawstyle, **kwargs)
+    axis.plot(bins[:-1], values, style, **kwargs)
     axis.set_xlabel("Inter-Spike Interval [ms]")
     axis.set_ylabel("Interval #")
 
@@ -472,7 +472,7 @@ def pop_trains(spike_trains, num):
 
 
 
-def trim_spikes(spike_trains, start, stop):
+def trim_spikes(spike_trains, start, stop=None):
     """ Return spike trains with that are between `start' and `stop'.
 
     >>> spikes = [np.array([1,2,3,4]), np.array([3,4,5,6])]
@@ -480,10 +480,15 @@ def trim_spikes(spike_trains, start, stop):
     [array([2, 3, 4]), array([3, 4])]
 
     """
+    if stop is None:
+        stop = np.concatenate(tuple(spike_trains)).max()
+
     trimmed = [ train[(train >= start) & (train <= stop)]
                 for train in spike_trains ]
 
-    return trimmed
+    shifted = shift_spikes(trimmed, -start)
+
+    return shifted
 
 trim = trim_spikes
 

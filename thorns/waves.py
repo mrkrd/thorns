@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2009-12-14 15:19:49 marek>
+# Time-stamp: <2010-02-22 15:02:34 marek>
 
 # Description:
 
@@ -70,9 +70,15 @@ def generate_ramped_tone(fs, freq,
                          ramp_duration=2.5,
                          pad_duration=55,
                          dbspl=None):
-    """
-    fs: Hz
-    durations: ms
+    """ Generate ramped tone singal.
+
+    fs: sampling frequancy (Hz)
+    freq: frequancy of the tone (Hz)
+    tone_durations: ms
+    ramp_duration:
+    pad_duration:
+    dbspl:
+
     """
     tsin = np.arange(0, tone_duration, 1000/fs)
     s = np.sin(2 * np.pi * tsin * freq/1000)
@@ -88,6 +94,19 @@ def generate_ramped_tone(fs, freq,
 
     return s
 
+
+
+def now():
+    from datetime import datetime
+    t = datetime.now()
+
+    now = "%04d%02d%02d-%02d%02d%02d" % (t.year,
+                                         t.month,
+                                         t.day,
+                                         t.hour,
+                                         t.minute,
+                                         t.second)
+    return now
 
 
 
