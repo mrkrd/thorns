@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-02-22 15:02:34 marek>
+# Time-stamp: <2010-03-01 17:02:08 marek>
 
 # Description:
 
@@ -55,7 +55,7 @@ def make_time(fs, s):
     vector and return.  Useful for plots.
 
     >>> make_time(10, [2,3,4,4,5])
-    array([ 0.,  1.,  2.,  3.,  4.])
+    array([ 0. ,  0.1,  0.2,  0.3,  0.4])
     """
     tmax = (len(s)-1) / fs
     return np.linspace(0, tmax, len(s))
@@ -64,7 +64,6 @@ t = make_time
 
 
 
-# TODO: generation of standard ramped tones
 def generate_ramped_tone(fs, freq,
                          tone_duration=50,
                          ramp_duration=2.5,
@@ -108,6 +107,40 @@ def now():
                                          t.second)
     return now
 
+
+def time_stamp(fname):
+    from os import path
+
+    root,ext = path.splitext(fname)
+    return root + "_" + now() + ext
+
+tstamp = time_stamp
+
+
+def meta_stamp(fname, *meta_args, **meta_kwargs):
+    """ Add meta data string to the file name.
+
+    >>> meta_stamp('/tmp/a.txt', {'b':1, 'c':3}, d=12, e=13.6)
+    '/tmp/a__c=3__b=1__e=13.6__d=12.txt'
+
+    """
+    from os import path
+
+    root,ext = path.splitext(fname)
+    meta_str = str()
+
+    for meta_dict in meta_args:
+        for meta_key in meta_dict:
+            meta_str += _meta_sub_string(meta_key, meta_dict[meta_key])
+
+    for meta_key in meta_kwargs:
+        meta_str += _meta_sub_string(meta_key, meta_kwargs[meta_key])
+
+    return root + meta_str + ext
+
+
+def _meta_sub_string(var, value):
+    return '__' + str(var) + '=' + str(value)
 
 
 if __name__ == "__main__":
