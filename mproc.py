@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-03-04 18:56:23 marek>
+# Time-stamp: <2010-03-05 00:05:57 marek>
 
 # Description:
 
