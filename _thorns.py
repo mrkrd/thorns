@@ -175,22 +175,28 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None,
         plt.show()
 
 
+def calc_isih(spike_trains, bin_size=1, trial_num=None):
+    """ Calculate inter-spike interval histogram.
 
-def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None,
-              style='', **kwargs):
-    """ Plot inter-spike interval histogram. """
-    import matplotlib.pyplot as plt
+    >>> spikes = [np.array([1,2,3]), np.array([2,5,8])]
+    >>> calc_isih(spikes)
+    (array([ 1.,  1.]), array([ 1.5,  2.5]))
 
+    """
     isi_trains = [ np.diff(train) for train in spike_trains ]
 
     all_isi = np.concatenate(isi_trains)
+
+    if len(all_isi) < 2:
+        return np.array([]), np.array([])
 
     nbins = np.ceil((max(all_isi) - min(all_isi)) / bin_size)
 
     values, bins = np.histogram(all_isi, nbins)
 
-    values = np.append(0, values)
-    bins = np.append(bins[0]-bin_size, bins)
+    dbins = (bins[1]-bins[0])/2
+    bins = bins + dbins
+    bins = bins[0:-1]
 
     # Normalize values
     if trial_num == None:
@@ -198,13 +204,49 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None,
     # values = values / bin_size / trial_num
     values = values / trial_num
 
+    return values, bins
+
+
+def calc_entrainment(spike_trains, fstim, bin_size=1):
+    """ Calculate entrainment of spike_trains.
+
+    >>> spike_trains = [np.array([2, 4, 6]), np.array([0, 5, 10])]
+    >>> calc_entrainment(spike_trains, fstim=500)
+    0.5
+    """
+    isih, bins = calc_isih(spike_trains, bin_size=bin_size)
+
+    if len(isih) == 0:
+        return 0
+
+    stim_period = 1000/fstim    # ms
+
+    entrainment_window = (bins > stim_period/2) & (bins < stim_period*3/2)
+
+    entrainment =  sum(isih[entrainment_window])/sum(isih)
+
+    return entrainment
+
+
+def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None,
+              style='', **kwargs):
+    """ Plot inter-spike interval histogram. """
+    import matplotlib.pyplot as plt
+
+    values, bins = isih(spike_trains, bin_size, trial_num)
+
+    # Looks better when ISI plot starts from 0
+    if bins[0]-bin_size > 0:
+        values = np.append(0, values)
+        bins = np.append(bins[0]-bin_size, bins)
+
     if axis == None:
         axis = plt.gca()
         do_show = True
     else:
         do_show = False
 
-    axis.plot(bins[:-1], values, style, **kwargs)
+    axis.plot(bins, values, style, **kwargs)
     axis.set_xlabel("Inter-Spike Interval [ms]")
     axis.set_ylabel("Interval #")
 
@@ -215,30 +257,29 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None,
 
 
 
-def synchronization_index(Fstim, spike_trains):
+def calc_synchronization_index(spike_trains, fstim):
     """ Calculate Synchronization Index.
 
-    Fstim: stimulus frequency in Hz
     spike_trains: list of arrays of spiking times
-    min_max: range for SI calculation
+    fstim: stimulus frequency in Hz
 
     return: synchronization index
 
     >>> fs = 36000.0
-    >>> Fstim = 100.0
+    >>> fstim = 100.0
 
     >>> test0 = [np.arange(0, 0.1, 1/fs)*1000, np.arange(0, 0.1, 1/fs)*1000]
-    >>> si0 = synchronization_index(Fstim, test0)
+    >>> si0 = calc_synchronization_index(test0, fstim)
     >>> si0 < 1e-4   # numerical errors
     True
 
     >>> test1 = [np.zeros(fs)]
-    >>> si1 = synchronization_index(Fstim, test1)
+    >>> si1 = calc_synchronization_index(test1, fstim)
     >>> si1 == 1
     True
     """
 
-    Fstim = Fstim / 1000        # Hz -> kHz; s -> ms
+    fstim = fstim / 1000        # Hz -> kHz; s -> ms
 
     if len(spike_trains) == 0:
         return 0
@@ -250,7 +291,7 @@ def synchronization_index(Fstim, spike_trains):
 
     all_spikes = all_spikes - all_spikes.min()
 
-    folded = np.fmod(all_spikes, 1/Fstim)
+    folded = np.fmod(all_spikes, 1/fstim)
     ph = np.histogram(folded, bins=180)[0]
 
     # indexing trick is necessary, because the sample at 2*pi belongs
@@ -266,9 +307,9 @@ def synchronization_index(Fstim, spike_trains):
     return r
 
 
-si = synchronization_index
-vector_strength = synchronization_index
-vs = synchronization_index
+calc_si = calc_synchronization_index
+calc_vector_strength = calc_synchronization_index
+calc_vs = calc_synchronization_index
 
 
 
@@ -320,7 +361,7 @@ def test_shuffle_spikes():
 
 
 
-def average_firing_rate(spike_trains, stimulus_duration=None, trial_num=None):
+def calc_average_firing_rate(spike_trains, stimulus_duration=None, trial_num=None):
     """ Calculates average firing rate.
 
     spike_trains: trains of spikes
@@ -329,7 +370,7 @@ def average_firing_rate(spike_trains, stimulus_duration=None, trial_num=None):
     return: average firing rate in spikes per second (Hz)
 
     >>> spike_trains = [range(20), range(10)]
-    >>> average_firing_rate(spike_trains, 1000)
+    >>> calc_average_firing_rate(spike_trains, 1000)
     15.0
 
     """
@@ -345,8 +386,8 @@ def average_firing_rate(spike_trains, stimulus_duration=None, trial_num=None):
     return r
 
 
-firing_rate = average_firing_rate
-rate = average_firing_rate
+calc_firing_rate = calc_average_firing_rate
+calc_rate = calc_average_firing_rate
 
 
 def count_spikes(spike_trains):
@@ -356,7 +397,7 @@ def count_spikes(spike_trains):
 count = count_spikes
 
 
-def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=None):
+def calc_correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=None):
     """ Compute correlation index (Joris 2006) """
     if len(spike_trains) == 0:
         return 0
@@ -365,9 +406,9 @@ def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=N
         all_spikes = np.concatenate(tuple(spike_trains))
         stimulus_duration = all_spikes.max() - all_spikes.min()
 
-    firing_rate = average_firing_rate(spike_trains, stimulus_duration)
+    firing_rate = calc_average_firing_rate(spike_trains, stimulus_duration)
     firing_rate = firing_rate / 1000
-    # average_firing_rate() takes input in ms and output in sp/s, threfore:
+    # calc_average_firing_rate() takes input in ms and output in sp/s, threfore:
     # Hz -> kHz
 
     trial_num = len(spike_trains)
@@ -379,24 +420,24 @@ def correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=N
     return ci
 
 
-ci = correlation_index
+calc_ci = calc_correlation_index
 
 
-def shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_window=5,
-                             stimulus_duration=None):
+def calc_shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_window=5,
+                                  stimulus_duration=None):
     """ Calculate Shuffled Autocorrelogram (Joris 2006)
 
     >>> a = [np.array([1, 2, 3]), np.array([1, 2.01, 2.5])]
-    >>> shuffled_autocorrelation(a, coincidence_window=1, analysis_window=2)
+    >>> calc_shuffled_autocorrelation(a, coincidence_window=1, analysis_window=2)
     (array([-1.2, -0.4,  0.4,  1.2,  2. ]), array([ 0.11111111,  0.55555556,  0.44444444,  0.55555556,  0.11111111]))
 
     """
     if stimulus_duration == None:
         all_spikes = np.concatenate(tuple(spike_trains))
         stimulus_duration = all_spikes.max() - all_spikes.min()
-    firing_rate = average_firing_rate(spike_trains, stimulus_duration)
+    firing_rate = calc_average_firing_rate(spike_trains, stimulus_duration)
     firing_rate = firing_rate / 1000
-    # average_firing_rate() takes input in ms and output in sp/s, threfore:
+    # calc_average_firing_rate() takes input in ms and output in sp/s, threfore:
     # Hz -> kHz
 
     trial_num = len(spike_trains)
@@ -426,7 +467,7 @@ def shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_win
 
 
 
-sac = shuffled_autocorrelation
+sac = calc_shuffled_autocorrelation
 
 
 def plot_sac(spike_trains, coincidence_window=0.05, analysis_window=5,
@@ -434,8 +475,8 @@ def plot_sac(spike_trains, coincidence_window=0.05, analysis_window=5,
     """ Plot shuffled autocorrelogram (SAC) (Joris 2006) """
     import matplotlib.pyplot as plt
 
-    t, sac = shuffled_autocorrelation(spike_trains, coincidence_window,
-                                      analysis_window, stimulus_duration)
+    t, sac = calc_shuffled_autocorrelation(spike_trains, coincidence_window,
+                                           analysis_window, stimulus_duration)
 
     if axis == None:
         axis = plt.gca()
@@ -470,7 +511,6 @@ def pop_trains(spike_trains, num):
     return popped
 
 
-
 def trim_spikes(spike_trains, start, stop=None):
     """ Return spike trains with that are between `start' and `stop'.
 
@@ -479,6 +519,10 @@ def trim_spikes(spike_trains, start, stop=None):
     [array([0, 1, 2]), array([1, 2])]
 
     """
+    all_spikes = np.concatenate(tuple(spike_trains))
+    if len(all_spikes) == 0:
+        return spike_trains
+
     if stop is None:
         stop = np.concatenate(tuple(spike_trains)).max()
 
@@ -550,6 +594,14 @@ def shift_spikes(spike_trains, shift):
 shift = shift_spikes
 
 
+def split_and_fold_trains(long_train, silence_duration, tone_duration, pad_duration):
+    silence = th.trim(long_train, 0, silence_duration)
+
+    tones = th.trim(long_train, silence_duration)
+    tones = th.fold(tones, tone_duration+pad_duration)
+    tones = th.trim(tones, 0, tone_duration)
+
+    return silence, tones
 
 
 if __name__ == "__main__":
