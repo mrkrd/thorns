@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-03-01 17:02:08 marek>
+# Time-stamp: <2010-03-08 16:56:31 marek>
 
 # Description:
 
@@ -112,7 +112,7 @@ def time_stamp(fname):
     from os import path
 
     root,ext = path.splitext(fname)
-    return root + "_" + now() + ext
+    return root + "__" + now() + ext
 
 tstamp = time_stamp
 
