@@ -123,14 +123,18 @@ def plot_raster(spike_trains, axis=None, style='k,', **kwargs):
 
     if axis == None:
         axis = plt.gca()
-        axis.plot(s, n, style, **kwargs)
-        axis.set_xlabel("Time [ms]")
-        axis.set_ylabel("Trial #")
-        plt.show()
+        do_show = True
     else:
-        axis.plot(s, n, style, **kwargs)
-        axis.set_xlabel("Time [ms]")
-        axis.set_ylabel("Trial #")
+        do_show = False
+
+    axis.plot(s, n, style, **kwargs)
+    axis.set_xlabel("Time (ms)")
+    axis.set_ylabel("Trial #")
+    axis.set_ylim((0,len(spike_trains)-1))
+
+    if do_show:
+        plt.show()
+
 
 
 
@@ -168,7 +172,7 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None,
         do_show = False
 
     axis.plot(bins[:-1], values, style, **kwargs)
-    axis.set_xlabel("Time [ms]")
+    axis.set_xlabel("Time (ms)")
     axis.set_ylabel("Spikes per second")
 
     if do_show:
@@ -233,7 +237,7 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None,
     """ Plot inter-spike interval histogram. """
     import matplotlib.pyplot as plt
 
-    values, bins = isih(spike_trains, bin_size, trial_num)
+    values, bins = calc_isih(spike_trains, bin_size, trial_num)
 
     # Looks better when ISI plot starts from 0
     if bins[0]-bin_size > 0:
@@ -247,13 +251,50 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None,
         do_show = False
 
     axis.plot(bins, values, style, **kwargs)
-    axis.set_xlabel("Inter-Spike Interval [ms]")
+    axis.set_xlabel("Inter-Spike Interval (ms)")
     axis.set_ylabel("Interval #")
 
     if do_show:
         plt.show()
 
 
+
+def plot_period_histogram(spike_trains, fstim, nbins=64, axis=None, style='', **kwargs):
+    """ Plots period histogram. """
+    import matplotlib.pyplot as plt
+
+    fstim = fstim / 1000        # Hz -> kHz; s -> ms
+
+    if len(spike_trains) == 0:
+        return 0
+
+    all_spikes = np.concatenate(tuple(spike_trains))
+
+    if len(all_spikes) == 0:
+        return 0
+
+    folded = np.fmod(all_spikes, 1/fstim)
+    ph = np.histogram(folded, bins=nbins)[0]
+
+    # Normalize
+    ph = ph / np.sum(ph)
+
+    # TODO: find the direction instead of max value
+    center_idx = ph.argmax()
+    ph = np.roll(ph, nbins//2 - center_idx)
+
+    if axis == None:
+        axis = plt.gca()
+        do_show = True
+    else:
+        do_show = False
+
+    axis.plot(np.linspace(0,1,len(ph)), ph, style, **kwargs)
+    axis.set_xlabel("Normalized Phase")
+    axis.set_ylabel("Normalized Spike Count")
+
+    if do_show:
+        plt.show()
 
 
 
@@ -481,12 +522,12 @@ def plot_sac(spike_trains, coincidence_window=0.05, analysis_window=5,
     if axis == None:
         axis = plt.gca()
         axis.plot(t, sac, **kwargs)
-        axis.set_xlabel("Delay [ms]")
+        axis.set_xlabel("Delay (ms)")
         axis.set_ylabel("Normalized # coincidences")
         plt.show()
     else:
         axis.plot(t, sac, **kwargs)
-        axis.set_xlabel("Delay [ms]")
+        axis.set_xlabel("Delay (ms)")
         axis.set_ylabel("Normalized # coincidences")
 
 
@@ -595,11 +636,10 @@ shift = shift_spikes
 
 
 def split_and_fold_trains(long_train, silence_duration, tone_duration, pad_duration):
-    silence = th.trim(long_train, 0, silence_duration)
+    silence = trim(long_train, 0, silence_duration)
 
-    tones = th.trim(long_train, silence_duration)
-    tones = th.fold(tones, tone_duration+pad_duration)
-    tones = th.trim(tones, 0, tone_duration)
+    tones = trim(long_train, silence_duration)
+    tones = fold(tones, tone_duration+pad_duration)
 
     return silence, tones
 

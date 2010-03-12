@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-03-08 16:56:31 marek>
+# Time-stamp: <2010-03-11 19:59:08 marek>
 
 # Description:
 
@@ -64,6 +64,7 @@ t = make_time
 
 
 
+# TODO: allow values to be 0, change default values
 def generate_ramped_tone(fs, freq,
                          tone_duration=50,
                          ramp_duration=2.5,
@@ -138,6 +139,7 @@ def meta_stamp(fname, *meta_args, **meta_kwargs):
 
     return root + meta_str + ext
 
+mstamp = meta_stamp
 
 def _meta_sub_string(var, value):
     return '__' + str(var) + '=' + str(value)
