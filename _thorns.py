@@ -3,6 +3,7 @@ from __future__ import division
 import numpy as np
 from numpy.random import shuffle
 
+golden = 1.6180339887
 
 def signal_to_spikes_1D(fs, signal):
     """ Convert 1D time function array into array of spike timings.
@@ -109,9 +110,9 @@ def spikes_to_signal(fs, spike_trains, tmax=None):
 
 # TODO: def is_spike_train()
 
-def plot_raster(spike_trains, axis=None, style='k,', **kwargs):
+def plot_raster(spike_trains, plot=None, **style):
     """ Plot raster plot. """
-    import matplotlib.pyplot as plt
+    import biggles
 
     # Compute trial number
     L = [ len(train) for train in spike_trains ]
@@ -121,25 +122,24 @@ def plot_raster(spike_trains, axis=None, style='k,', **kwargs):
     # Spike timings
     s = np.concatenate(tuple(spike_trains))
 
-    if axis == None:
-        axis = plt.gca()
-        do_show = True
-    else:
-        do_show = False
 
-    axis.plot(s, n, style, **kwargs)
-    axis.set_xlabel("Time (ms)")
-    axis.set_ylabel("Trial #")
-    axis.set_ylim((0,len(spike_trains)-1))
+    c = biggles.Points(s, n, type='dot')
+    c.style(**style)
 
-    if do_show:
-        plt.show()
+    if plot is None:
+        plot = biggles.FramedPlot()
+    plot.xlabel = "Time (ms)"
+    plot.ylabel = "Trial Number"
+    plot.yrange = (0, len(spike_trains)-1)
+    plot.add(c)
 
 
+    return plot
 
 
-def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None,
-              style='', **kwargs):
+
+
+def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     """ Plots PSTH of spike_trains.
 
     spike_trains: list of spike trains
@@ -148,7 +148,7 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None,
     axis: axis to draw on
     **kwargs: plt.plot arguments
     """
-    import matplotlib.pyplot as plt
+    import biggles
 
     all_spikes = np.concatenate(tuple(spike_trains))
 
@@ -165,18 +165,17 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, axis=None,
         trial_num = len(spike_trains)
     values = 1000 * values / bin_size / trial_num
 
-    if axis == None:
-        axis = plt.gca()
-        do_show = True
-    else:
-        do_show = False
 
-    axis.plot(bins[:-1], values, style, **kwargs)
-    axis.set_xlabel("Time (ms)")
-    axis.set_ylabel("Spikes per second")
+    c = biggles.Curve(bins[:-1], values)
+    c.style(**style)
 
-    if do_show:
-        plt.show()
+    if plot is None:
+        plot = biggles.FramedPlot()
+    plot.xlabel = "Time (ms)"
+    plot.ylabel = "Spikes per second"
+    plot.add(c)
+
+    return plot
 
 
 def calc_isih(spike_trains, bin_size=1, trial_num=None):
@@ -232,10 +231,9 @@ def calc_entrainment(spike_trains, fstim, bin_size=1):
     return entrainment
 
 
-def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None,
-              style='', **kwargs):
+def plot_isih(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     """ Plot inter-spike interval histogram. """
-    import matplotlib.pyplot as plt
+    import biggles
 
     values, bins = calc_isih(spike_trains, bin_size, trial_num)
 
@@ -244,24 +242,24 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, axis=None,
         values = np.append(0, values)
         bins = np.append(bins[0]-bin_size, bins)
 
-    if axis == None:
-        axis = plt.gca()
-        do_show = True
-    else:
-        do_show = False
 
-    axis.plot(bins, values, style, **kwargs)
-    axis.set_xlabel("Inter-Spike Interval (ms)")
-    axis.set_ylabel("Interval #")
+    c = biggles.Curve(bins, values)
+    c.style(**style)
 
-    if do_show:
-        plt.show()
+    if plot is None:
+        plot = biggles.FramedPlot()
+    plot.xlabel = "Inter-Spike Interval (ms)"
+    plot.ylabel = "Interval Count"
+    plot.add(c)
 
+    return plot
 
 
-def plot_period_histogram(spike_trains, fstim, nbins=64, axis=None, style='', **kwargs):
+
+
+def plot_period_histogram(spike_trains, fstim, nbins=64, plot=None, **style):
     """ Plots period histogram. """
-    import matplotlib.pyplot as plt
+    import biggles
 
     fstim = fstim / 1000        # Hz -> kHz; s -> ms
 
@@ -283,18 +281,17 @@ def plot_period_histogram(spike_trains, fstim, nbins=64, axis=None, style='', **
     center_idx = ph.argmax()
     ph = np.roll(ph, nbins//2 - center_idx)
 
-    if axis == None:
-        axis = plt.gca()
-        do_show = True
-    else:
-        do_show = False
+    c = biggles.Curve(np.linspace(0,1,len(ph)), ph)
+    c.style(**style)
 
-    axis.plot(np.linspace(0,1,len(ph)), ph, style, **kwargs)
-    axis.set_xlabel("Normalized Phase")
-    axis.set_ylabel("Normalized Spike Count")
+    if plot is None:
+        plot = biggles.FramedPlot()
+    plot.xlabel = "Normalized Phase"
+    plot.ylabel = "Normalized Spike Count"
+    plot.add(c)
 
-    if do_show:
-        plt.show()
+    return plot
+
 
 
 
@@ -512,23 +509,23 @@ sac = calc_shuffled_autocorrelation
 
 
 def plot_sac(spike_trains, coincidence_window=0.05, analysis_window=5,
-             stimulus_duration=None, axis=None, **kwargs):
+             stimulus_duration=None, plot=None, **style):
     """ Plot shuffled autocorrelogram (SAC) (Joris 2006) """
-    import matplotlib.pyplot as plt
+    import biggles
 
     t, sac = calc_shuffled_autocorrelation(spike_trains, coincidence_window,
                                            analysis_window, stimulus_duration)
 
-    if axis == None:
-        axis = plt.gca()
-        axis.plot(t, sac, **kwargs)
-        axis.set_xlabel("Delay (ms)")
-        axis.set_ylabel("Normalized # coincidences")
-        plt.show()
-    else:
-        axis.plot(t, sac, **kwargs)
-        axis.set_xlabel("Delay (ms)")
-        axis.set_ylabel("Normalized # coincidences")
+    c = biggles.Curve(t, sac)
+    c.style(**style)
+
+    if plot is None:
+        plot = biggles.FramedPlot()
+    plot.xlabel = "Delay (ms)"
+    plot.ylabel = "Normalized Coincidences Count"
+    plot.add(c)
+
+    return plot
 
 
 
