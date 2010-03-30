@@ -440,8 +440,11 @@ def calc_correlation_index(spike_trains, coincidence_window=0.05, stimulus_durat
     if len(spike_trains) == 0:
         return 0
 
+    all_spikes = np.concatenate(tuple(spike_trains))
+    if len(all_spikes) == 0:
+        return 0
+
     if stimulus_duration == None:
-        all_spikes = np.concatenate(tuple(spike_trains))
         stimulus_duration = all_spikes.max() - all_spikes.min()
 
     firing_rate = calc_average_firing_rate(spike_trains, stimulus_duration)
