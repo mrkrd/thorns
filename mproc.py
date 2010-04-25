@@ -1,13 +1,10 @@
 #!/usr/bin/env python
 
-# Author: Marek Rudnicki
-# Time-stamp: <2010-03-05 00:05:57 marek>
-
-# Description:
-
 from __future__ import division
-import numpy as np
 
+__author__ = "Marek Rudnicki"
+
+import numpy as np
 import multiprocessing
 
 
@@ -53,7 +50,8 @@ def run_workers(sender, worker, receiver, nproc=None):
     # Stop receiver process
     done_queue.put('STOP')
 
-
+    # Wait receiver process it to be done
+    rcv_proc.join()
 
 run_ants = run_workers
 
