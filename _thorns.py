@@ -138,6 +138,23 @@ def plot_raster(spike_trains, plot=None, **style):
 
 
 
+def plot_spikegram(spike_trains, bin_size=1, plot=None, **style):
+    import biggles
+
+    fs = 1000 / bin_size
+
+    spikes = spikes_to_signal(fs, spike_trains)
+
+    d = biggles.Density(spikes, [[0,0],[1,1]])
+
+    if plot is None:
+        plot = biggles.FramedPlot()
+    plot.add(d)
+
+    return plot
+
+
+
 
 def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     """ Plots PSTH of spike_trains.
@@ -195,6 +212,9 @@ def calc_isih(spike_trains, bin_size=1, trial_num=None):
 
     nbins = np.ceil((max(all_isi) - min(all_isi)) / bin_size)
 
+    if nbins == 0:
+        nbins = 1
+
     values, bins = np.histogram(all_isi, nbins)
 
     dbins = (bins[1]-bins[0])/2
@@ -236,6 +256,8 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     import biggles
 
     values, bins = calc_isih(spike_trains, bin_size, trial_num)
+
+    # assert not values, "No spikes in the trains."
 
     # Looks better when ISI plot starts from 0
     if bins[0]-bin_size > 0:
@@ -642,6 +664,8 @@ def split_and_fold_trains(long_train, silence_duration, tone_duration, pad_durat
     tones = fold(tones, tone_duration+pad_duration)
 
     return silence, tones
+
+split_and_fold = split_and_fold_trains
 
 
 if __name__ == "__main__":

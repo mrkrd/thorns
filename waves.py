@@ -1,13 +1,16 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-03-11 19:59:08 marek>
+# Time-stamp: <2010-05-07 10:24:12 marek>
 
 # Description:
 
 from __future__ import division
 import numpy as np
 import matplotlib.pyplot as plt
+
+golden = 1.6180339887
+
 
 # TODO: help, testdoc
 def detect_peaks(fs, signal):
@@ -80,8 +83,8 @@ def generate_ramped_tone(fs, freq,
     dbspl:
 
     """
-    tsin = np.arange(0, tone_duration, 1000/fs)
-    s = np.sin(2 * np.pi * tsin * freq/1000)
+    t = np.arange(0, tone_duration, 1000/fs)
+    s = np.sin(2 * np.pi * t * freq/1000)
     if dbspl != None:
         s = set_dbspl(dbspl, s)
 

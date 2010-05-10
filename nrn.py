@@ -19,12 +19,28 @@ def record_voltages(secs):
 def plot_voltages(fs, vecs):
     import biggles
 
-    p = biggles.FramedArray(len(vecs), 1)
+    all_values = np.concatenate( vecs )
+    hi = all_values.max()
+    lo = all_values.min()
 
+    plot = biggles.Table(len(vecs), 1)
+    plot.cellpadding = 0
+    plot.cellspacing = 0
     for i,vec in enumerate(vecs):
-        p[i,0].add( biggles.Curve(wv.t(fs, vec), vec) )
+        p = biggles.Plot()
+        p.add( biggles.Curve(wv.t(fs, vec), vec) )
+        p.yrange = (lo, hi)
+        plot[i,0] = p
 
-    return p
+
+    p.add( biggles.LineX(0) )
+    p.add( biggles.Label(0, (hi+lo)/2, "%.2f mV" % (hi-lo), halign='left') )
+
+    p.add( biggles.LineY(lo) )
+    p.add( biggles.Label((len(vec)/fs/2), lo, "%.1f ms" % (1000*len(vec)/fs), valign='bottom') )
+
+
+    return plot
 
 
 def main():
