@@ -169,13 +169,12 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
 
     all_spikes = np.concatenate(tuple(spike_trains))
 
+    assert len(all_spikes)>0, "No spikes!"
+
     nbins = np.ceil((max(all_spikes) - min(all_spikes)) / bin_size)
 
     values, bins = np.histogram(all_spikes, nbins)
 
-    if bins[0]-bin_size > 0:
-        values = np.append(0, values)
-        bins = np.append(bins[0]-bin_size, bins)
 
     # Normalize values for spikes per second
     if trial_num == None:
@@ -183,7 +182,7 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     values = 1000 * values / bin_size / trial_num
 
 
-    c = biggles.Curve(bins[:-1], values)
+    c = biggles.Histogram(values, x0=0, binsize=bin_size)
     c.style(**style)
 
     if plot is None:
@@ -212,14 +211,10 @@ def calc_isih(spike_trains, bin_size=1, trial_num=None):
 
     nbins = np.ceil((max(all_isi) - min(all_isi)) / bin_size)
 
-    if nbins == 0:
+    if nbins == 0:              # just in case of two equal spikes
         nbins = 1
 
     values, bins = np.histogram(all_isi, nbins)
-
-    dbins = (bins[1]-bins[0])/2
-    bins = bins + dbins
-    bins = bins[0:-1]
 
     # Normalize values
     if trial_num == None:
@@ -257,15 +252,7 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
 
     values, bins = calc_isih(spike_trains, bin_size, trial_num)
 
-    # assert not values, "No spikes in the trains."
-
-    # Looks better when ISI plot starts from 0
-    if bins[0]-bin_size > 0:
-        values = np.append(0, values)
-        bins = np.append(bins[0]-bin_size, bins)
-
-
-    c = biggles.Curve(bins, values)
+    c = biggles.Histogram(values, x0=bins[0], binsize=bin_size)
     c.style(**style)
 
     if plot is None:
@@ -303,7 +290,7 @@ def plot_period_histogram(spike_trains, fstim, nbins=64, plot=None, **style):
     center_idx = ph.argmax()
     ph = np.roll(ph, nbins//2 - center_idx)
 
-    c = biggles.Curve(np.linspace(0,1,len(ph)), ph)
+    c = biggles.Histogram(ph, x0=0, binsize=1/len(ph))
     c.style(**style)
 
     if plot is None:
