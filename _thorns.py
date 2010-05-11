@@ -96,7 +96,7 @@ def spikes_to_signal(fs, spike_trains, tmax=None):
 
     """
     if tmax == None:
-        tmax = max( [max(train) for train in spike_trains] )
+        tmax = max( [max(train) for train in spike_trains if len(train)>0] )
 
     max_len = np.ceil( tmax * fs / 1000 ) + 1
     signals = np.zeros( (max_len, len(spike_trains)) )
@@ -105,6 +105,9 @@ def spikes_to_signal(fs, spike_trains, tmax=None):
         s = spikes_to_signal_1D(fs, train, tmax)
         signals[:,i] = s
 
+    # import matplotlib.pyplot as plt
+    # plt.imshow(signals, aspect='auto')
+    # plt.show()
     return signals
 
 
@@ -144,7 +147,7 @@ def plot_spikegram(spike_trains, bin_size=1, plot=None, **style):
     fs = 1000 / bin_size
 
     spikes = spikes_to_signal(fs, spike_trains)
-
+    spikes = 1 - spikes/spikes.max()
     d = biggles.Density(spikes, [[0,0],[1,1]])
 
     if plot is None:
