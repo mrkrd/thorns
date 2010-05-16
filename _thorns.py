@@ -5,7 +5,8 @@ from numpy.random import shuffle
 
 golden = 1.6180339887
 
-def signal_to_spikes_1D(fs, signal):
+
+def _signal_to_spikes(fs, signal):
     """ Convert 1D time function array into array of spike timings.
 
     fs: sampling frequency in Hz
@@ -15,7 +16,7 @@ def signal_to_spikes_1D(fs, signal):
 
     >>> fs = 10
     >>> signal = np.array([0,2,0,0,1,0])
-    >>> signal_to_spikes_1D(fs, signal)
+    >>> _signal_to_spikes(fs, signal)
     array([ 100.,  100.,  400.])
 
     """
@@ -47,25 +48,22 @@ def signal_to_spikes(fs, signals):
     spike_trains = []
 
     if signals.ndim == 1:
-        spike_trains = [ signal_to_spikes_1D(fs, signals) ]
+        spike_trains = [ _signal_to_spikes(fs, signals) ]
     elif signals.ndim == 2:
-        spike_trains = [ signal_to_spikes_1D(fs, signal)
+        spike_trains = [ _signal_to_spikes(fs, signal)
                          for signal in signals.T ]
     else:
-        assert False
+        assert False, "Input signal must be 1 or 2 dimensional"
 
     return spike_trains
 
 
-
-
-
-def spikes_to_signal_1D(fs, spikes, tmax=None):
+def _spikes_to_signal(fs, spikes, tmax=None):
     """ Convert spike train to its time function. 1D version.
 
     >>> fs = 10
     >>> spikes = np.array([100, 500, 1000, 1000])
-    >>> spikes_to_signal_1D(fs, spikes)
+    >>> _spikes_to_signal(fs, spikes)
     array([0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2])
 
     """
@@ -78,7 +76,6 @@ def spikes_to_signal_1D(fs, spikes, tmax=None):
     return signal
 
 
-
 def spikes_to_signal(fs, spike_trains, tmax=None):
     """ Convert spike trains to theirs time functions.
 
@@ -89,10 +86,10 @@ def spikes_to_signal(fs, spike_trains, tmax=None):
     return: time signal
 
     >>> spikes_to_signal(10, [np.array([100]), np.array([200, 300])])
-    array([[ 0.,  0.],
-           [ 1.,  0.],
-           [ 0.,  1.],
-           [ 0.,  1.]])
+    array([[0, 0],
+           [1, 0],
+           [0, 1],
+           [0, 1]])
 
     """
     if tmax == None:
@@ -101,14 +98,11 @@ def spikes_to_signal(fs, spike_trains, tmax=None):
     max_len = np.ceil( tmax * fs / 1000 ) + 1
     signals = np.zeros( (max_len, len(spike_trains)) )
 
-    for i,train in enumerate(spike_trains):
-        s = spikes_to_signal_1D(fs, train, tmax)
-        signals[:,i] = s
+    signals = [_spikes_to_signal(fs, train, tmax) for train in spike_trains]
+    signals = np.array(signals).T
 
     return signals
 
-
-# TODO: def is_spike_train()
 
 def plot_raster(spike_trains, plot=None, **style):
     """ Plot raster plot. """
@@ -130,12 +124,11 @@ def plot_raster(spike_trains, plot=None, **style):
         plot = biggles.FramedPlot()
     plot.xlabel = "Time (ms)"
     plot.ylabel = "Trial Number"
-    plot.yrange = (0, len(spike_trains)-1)
+    plot.yrange = (-0.5, len(spike_trains)-0.5)
     plot.add(c)
 
 
     return plot
-
 
 
 def plot_spikegram(spike_trains, bin_size=1, plot=None, **style):
@@ -152,8 +145,6 @@ def plot_spikegram(spike_trains, bin_size=1, plot=None, **style):
     plot.add(d)
 
     return plot
-
-
 
 
 def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
@@ -199,7 +190,7 @@ def calc_isih(spike_trains, bin_size=1, trial_num=None):
 
     >>> spikes = [np.array([1,2,3]), np.array([2,5,8])]
     >>> calc_isih(spikes)
-    (array([ 1.,  1.]), array([ 1.5,  2.5]))
+    (array([ 1.,  1.]), array([ 1.,  2.,  3.]))
 
     """
     isi_trains = [ np.diff(train) for train in spike_trains ]
@@ -239,9 +230,9 @@ def calc_entrainment(spike_trains, fstim, bin_size=1):
 
     stim_period = 1000/fstim    # ms
 
-    entrainment_window = (bins > stim_period/2) & (bins < stim_period*3/2)
+    entrainment_window = (bins[:-1] > stim_period/2) & (bins[:-1] < stim_period*3/2)
 
-    entrainment =  sum(isih[entrainment_window])/sum(isih)
+    entrainment =  np.sum(isih[entrainment_window]) / np.sum(isih)
 
     return entrainment
 
@@ -262,8 +253,6 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     plot.add(c)
 
     return plot
-
-
 
 
 def plot_period_histogram(spike_trains, fstim, nbins=64, plot=None, **style):
@@ -300,8 +289,6 @@ def plot_period_histogram(spike_trains, fstim, nbins=64, plot=None, **style):
     plot.add(c)
 
     return plot
-
-
 
 
 def calc_synchronization_index(spike_trains, fstim):
@@ -381,7 +368,6 @@ def _raw_correlation_index(spike_trains, window_len=0.05):
     return Nc
 
 
-
 def shuffle_spikes(spike_trains):
     """ Get input spikes.  Randomly permute inter spikes intervals.
     Return new spike trains.
@@ -405,7 +391,6 @@ def test_shuffle_spikes():
 
     print spikes
     print shuffle_spikes(spikes)
-
 
 
 def calc_average_firing_rate(spike_trains, stimulus_duration=None, trial_num=None):
@@ -516,8 +501,7 @@ def calc_shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysi
     return t, sac
 
 
-
-sac = calc_shuffled_autocorrelation
+calc_sac = calc_shuffled_autocorrelation
 
 
 def plot_sac(spike_trains, coincidence_window=0.05, analysis_window=5,
@@ -538,7 +522,6 @@ def plot_sac(spike_trains, coincidence_window=0.05, analysis_window=5,
     plot.add(c)
 
     return plot
-
 
 
 def split_trains(spike_trains, idx):
@@ -583,8 +566,8 @@ def trim_spikes(spike_trains, start, stop=None):
 
     return shifted
 
-trim = trim_spikes
 
+trim = trim_spikes
 
 
 # def remove_empty(spike_trains):
