@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-05-07 10:24:12 marek>
+# Time-stamp: <2010-05-17 22:45:27 marek>
 
 # Description:
 
@@ -73,7 +73,8 @@ def generate_ramped_tone(fs, freq,
                          ramp_duration=2.5,
                          pad_duration=55,
                          dbspl=None):
-    """ Generate ramped tone singal.
+    """
+    Generate ramped tone singal.
 
     fs: sampling frequancy (Hz)
     freq: frequancy of the tone (Hz)
