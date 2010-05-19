@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 # Author: Marek Rudnicki
-# Time-stamp: <2010-05-17 22:45:27 marek>
+# Time-stamp: <2010-05-19 19:41:30 marek>
 
 # Description:
 
@@ -54,13 +54,15 @@ set_dbspl = set_dB_SPL
 
 def make_time(fs, s):
     """
-    Based on signal `s' with sampling frequancy `fs' produce time
-    vector and return.  Useful for plots.
+    Return time vector for signal `s' in ms.
+
+    fs: sampling frequency in Hz
+    s: signal
 
     >>> make_time(10, [2,3,4,4,5])
-    array([ 0. ,  0.1,  0.2,  0.3,  0.4])
+    array([   0.,  100.,  200.,  300.,  400.])
     """
-    tmax = (len(s)-1) / fs
+    tmax = 1000 * (len(s)-1) / fs
     return np.linspace(0, tmax, len(s))
 
 t = make_time
@@ -147,6 +149,28 @@ mstamp = meta_stamp
 
 def _meta_sub_string(var, value):
     return '__' + str(var) + '=' + str(value)
+
+
+
+def generate_biphasic_pulse(fs, fstim, pulse_width, gap_width, amplitude=1):
+    """
+    fs: Hz
+    fstim: Hz
+    pulse_width: us
+    gap_width: us
+    amplitude: mA
+
+    """
+    def idx(width):
+        """ fs: Hz, width: us """
+        return np.round(fs*width/1e6)
+
+    stim = np.zeros(np.ceil( fs/fstim ))
+
+    stim[ 0:idx(pulse_width) ] = amplitude
+    stim[ idx(pulse_width+gap_width):idx(2*pulse_width+gap_width) ] = -amplitude
+
+    return stim
 
 
 if __name__ == "__main__":
