@@ -6,9 +6,14 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 import multiprocessing
+import inspect
 
+def run_workers(sender, worker, receiver, nproc=None, config=None):
+    """
+    config: object that will be passed to each process if each process
+    function has it declared
 
-def run_workers(sender, worker, receiver, nproc=None):
+    """
     if nproc is None:
         nproc = multiprocessing.cpu_count()
 
@@ -16,23 +21,44 @@ def run_workers(sender, worker, receiver, nproc=None):
     done_queue = multiprocessing.Queue()
 
     # Receiver process
+    nargs = len(inspect.getargspec(receiver).args)
+    if nargs == 1:
+        args = (done_queue,)
+    elif nargs == 2:
+        args = (done_queue, config)
+    else:
+        assert False, "Too many arguments for receiver()"
     rcv_proc = multiprocessing.Process(target=receiver,
-                                       args=(done_queue,))
+                                       args=args)
     rcv_proc.start()
 
 
     # Worker processes
     work_procs = []
+    nargs = len(inspect.getargspec(worker).args)
+    if nargs == 2:
+        args = (task_queue, done_queue)
+    elif nargs == 3:
+        args = (task_queue, done_queue, config)
+    else:
+        assert False, "Wrong number of arguments in worker()"
     for i in range(nproc):
         w = multiprocessing.Process(target=worker,
-                                    args=(task_queue, done_queue))
+                                    args=args)
         w.start()
         work_procs.append(w)
 
 
     # Sender process
+    nargs = len(inspect.getargspec(sender).args)
+    if nargs == 1:
+        args = (task_queue,)
+    elif nargs == 2:
+        args = (task_queue, config)
+    else:
+        assert False, "Too many arguments for sender()"
     snd_proc = multiprocessing.Process(target=sender,
-                                       args=(task_queue,))
+                                       args=args)
     snd_proc.start()
     snd_proc.join()
 

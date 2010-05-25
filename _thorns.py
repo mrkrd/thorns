@@ -107,9 +107,8 @@ def spikes_to_signal(fs, spike_trains, tmax=None):
     return signals
 
 
-def plot_raster(spike_trains, plot=None, **style):
+def plot_raster(spike_trains, plot=None, backend='biggles', **style):
     """ Plot raster plot. """
-    import biggles
 
     # Compute trial number
     L = [ len(train) for train in spike_trains ]
@@ -120,16 +119,27 @@ def plot_raster(spike_trains, plot=None, **style):
     s = np.concatenate(tuple(spike_trains))
 
 
-    c = biggles.Points(s, n, type='dot')
-    c.style(**style)
 
-    if plot is None:
-        plot = biggles.FramedPlot()
-    plot.xlabel = "Time (ms)"
-    plot.ylabel = "Trial Number"
-    plot.yrange = (-0.5, len(spike_trains)-0.5)
-    plot.add(c)
+    if backend == 'biggles':
+        import biggles
+        c = biggles.Points(s, n, type='dot')
+        c.style(**style)
 
+        if plot is None:
+            plot = biggles.FramedPlot()
+        plot.xlabel = "Time (ms)"
+        plot.ylabel = "Trial Number"
+        plot.yrange = (-0.5, len(spike_trains)-0.5)
+        plot.add(c)
+
+    elif backend == 'matplotlib':
+        import matplotlib.pyplot as plt
+        if plot is None:
+            plot = plt.gca()
+        plot.plot(s, n, 'k,')
+        plot.set_xlabel("Time (ms)")
+        plot.set_ylabel("Trial #")
+        plot.set_ylim( (-0.5, len(spike_trains)-0.5) )
 
     return plot
 
