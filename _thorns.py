@@ -175,9 +175,10 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
 
     assert len(all_spikes)>0, "No spikes!"
 
-    nbins = np.ceil((max(all_spikes) - min(all_spikes)) / bin_size)
+    nbins = np.ceil(all_spikes.max() / bin_size)
 
-    values, bins = np.histogram(all_spikes, nbins)
+    values, bins = np.histogram(all_spikes, nbins,
+                                range=(0, all_spikes.max()))
 
 
     # Normalize values for spikes per second
@@ -203,7 +204,7 @@ def calc_isih(spike_trains, bin_size=1, trial_num=None):
 
     >>> spikes = [np.array([1,2,3]), np.array([2,5,8])]
     >>> calc_isih(spikes)
-    (array([ 1.,  1.]), array([ 1.,  2.,  3.]))
+    (array([ 0.,  1.,  1.]), array([ 0.,  1.,  2.,  3.]))
 
     """
     isi_trains = [ np.diff(train) for train in spike_trains ]
@@ -213,12 +214,12 @@ def calc_isih(spike_trains, bin_size=1, trial_num=None):
     if len(all_isi) < 2:
         return np.array([]), np.array([])
 
-    nbins = np.ceil((max(all_isi) - min(all_isi)) / bin_size)
+    nbins = np.ceil(all_isi.max() / bin_size)
 
     if nbins == 0:              # just in case of two equal spikes
         nbins = 1
 
-    values, bins = np.histogram(all_isi, nbins)
+    values, bins = np.histogram(all_isi, nbins, range=(0,all_isi.max()))
 
     # Normalize values
     if trial_num == None:
@@ -283,7 +284,7 @@ def plot_period_histogram(spike_trains, fstim, nbins=64, plot=None, **style):
         return 0
 
     folded = np.fmod(all_spikes, 1/fstim)
-    ph = np.histogram(folded, bins=nbins)[0]
+    ph,edges = np.histogram(folded, bins=nbins, range=(0,1/fstim))
 
     # Normalize
     ph = ph / np.sum(ph)
@@ -339,7 +340,7 @@ def calc_synchronization_index(spike_trains, fstim):
     all_spikes = all_spikes - all_spikes.min()
 
     folded = np.fmod(all_spikes, 1/fstim)
-    ph = np.histogram(folded, bins=180)[0]
+    ph,edges = np.histogram(folded, bins=1000, range=(0, 1/fstim))
 
     # indexing trick is necessary, because the sample at 2*pi belongs
     # to the next cycle
