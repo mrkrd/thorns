@@ -1,11 +1,9 @@
 #!/usr/bin/env python
 
-# Author: Marek Rudnicki
-# Time-stamp: <2010-05-19 19:41:30 marek>
-
-# Description:
-
 from __future__ import division
+
+__author__ = "Marek Rudnicki"
+
 import numpy as np
 import matplotlib.pyplot as plt
 
@@ -143,7 +141,9 @@ def meta_stamp(fname, *meta_args, **meta_kwargs):
     for meta_key in meta_kwargs:
         meta_str += _meta_sub_string(meta_key, meta_kwargs[meta_key])
 
-    return root + meta_str + ext
+    new_fname = root + meta_str + ext
+    new_fname = new_fname.replace(' ', '_')
+    return new_fname
 
 mstamp = meta_stamp
 
