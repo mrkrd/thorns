@@ -152,13 +152,18 @@ def _meta_sub_string(var, value):
 
 
 
-def generate_biphasic_pulse(fs, fstim, pulse_width, gap_width, amplitude=1):
+def generate_biphasic_pulse(fs, fstim, pulse_width, gap_width,
+                            amplitude=1,
+                            stimulus_duration=None):
     """
+    Generate biphasic pulse for electrical stimulation.
+
     fs: Hz
     fstim: Hz
     pulse_width: us
     gap_width: us
     amplitude: mA
+    stimulus_duration: ms
 
     """
     def idx(width):
@@ -169,6 +174,11 @@ def generate_biphasic_pulse(fs, fstim, pulse_width, gap_width, amplitude=1):
 
     stim[ 0:idx(pulse_width) ] = amplitude
     stim[ idx(pulse_width+gap_width):idx(2*pulse_width+gap_width) ] = -amplitude
+
+    if stimulus_duration is not None:
+        times = np.ceil(stimulus_duration / (len(stim)*1000/fs))
+        stim = np.tile(stim, times)
+        stim = stim[0:np.ceil(stimulus_duration*fs/1000)]
 
     return stim
 
