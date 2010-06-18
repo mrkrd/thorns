@@ -166,8 +166,8 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     spike_trains: list of spike trains
     bin_size: bin size in ms
     trial_num: total number of trials
-    axis: axis to draw on
-    **kwargs: plt.plot arguments
+    plot: biggles container
+    **style: biggles curve style (e.g., color='red')
     """
     import biggles
 
@@ -195,6 +195,8 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     plot.xlabel = "Time (ms)"
     plot.ylabel = "Spikes per second"
     plot.add(c)
+    plot.xrange = (0, None)
+    plot.yrange = (0, None)
 
     return plot
 
@@ -265,6 +267,8 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     plot.xlabel = "Inter-Spike Interval (ms)"
     plot.ylabel = "Interval Count"
     plot.add(c)
+    plot.xrange = (0, None)
+    plot.yrange = (0, None)
 
     return plot
 
