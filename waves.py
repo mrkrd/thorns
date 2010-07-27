@@ -8,7 +8,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 golden = 1.6180339887
-
+pi = np.pi
 
 # TODO: help, testdoc
 def detect_peaks(fs, signal):
@@ -73,11 +73,10 @@ def generate_ramped_tone(fs, freq,
                          ramp_duration=2.5,
                          pad_duration=55,
                          dbspl=None):
-    """
-    Generate ramped tone singal.
+    """ Generate ramped tone singal.
 
-    fs: sampling frequancy (Hz)
-    freq: frequancy of the tone (Hz)
+    fs: sampling frequency (Hz)
+    freq: frequency of the tone (Hz)
     tone_durations: ms
     ramp_duration:
     pad_duration:
@@ -98,6 +97,27 @@ def generate_ramped_tone(fs, freq,
 
     return s
 
+
+def generate_amplitude_modulated_tone(fs, fm, fc,
+                                      modulation_depth=1,
+                                      tone_duration=100):
+    """ Generates amplitude modulated signals.
+
+    fs: sampling frequency (Hz)
+    fm: modulation frequency (Hz)
+    fc: carrier frequency (Hz)
+    modulation_depth: modulation depth
+    tone_duration: tone duration (ms)
+
+    """
+    m = modulation_depth
+    t = np.arange(0, tone_duration/1000, 1/fs)
+    s = (1 + m*np.sin(2*pi*fm*t)) * np.sin(2*pi*fc*t)
+
+    return s
+
+
+generate_am_tone = generate_amplitude_modulated_tone
 
 
 def now():
@@ -152,25 +172,29 @@ def _meta_sub_string(var, value):
 
 
 
-def generate_biphasic_pulse(fs, fstim, pulse_width, gap_width,
+def generate_biphasic_pulse(fs, pulse_width, gap_width,
                             amplitude=1,
-                            stimulus_duration=None):
-    """
-    Generate biphasic pulse for electrical stimulation.
+                            fstim=None,
+                            stimulus_duration=None,
+                            polarity='a'):
+    """ Generate biphasic pulse for electrical stimulation.
 
     fs: Hz
-    fstim: Hz
     pulse_width: us
     gap_width: us
     amplitude: mA
+    fstim: Hz
     stimulus_duration: ms
+    polarity: 'c': cathodic, 'a': anodic
 
     """
     def idx(width):
         """ fs: Hz, width: us """
         return np.round(fs*width/1e6)
 
-    stim = np.zeros(np.ceil( fs/fstim ))
+    if fstim is None:
+        fstim = 1e6 / (2*pulse_width + gap_width) # Hz
+    stim = np.zeros(np.round( fs/fstim ))
 
     stim[ 0:idx(pulse_width) ] = amplitude
     stim[ idx(pulse_width+gap_width):idx(2*pulse_width+gap_width) ] = -amplitude
@@ -179,6 +203,9 @@ def generate_biphasic_pulse(fs, fstim, pulse_width, gap_width,
         times = np.ceil(stimulus_duration / (len(stim)*1000/fs))
         stim = np.tile(stim, times)
         stim = stim[0:np.ceil(stimulus_duration*fs/1000)]
+
+    if polarity == 'c':
+        stim = -stim
 
     return stim
 
