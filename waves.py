@@ -34,7 +34,15 @@ rms = root_mean_square
 
 
 
-def set_dB_SPL(dB, signal):
+
+def set_dbspl(p0, p1):
+    if np.isscalar(p0) and isinstance(p1, np.ndarray):
+        dB, signal = p0, p1
+    elif np.isscalar(p1) and isinstance(p0, np.ndarray):
+        signal, dB = p0, p1
+    else:
+        assert False, "Input not correct, must be scalar and array"
+
     p0 = 2e-5                   # Pa
     squared = signal**2
     rms = np.sqrt( np.sum(squared) / len(signal) )
@@ -46,7 +54,6 @@ def set_dB_SPL(dB, signal):
 
     return signal * r * 1e6     # uPa
 
-set_dbspl = set_dB_SPL
 
 
 
@@ -208,6 +215,19 @@ def generate_biphasic_pulse(fs, pulse_width, gap_width,
         stim = -stim
 
     return stim
+
+
+def plot_signal(fs, s):
+    import biggles
+
+    t = make_time(fs, s)
+
+    plot = biggles.FramedPlot()
+    plot.add( biggles.Current(t, s) )
+    plot.xlabel = Time (ms)
+
+    return plot
+
 
 
 if __name__ == "__main__":
