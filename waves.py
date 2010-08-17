@@ -5,7 +5,6 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 golden = 1.6180339887
 pi = np.pi
@@ -35,11 +34,11 @@ rms = root_mean_square
 
 
 
-def set_dbspl(p0, p1):
-    if np.isscalar(p0) and isinstance(p1, np.ndarray):
-        dB, signal = p0, p1
-    elif np.isscalar(p1) and isinstance(p0, np.ndarray):
-        signal, dB = p0, p1
+def set_dbspl(*args):
+    if np.isscalar(args[0]) and isinstance(args[1], np.ndarray):
+        dB, signal = args
+    elif isinstance(args[0], np.ndarray) and np.isscalar(args[1]):
+        signal, dB = args
     else:
         assert False, "Input not correct, must be scalar and array"
 
