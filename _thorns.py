@@ -21,7 +21,6 @@ def _signal_to_spikes(fs, signal):
 
     """
     assert signal.ndim == 1
-    assert (np.mod(signal, 1) == 0).all()
 
     signal = signal.astype(int)
 

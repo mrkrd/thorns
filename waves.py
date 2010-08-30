@@ -5,7 +5,6 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 golden = 1.6180339887
 pi = np.pi
