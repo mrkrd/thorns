@@ -6,7 +6,7 @@ from numpy.random import shuffle
 golden = 1.6180339887
 
 
-def _signal_to_spikes(fs, signal):
+def _signal_to_spikes_1d(fs, signal):
     """ Convert 1D time function array into array of spike timings.
 
     fs: sampling frequency in Hz
@@ -16,7 +16,7 @@ def _signal_to_spikes(fs, signal):
 
     >>> fs = 10
     >>> signal = np.array([0,2,0,0,1,0])
-    >>> _signal_to_spikes(fs, signal)
+    >>> _signal_to_spikes_1d(fs, signal)
     array([ 100.,  100.,  400.])
 
     """
@@ -47,9 +47,9 @@ def signal_to_spikes(fs, signals):
     spike_trains = []
 
     if signals.ndim == 1:
-        spike_trains = [ _signal_to_spikes(fs, signals) ]
+        spike_trains = [ _signal_to_spikes_1d(fs, signals) ]
     elif signals.ndim == 2:
-        spike_trains = [ _signal_to_spikes(fs, signal)
+        spike_trains = [ _signal_to_spikes_1d(fs, signal)
                          for signal in signals.T ]
     else:
         assert False, "Input signal must be 1 or 2 dimensional"
@@ -57,12 +57,12 @@ def signal_to_spikes(fs, signals):
     return spike_trains
 
 
-def _spikes_to_signal(fs, spikes, tmax=None):
+def _spikes_to_signal_1d(fs, spikes, tmax=None):
     """ Convert spike train to its time function. 1D version.
 
     >>> fs = 10
     >>> spikes = np.array([100, 500, 1000, 1000])
-    >>> _spikes_to_signal(fs, spikes)
+    >>> _spikes_to_signal_1d(fs, spikes)
     array([0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2])
 
     """
@@ -97,13 +97,32 @@ def spikes_to_signal(fs, spike_trains, tmax=None):
     max_len = np.ceil( tmax * fs / 1000 ) + 1
     signals = np.zeros( (max_len, len(spike_trains)) )
 
-    signals = [_spikes_to_signal(fs, train, tmax) for train in spike_trains]
+    signals = [_spikes_to_signal_1d(fs, train, tmax) for train in spike_trains]
     signals = np.array(signals).T
 
     # import matplotlib.pyplot as plt
     # plt.imshow(signals, aspect='auto')
     # plt.show()
     return signals
+
+
+def accumulate_spikes(spike_trains, cfs):
+    """ Concatenate spike trains of the same CF and sort by increasing CF
+
+    >>> spikes = [np.array([1]), np.array([2]), np.array([3]), np.array([])]
+    >>> cfs = np.array([2,1,2,3])
+    >>> accumulate_spikes(spikes, cfs)
+    ([array([2]), array([1, 3]), array([], dtype=float64)], array([1, 2, 3]))
+
+    """
+    accumulated_trains = []
+    accumulated_cfs = np.unique(cfs)
+    for cf in accumulated_cfs:
+        selected_trains = [spike_trains[i] for i in np.where(cfs==cf)[0]]
+        t = np.concatenate( selected_trains )
+        accumulated_trains.append(t)
+
+    return accumulated_trains, accumulated_cfs
 
 
 def plot_raster(spike_trains, plot=None, backend='biggles', **style):

@@ -43,8 +43,7 @@ def set_dbspl(*args):
         assert False, "Input not correct, must be scalar and array"
 
     p0 = 2e-5                   # Pa
-    squared = signal**2
-    rms = np.sqrt( np.sum(squared) / len(signal) )
+    rms = np.sqrt( np.sum(signal**2) / len(signal) )
 
     if rms == 0:
         r = 0
