@@ -47,7 +47,117 @@ class Train(object):
     def __str__(self):
         return self._train.__str__()
 
+    def __lt__(self, other):
+        return self._train.__lt__(other)
+    def __le__(self, other):
+        return self._train.__le__(other)
+    def __eq__(self, other):
+        return self._train.__eq__(other)
+    def __ne__(self, other):
+        return self._train.__ne__(other)
+    def __gt__(self, other):
+        return self._train.__gt__(other)
+    def __ge__(self, other):
+        return self._train.__ge__(other)
 
+    def __add__(self, other):
+        return self._train.__add__(other)
+    def __sub__(self, other):
+        return self._train.__sub__(other)
+    def __mul__(self, other):
+        return self._train.__mul__(other)
+    def __floordiv__(self, other):
+        return self._train.__floordiv__(other)
+    def __mod__(self, other):
+        return self._train.__mod__(other)
+    def __divmod__(self, other):
+        return self._train.__divmod__(other, *args, **kwargs)
+    def __pow__(self, other, *args, **kwargs):
+        return self._train.__pow__(other)
+    def __lshift__(self, other):
+        return self._train.__lshift__(other)
+    def __rshift__(self, other):
+        return self._train.__rshift__(other)
+    def __and__(self, other):
+        return self._train.__and__(other)
+    def __xor__(self, other):
+        return self._train.__xor__(other)
+    def __or__(self, other):
+        return self._train.__or__(other)
+    def __div__(self, other):
+        return self._train.__div__(other)
+    def __truediv__(self, other):
+        return self._train.__truediv__(other)
+    def __radd__(self, other):
+        return self._train.__radd__(other)
+    def __rsub__(self, other):
+        return self._train.__rsub__(other)
+    def __rmul__(self, other):
+        return self._train.__rmul__(other)
+    def __rdiv__(self, other):
+        return self._train.__rdiv__(other)
+    def __rtruediv__(self, other):
+        return self._train.__rtruediv__(other)
+    def __rfloordiv__(self, other):
+        return self._train.__rfloordiv__(other)
+    def __rmod__(self, other):
+        return self._train.__rmod__(other)
+    def __rdivmod__(self, other):
+        return self._train.__rdivmod__(other)
+    def __rpow__(self, other):
+        return self._train.__rpow__(other)
+    def __rlshift__(self, other):
+        return self._train.__rlshift__(other)
+    def __rrshift__(self, other):
+        return self._train.__rrshift__(other)
+    def __rand__(self, other):
+        return self._train.__rand__(other)
+    def __rxor__(self, other):
+        return self._train.__rxor__(other)
+    def __ror__(self, other):
+        return self._train.__ror__(other)
+    def __iadd__(self, other):
+        return self._train.__iadd__(other)
+    def __isub__(self, other):
+        return self._train.__isub__(other)
+    def __imul__(self, other):
+        return self._train.__imul__(other)
+    def __idiv__(self, other):
+        return self._train.__idiv__(other)
+    def __itruediv__(self, other):
+        return self._train.__itruediv__(other)
+    def __ifloordiv__(self, other):
+        return self._train.__ifloordiv__(other)
+    def __imod__(self, other):
+        return self._train.__imod__(other)
+    def __ipow__(self, other, *args, **kwargs):
+        return self._train.__ipow__(other, *args, **kwargs)
+    def __ilshift__(self, other):
+        return self._train.__ilshift__(other)
+    def __irshift__(self, other):
+        return self._train.__irshift__(other)
+    def __iand__(self, other):
+        return self._train.__iand__(other)
+    def __ixor__(self, other):
+        return self._train.__ixor__(other)
+    def __ior__(self, other):
+        return self._train.__ior__(other)
+    def __neg__(self):
+        return self._train.__neg__(other)
+    def __pos__(self):
+        return self._train.__pos__(other)
+    def __abs__(self):
+        return self._train.__abs__(other)
+    def __invert__(self):
+        return self._train.__invert__(other)
+    def __complex__(self):
+        return self._train.__complex__(other)
+    def __int__(self):
+        return self._train.__int__(other)
+    def __long__(self):
+        return self._train.__long__(other)
+    def __float__(self):
+        return self._train.__float__(other)
 
 
 class SpikeTrains(object):
@@ -128,6 +238,7 @@ class SpikeTrains(object):
 def main():
     st = SpikeTrains()
     st.append([1,2,3], cf=12000, type='hsr')
+    st.append([4,5,6], cf=12222, type='msr')
 
     print st
     print st[0]

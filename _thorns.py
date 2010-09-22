@@ -593,7 +593,7 @@ def trim_spikes(spike_trains, start, stop=None):
         return spike_trains
 
     if stop is None:
-        stop = np.concatenate(tuple(spike_trains)).max()
+        stop = all_spikes.max()
 
     trimmed = [ train[(train >= start) & (train <= stop)]
                 for train in spike_trains ]
