@@ -3,6 +3,8 @@ from __future__ import division
 import numpy as np
 from numpy.random import shuffle
 
+from spikes import *
+
 golden = 1.6180339887
 
 
@@ -560,24 +562,6 @@ def plot_sac(spike_trains, coincidence_window=0.05, analysis_window=5,
     return plot
 
 
-def split_trains(spike_trains, idx):
-    """ Returns two spike trains created by spliting the input spike_train
-    at index `idx'.
-
-    """
-    left = spike_trains[0:idx]
-    right = spike_trains[idx:]
-
-    return left, right
-
-
-def pop_trains(spike_trains, num):
-    """  Pop `num' of trains from `spike_trains'. """
-    popped = [ spike_trains.pop() for each in range(num) ]
-
-    popped.reverse()
-
-    return popped
 
 
 def trim_spikes(spike_trains, start, stop=None):
@@ -588,7 +572,8 @@ def trim_spikes(spike_trains, start, stop=None):
     [array([0, 1, 2]), array([1, 2])]
 
     """
-    all_spikes = np.concatenate(tuple(spike_trains))
+    all_spikes = np.concatenate(spike_trains)
+
     if len(all_spikes) == 0:
         return spike_trains
 
@@ -600,7 +585,7 @@ def trim_spikes(spike_trains, start, stop=None):
 
     shifted = shift_spikes(trimmed, -start)
 
-    return shifted
+    return SpikeTrains(shifted)
 
 
 trim = trim_spikes

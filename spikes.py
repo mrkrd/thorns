@@ -26,9 +26,26 @@ class Train(object):
             setattr(self.meta, key, kwargs[key])
 
 
+    def copy_meta(f):
+        """
+        This decorator assures that meta data is copied for the output
+        train.
+
+        """
+        def w(self, *args, **kwargs):
+            vec = f(self, *args, **kwargs)
+            if isinstance(vec, np.ndarray):
+                vec = Train(vec)
+                vec.meta = self.meta
+            return vec
+
+        return w
+
+
     def __setslice__(self, *args, **kwargs):
         self._train.__setslice__(*args, **kwargs)
 
+    @copy_meta
     def __getslice__(self, *args, **kwargs):
         return self._train.__getslice__(*args, **kwargs)
 
@@ -38,6 +55,7 @@ class Train(object):
     def __setitem__(self, *args, **kwargs):
         self._train.__setitem__(*args, **kwargs)
 
+    @copy_meta
     def __getitem__(self, *args, **kwargs):
         return self._train.__getitem__(*args, **kwargs)
 
@@ -60,12 +78,18 @@ class Train(object):
     def __ge__(self, other):
         return self._train.__ge__(other)
 
+    @copy_meta
     def __add__(self, other):
         return self._train.__add__(other)
+
+    @copy_meta
     def __sub__(self, other):
         return self._train.__sub__(other)
+
+    @copy_meta
     def __mul__(self, other):
         return self._train.__mul__(other)
+
     def __floordiv__(self, other):
         return self._train.__floordiv__(other)
     def __mod__(self, other):
@@ -178,7 +202,6 @@ class SpikeTrains(object):
 
     def __getitem__(self, key):
 
-
         if isinstance(key, str):
             # String gives us array of attributes
             item = np.array([getattr(train.meta, key) for train in self._trains])
@@ -240,8 +263,13 @@ def main():
     st.append([1,2,3], cf=12000, type='hsr')
     st.append([4,5,6], cf=12222, type='msr')
 
+    import thorns as th
+    print th.trim(st, 0, 2)
+
     print st
-    print st[0]
+    train = st[0]
+
+    print train[(train > 2)]
     print st[0][2]
 
 
