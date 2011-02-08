@@ -249,12 +249,17 @@ class SpikeTrains(object):
 
         return self[mask]
 
-    def pop(self, *args, **kwargs):
-        return self._trains.pop(*args, **kwargs)
 
-    def pop_random(self):
-        i = random.randint(0, len(self._trains)-1)
-        return self._trains.pop(i)
+    def pop(self, random=False, *args):
+        if random:
+            i = random.randint(0, len(self._trains)-1)
+            train = self._trains.pop(i)
+        else:
+            train = self._trains.pop(*args)
+
+        return train
+
+
 
 
 def main():
