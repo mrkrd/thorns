@@ -71,7 +71,8 @@ def _spikes_to_signal_1d(fs, spikes, tmax=None):
     if tmax == None:
         tmax = max(spikes)
 
-    bins = np.ceil(tmax*fs/1000) + 1
+    bins = np.floor(tmax*fs/1000) + 1
+    tmax = bins * 1000/fs
     signal, bin_edges = np.histogram(spikes, bins=bins, range=(0,tmax))
 
     return signal
@@ -243,11 +244,11 @@ def calc_isih(spike_trains, bin_size=1, trial_num=None):
 
     values, bins = np.histogram(all_isi, nbins, range=(0,all_isi.max()))
 
-    # Normalize values
-    if trial_num == None:
-        trial_num = len(spike_trains)
-    # values = values / bin_size / trial_num
-    values = values / trial_num
+    # # Normalize values
+    # if trial_num == None:
+    #     trial_num = len(spike_trains)
+    # # values = values / bin_size / trial_num
+    # values = values / trial_num
 
     return values, bins
 
@@ -568,8 +569,11 @@ def trim_spikes(spike_trains, start, stop=None):
     """ Return spike trains with that are between `start' and `stop'.
 
     >>> spikes = [np.array([1,2,3,4]), np.array([3,4,5,6])]
-    >>> trim_spikes(spikes, 2, 4)
-    [array([0, 1, 2]), array([1, 2])]
+    >>> print trim_spikes(spikes, 2, 4)
+    [
+      [ 0.  1.  2.] {}
+      [ 1.  2.] {}
+    ]
 
     """
     all_spikes = np.concatenate(spike_trains)
