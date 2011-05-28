@@ -652,13 +652,20 @@ def shift_spikes(spike_trains, shift):
 shift = shift_spikes
 
 
-def split_and_fold_trains(long_train, silence_duration, tone_duration, pad_duration):
+def split_and_fold_trains(long_train,
+                          silence_duration,
+                          tone_duration,
+                          pad_duration,
+                          remove_pads=False):
     silence = trim(long_train, 0, silence_duration)
 
-    tones = trim(long_train, silence_duration)
-    tones = fold(tones, tone_duration+pad_duration)
+    tones_and_pads = trim(long_train, silence_duration)
+    tones_and_pads = fold(tones_and_pads, tone_duration+pad_duration)
 
-    return silence, tones
+    if remove_pads:
+        tones_and_pads = trim(tones_and_pads, 0, tone_duration)
+
+    return silence, tones_and_pads
 
 split_and_fold = split_and_fold_trains
 
