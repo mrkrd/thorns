@@ -297,7 +297,9 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
 def plot_period_histogram(spike_trains, fstim,
                           nbins=64, spike_fs=None,
                           center=False,
-                          plot=None, **style):
+                          plot=None,
+                          label=None,
+                          **style):
     """ Plots period histogram. """
     import biggles
 
@@ -328,6 +330,9 @@ def plot_period_histogram(spike_trains, fstim,
 
     c = biggles.Histogram(ph, x0=0, binsize=1/len(ph))
     c.style(**style)
+    if label is not None:
+            c.label = label
+
 
     if plot is None:
         plot = biggles.FramedPlot()
