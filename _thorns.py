@@ -294,9 +294,16 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     return plot
 
 
-def plot_period_histogram(spike_trains, fstim, nbins=64, plot=None, **style):
+def plot_period_histogram(spike_trains, fstim,
+                          nbins=64, spike_fs=None,
+                          center=False,
+                          plot=None, **style):
     """ Plots period histogram. """
     import biggles
+
+    if spike_fs is not None:
+        nbins = int(spike_fs / fstim)
+
 
     fstim = fstim / 1000        # Hz -> kHz; s -> ms
 
@@ -311,12 +318,13 @@ def plot_period_histogram(spike_trains, fstim, nbins=64, plot=None, **style):
     folded = np.fmod(all_spikes, 1/fstim)
     ph,edges = np.histogram(folded, bins=nbins, range=(0,1/fstim))
 
-    # Normalize
+    ### Normalize
     ph = ph / np.sum(ph)
 
-    # TODO: find the direction instead of max value
-    center_idx = ph.argmax()
-    ph = np.roll(ph, nbins//2 - center_idx)
+    ### TODO: find the direction instead of max value
+    if center:
+        center_idx = ph.argmax()
+        ph = np.roll(ph, nbins//2 - center_idx)
 
     c = biggles.Histogram(ph, x0=0, binsize=1/len(ph))
     c.style(**style)
