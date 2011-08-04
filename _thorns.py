@@ -71,7 +71,7 @@ def _spikes_to_signal_1d(fs, spikes, tmax=None):
     if tmax == None:
         tmax = np.max(spikes)
 
-    bins = np.ceil(tmax*fs/1000)
+    bins = np.floor(tmax*fs/1000) + 1
     real_tmax = bins * 1000/fs
     signal, bin_edges = np.histogram(spikes, bins=bins, range=(0,real_tmax))
 
@@ -225,9 +225,9 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
 def calc_isih(spike_trains, bin_size=1, trial_num=None):
     """ Calculate inter-spike interval histogram.
 
-    # >>> spikes = [np.array([1,2,3]), np.array([2,5,8])]
-    # >>> calc_isih(spikes)
-    # (array([ 0.,  1.,  1.]), array([ 0.,  1.,  2.,  3.]))
+    >>> spikes = [np.array([1,2,3]), np.array([2,5,8])]
+    >>> calc_isih(spikes)
+    (array([0, 2, 2]), array([ 0.,  1.,  2.,  3.]))
 
     """
     isi_trains = [ np.diff(train) for train in spike_trains ]
