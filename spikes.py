@@ -8,241 +8,166 @@ import random
 import numpy as np
 
 
-class Train(object):
-    def __init__(self, data=[], **kwargs):
-        if isinstance(data, Train):
-            self._meta = dict(data._meta)
+class Spikes(object):
+    """Class that respresents a single spike train.  Objects of this
+    class have the same interface as np.ndarray's.  Meta data can be
+    accessed using spikes['key'] notation.
+
+    Raw spikes are in self.spikes.  Metadata is a dictionary in
+    self.meta.
+
+    """
+
+
+    def __init__(self, spikes=[], **kwargs):
+
+        ### Initialize spikes
+        self.spikes = np.array(spikes, dtype=float)
+        assert self.spikes.ndim == 1
+
+
+        ### Initialize meta
+        if isinstance(spikes, Spikes):
+            self.meta = dict(spikes.meta)
         else:
-            self._meta = dict()
+            self.meta = dict()
 
-        self._data = np.array(data, dtype=float)
-        self._meta.update(kwargs)
-
+        self.meta.update(kwargs)
 
 
-    def copy_meta(f):
+
+    def copy_meta(func):
         """
-        This decorator assures that meta data is copied for the output
+        Decorator that copies metadata before returning the output
         train.
 
         """
-        def w(self, *args, **kwargs):
-            data = f(self, *args, **kwargs)
+        def wrapper(self, *args, **kwargs):
+            output_train = func(self, *args, **kwargs)
 
-            # Copy the meta data from the original train
-            if isinstance(data, np.ndarray):
-                data = Train(data, **self._meta)
+            if isinstance(output_train, np.ndarray):
+                output_train = Spikes(output_train, **self.meta)
 
-            return data
+            return output_train
 
-        return w
+        return wrapper
 
 
-    @copy_meta
-    def __getslice__(self, *args, **kwargs):
-        return self._data.__getslice__(*args, **kwargs)
-    def __setslice__(self, *args, **kwargs):
-        self._data.__setslice__(*args, **kwargs)
 
     @copy_meta
     def __getitem__(self, key):
         if isinstance(key, str):
-            item = self._meta[key]
+            item = self.meta[key]
         else:
-            item = self._data.__getitem__(key)
-
+            item = self.spikes.__getitem__(key)
         return item
 
-
-    def __setitem__(self, *args, **kwargs):
-        self._data.__setitem__(*args, **kwargs)
+    def __setitem__(self, key, value):
+        self.spikes.__setitem__(key, value)
 
     def __len__(self):
-        return self._data.__len__()
+        return self.spikes.__len__()
 
     def __iter__(self):
-        return self._data.__iter__()
+        return self.spikes.__iter__()
 
     def __str__(self):
-        return self._data.__str__() + " " + self._meta.__str__()
+        return self.spikes.__str__() + " " + self.meta.__str__()
 
     def __lt__(self, other):
-        return self._data.__lt__(other)
+        return self.spikes.__lt__(other)
     def __le__(self, other):
-        return self._data.__le__(other)
+        return self.spikes.__le__(other)
     def __eq__(self, other):
-        return self._data.__eq__(other)
+        return self.spikes.__eq__(other)
     def __ne__(self, other):
-        return self._data.__ne__(other)
+        return self.spikes.__ne__(other)
     def __gt__(self, other):
-        return self._data.__gt__(other)
+        return self.spikes.__gt__(other)
     def __ge__(self, other):
-        return self._data.__ge__(other)
+        return self.spikes.__ge__(other)
 
     @copy_meta
     def __add__(self, other):
-        return self._data.__add__(other)
+        return self.spikes.__add__(other)
 
     @copy_meta
     def __sub__(self, other):
-        return self._data.__sub__(other)
+        return self.spikes.__sub__(other)
 
     @copy_meta
     def __mul__(self, other):
-        return self._data.__mul__(other)
-
-    def __floordiv__(self, other):
-        return self._data.__floordiv__(other)
-    def __mod__(self, other):
-        return self._data.__mod__(other)
-    def __divmod__(self, other):
-        return self._data.__divmod__(other, *args, **kwargs)
-    def __pow__(self, other, *args, **kwargs):
-        return self._data.__pow__(other)
-    def __lshift__(self, other):
-        return self._data.__lshift__(other)
-    def __rshift__(self, other):
-        return self._data.__rshift__(other)
-    def __and__(self, other):
-        return self._data.__and__(other)
-    def __xor__(self, other):
-        return self._data.__xor__(other)
-    def __or__(self, other):
-        return self._data.__or__(other)
-    def __div__(self, other):
-        return self._data.__div__(other)
-    def __truediv__(self, other):
-        return self._data.__truediv__(other)
-    def __radd__(self, other):
-        return self._data.__radd__(other)
-    def __rsub__(self, other):
-        return self._data.__rsub__(other)
-    def __rmul__(self, other):
-        return self._data.__rmul__(other)
-    def __rdiv__(self, other):
-        return self._data.__rdiv__(other)
-    def __rtruediv__(self, other):
-        return self._data.__rtruediv__(other)
-    def __rfloordiv__(self, other):
-        return self._data.__rfloordiv__(other)
-    def __rmod__(self, other):
-        return self._data.__rmod__(other)
-    def __rdivmod__(self, other):
-        return self._data.__rdivmod__(other)
-    def __rpow__(self, other):
-        return self._data.__rpow__(other)
-    def __rlshift__(self, other):
-        return self._data.__rlshift__(other)
-    def __rrshift__(self, other):
-        return self._data.__rrshift__(other)
-    def __rand__(self, other):
-        return self._data.__rand__(other)
-    def __rxor__(self, other):
-        return self._data.__rxor__(other)
-    def __ror__(self, other):
-        return self._data.__ror__(other)
-    def __iadd__(self, other):
-        return self._data.__iadd__(other)
-    def __isub__(self, other):
-        return self._data.__isub__(other)
-    def __imul__(self, other):
-        return self._data.__imul__(other)
-    def __idiv__(self, other):
-        return self._data.__idiv__(other)
-    def __itruediv__(self, other):
-        return self._data.__itruediv__(other)
-    def __ifloordiv__(self, other):
-        return self._data.__ifloordiv__(other)
-    def __imod__(self, other):
-        return self._data.__imod__(other)
-    def __ipow__(self, other, *args, **kwargs):
-        return self._data.__ipow__(other, *args, **kwargs)
-    def __ilshift__(self, other):
-        return self._data.__ilshift__(other)
-    def __irshift__(self, other):
-        return self._data.__irshift__(other)
-    def __iand__(self, other):
-        return self._data.__iand__(other)
-    def __ixor__(self, other):
-        return self._data.__ixor__(other)
-    def __ior__(self, other):
-        return self._data.__ior__(other)
-    def __neg__(self):
-        return self._data.__neg__(other)
-    def __pos__(self):
-        return self._data.__pos__(other)
-    def __abs__(self):
-        return self._data.__abs__(other)
-    def __invert__(self):
-        return self._data.__invert__(other)
-    def __complex__(self):
-        return self._data.__complex__(other)
-    def __int__(self):
-        return self._data.__int__(other)
-    def __long__(self):
-        return self._data.__long__(other)
-    def __float__(self):
-        return self._data.__float__(other)
+        return self.spikes.__mul__(other)
 
 
-class SpikeTrains(object):
-    def __init__(self, spike_trains=[]):
-        self._trains = [Train(train) for train in spike_trains]
 
-    def __setslice__(self, *args, **kwargs):
-        self._trains.__setslice__(*args, **kwargs)
 
-    def __getslice__(self, *args, **kwargs):
-        return self._trains.__getslice__(*args, **kwargs)
+
+
+class Trains(object):
+    def __init__(self, trains=[]):
+        self.trains = [Spikes(spikes) for spikes in trains]
+
+
 
     def __len__(self):
-        return self._trains.__len__()
+        return self.trains.__len__()
 
-    def __setitem__(self, *args, **kwargs):
-        self._trains.__setitem__(*args, **kwargs)
+
+
+    def __setitem__(self, key, value):
+        self.trains.__setitem__(key, value)
+
+
 
     def __getitem__(self, key):
 
         if isinstance(key, str):
-            # String gives us array of attributes
-            item = np.array([train[key] for train in self._trains])
+            ### String gives us an array of attributes
+            item = np.array([spikes[key] for spikes in self.trains])
 
         elif isinstance(key, np.ndarray) and (key.dtype is np.dtype('bool')):
-            # Indexing using Bool table (a la Numpy)
-
-            assert len(key) == len(self._trains)
+            ### Indexing using Bool table (a la Numpy)
+            assert len(key) == len(self.trains)
             idx = np.where(key)[0]
-
-            item = SpikeTrains()
-            for i in idx:
-                item.append(self[i])
+            item = Trains([self[i] for i in idx])
 
         else:
-            # Integer indexing
-            item = self._trains.__getitem__(key)
+            ### Integer indexing
+            item = self.trains.__getitem__(key)
 
         return item
 
+
+
     def __iter__(self):
-        return self._trains.__iter__()
+        return self.trains.__iter__()
+
+
 
     def __str__(self):
         s = "[\n"
-        for t in self._trains:
+        for t in self.trains:
             s = s + "  " + str(t) + "\n"
         s += "]"
         return s
 
-    def append(self, train, **kwargs):
-        train = Train(train, **kwargs)
-        self._trains.append(train)
+
+
+    def append(self, spikes, **kwargs):
+        spikes = Spikes(spikes, **kwargs)
+        self.trains.append(spikes)
+
+
 
     def extend(self, L):
-        L = [Train(el) for el in L]
-        self._trains.extend(L)
+        trains = [Spikes(spikes) for spikes in L]
+        self.trains.extend(trains)
+
+
 
     def where(self, **kwargs):
-        mask = np.ones(len(self._trains), dtype=np.dtype('bool'))
+        mask = np.ones(len(self.trains), dtype=np.dtype('bool'))
 
         for key in kwargs:
             mask = mask & (self[key]==kwargs[key])
@@ -250,12 +175,13 @@ class SpikeTrains(object):
         return self[mask]
 
 
+
     def pop(self, random=False, *args):
         if random:
-            i = random.randint(0, len(self._trains)-1)
-            train = self._trains.pop(i)
+            i = random.randint(0, len(self.trains)-1)
+            train = self.trains.pop(i)
         else:
-            train = self._trains.pop(*args)
+            train = self.trains.pop(*args)
 
         return train
 
@@ -263,25 +189,31 @@ class SpikeTrains(object):
 
 
 def main():
-    t = Train([1,2,3], cf=12)
-    print t['cf']
-
-
-    st = SpikeTrains()
-    st.append([1,2,3], cf=12000, type='hsr')
-    st.append([4,5,6], cf=12222, type='msr')
-
-    print st
-    train = st[0]
-    print train[(train > 2)]
-    print st[0][2]
-
-
-
     import thorns as th
+    from thorns.spikes import Spikes, Trains
+
+    print
+    print "=== Spikes ==="
+    sp = Spikes([1,2,3], cf=12)
+    print sp[1]
+    print sp[0:2]
+    print sp['cf']
+
+
+    print
+    print "=== Trains ==="
+
+    t = Trains()
+    t.append([1,2,3], cf=12000, type='hsr')
+    t.append([4,5,6], cf=12222, type='msr')
+
+    print "trains:", t
+    print "spikes:", t[0]
+    print "spike:", t[0][2]
+
     print
     print "trimming"
-    print th.trim(st, 0, 2)
+    print th.trim_spikes(t, 0, 2)
 
 
 

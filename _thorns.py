@@ -3,7 +3,7 @@ from __future__ import division
 import numpy as np
 from numpy.random import shuffle
 
-from spikes import *
+from thorns.spikes import Spikes, Trains
 
 golden = 1.6180339887
 
@@ -583,10 +583,7 @@ def trim_spikes(spike_trains, start, stop=None):
 
     >>> spikes = [np.array([1,2,3,4]), np.array([3,4,5,6])]
     >>> print trim_spikes(spikes, 2, 4)
-    [
-      [ 0.  1.  2.] {}
-      [ 1.  2.] {}
-    ]
+    [array([0, 1, 2]), array([1, 2])]
 
     """
     all_spikes = np.concatenate(spike_trains)
@@ -597,12 +594,17 @@ def trim_spikes(spike_trains, start, stop=None):
     if stop is None:
         stop = all_spikes.max()
 
-    trimmed = [ train[(train >= start) & (train <= stop)]
-                for train in spike_trains ]
+    trimmed = []
+    for train in spike_trains:
+        t = train[(train >= start) & (train <= stop)]
+        trimmed.append(t)
 
     shifted = shift_spikes(trimmed, -start)
 
-    return SpikeTrains(shifted)
+    if isinstance(spike_trains, Trains):
+        shifted = Trains(shifted)
+
+    return shifted
 
 
 trim = trim_spikes
@@ -660,6 +662,10 @@ concat = concatenate_spikes
 
 def shift_spikes(spike_trains, shift):
     shifted = [train+shift for train in spike_trains]
+
+    if isinstance(spike_trains, Trains):
+        shifted = Trains(shifted)
+
     return shifted
 
 shift = shift_spikes
