@@ -53,13 +53,18 @@ class Spikes(object):
         return wrapper
 
 
-
     @copy_meta
     def __getitem__(self, key):
         if isinstance(key, str):
             item = self.meta[key]
+        elif isinstance(key, tuple):
+            ### Tuple of attributes
+            item = [self.meta[k] for k in key]
         else:
             item = self.spikes.__getitem__(key)
+            if isinstance(item, np.ndarray):
+                item = Spikes(item, **self.meta)
+
         return item
 
     def __setitem__(self, key, value):
@@ -106,8 +111,12 @@ class Spikes(object):
 
 class Trains(object):
     def __init__(self, trains=[]):
-        self.trains = [Spikes(spikes) for spikes in trains]
-
+        self.trains = []
+        for train in trains:
+            if isinstance(train, Spikes):
+                self.trains.append(train)
+            else:
+                self.trains.append(Spikes(train))
 
 
     def __len__(self):
@@ -121,10 +130,25 @@ class Trains(object):
 
 
     def __getitem__(self, key):
+        # print type(key), key
 
-        if isinstance(key, str):
+        if isinstance(key, int):
+            ### Integer indexing
+            item = self.trains.__getitem__(key)
+
+        elif isinstance(key, str):
             ### String gives us an array of attributes
             item = np.array([spikes[key] for spikes in self.trains])
+
+        elif isinstance(key, tuple):
+            ### Tuple of attributes
+            item = []
+            for spikes in self.trains:
+                item.append( spikes[key] )
+
+            item = np.rec.array(item, names=key)
+            return item
+
 
         elif isinstance(key, np.ndarray) and (key.dtype is np.dtype('bool')):
             ### Indexing using Bool table (a la Numpy)
@@ -132,9 +156,6 @@ class Trains(object):
             idx = np.where(key)[0]
             item = Trains([self[i] for i in idx])
 
-        else:
-            ### Integer indexing
-            item = self.trains.__getitem__(key)
 
         return item
 
@@ -168,9 +189,10 @@ class Trains(object):
 
     def where(self, **kwargs):
         mask = np.ones(len(self.trains), dtype=np.dtype('bool'))
+        meta_values = self[tuple(kwargs.keys())]
 
         for key in kwargs:
-            mask = mask & (self[key]==kwargs[key])
+            mask = mask & (meta_values[key]==kwargs[key])
 
         return self[mask]
 
