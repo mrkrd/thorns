@@ -8,237 +8,245 @@ import random
 import numpy as np
 
 
-class Spikes(object):
-    """Class that respresents a single spike train.  Objects of this
-    class have the same interface as np.ndarray's.  Meta data can be
-    accessed using spikes['key'] notation.
+def _signal_to_spikes_1d(fs, signal):
+    """ Convert 1D time function array into array of spike timings.
 
-    Raw spikes are in self.spikes.  Metadata is a dictionary in
-    self.meta.
+    fs: sampling frequency in Hz
+    signal: input signal
+
+    return: spike timings in ms
+
+    >>> fs = 10
+    >>> signal = np.array([0,2,0,0,1,0])
+    >>> _signal_to_spikes_1d(fs, signal)
+    array([ 100.,  100.,  400.])
 
     """
+    assert signal.ndim == 1
 
+    signal = signal.astype(int)
 
-    def __init__(self, spikes=[], **kwargs):
+    t = np.arange(len(signal))
+    spikes = np.repeat(t, signal) * 1000 / fs
 
-        ### Initialize spikes
-        self.spikes = np.array(spikes, dtype=float)
-        assert self.spikes.ndim == 1
+    return spikes
 
 
-        ### Initialize meta
-        if isinstance(spikes, Spikes):
-            self.meta = dict(spikes.meta)
-        else:
-            self.meta = dict()
+def signal_to_spikes(fs, signals):
+    """ Convert time functions to a list of spike trains.
 
-        self.meta.update(kwargs)
+    fs: samping frequency in Hz
+    signals: input signals
 
+    return: spike trains with spike timings
 
+    >>> fs = 10
+    >>> s = np.array([[0,0,0,1,0,0], [0,2,1,0,0,0]]).T
+    >>> signal_to_spikes(fs, s)
+    [array([ 300.]), array([ 100.,  100.,  200.])]
 
-    def copy_meta(func):
-        """
-        Decorator that copies metadata before returning the output
-        train.
+    """
+    spike_trains = []
 
-        """
-        def wrapper(self, *args, **kwargs):
-            output_train = func(self, *args, **kwargs)
+    if signals.ndim == 1:
+        spike_trains = [ _signal_to_spikes_1d(fs, signals) ]
+    elif signals.ndim == 2:
+        spike_trains = [ _signal_to_spikes_1d(fs, signal)
+                         for signal in signals.T ]
+    else:
+        assert False, "Input signal must be 1 or 2 dimensional"
 
-            if isinstance(output_train, np.ndarray):
-                output_train = Spikes(output_train, **self.meta)
+    return spike_trains
 
-            return output_train
 
-        return wrapper
+def _spikes_to_signal_1d(fs, spikes, tmax=None):
+    """ Convert spike train to its time function. 1D version.
 
+    >>> fs = 10
+    >>> spikes = np.array([100, 500, 1000, 1000])
+    >>> _spikes_to_signal_1d(fs, spikes)
+    array([0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2])
 
-    @copy_meta
-    def __getitem__(self, key):
-        if isinstance(key, str):
-            item = self.meta[key]
-        elif isinstance(key, tuple):
-            ### Tuple of attributes
-            item = [self.meta[k] for k in key]
-        else:
-            item = self.spikes.__getitem__(key)
-            if isinstance(item, np.ndarray):
-                item = Spikes(item, **self.meta)
+    """
+    if tmax == None:
+        tmax = np.max(spikes)
 
-        return item
+    bins = np.floor(tmax*fs/1000) + 1
+    real_tmax = bins * 1000/fs
+    signal, bin_edges = np.histogram(spikes, bins=bins, range=(0,real_tmax))
 
-    def __setitem__(self, key, value):
-        self.spikes.__setitem__(key, value)
+    return signal
 
-    def __len__(self):
-        return self.spikes.__len__()
 
-    def __iter__(self):
-        return self.spikes.__iter__()
+def spikes_to_signal(fs, spike_trains, tmax=None):
+    """ Convert spike trains to theirs time functions.
 
-    def __str__(self):
-        return self.spikes.__str__() + " " + self.meta.__str__()
+    fs: sampling frequency (Hz)
+    spike_trains: trains of spikes to be converted (ms)
+    tmax: length of the output signal (ms)
 
-    def __lt__(self, other):
-        return self.spikes.__lt__(other)
-    def __le__(self, other):
-        return self.spikes.__le__(other)
-    def __eq__(self, other):
-        return self.spikes.__eq__(other)
-    def __ne__(self, other):
-        return self.spikes.__ne__(other)
-    def __gt__(self, other):
-        return self.spikes.__gt__(other)
-    def __ge__(self, other):
-        return self.spikes.__ge__(other)
+    return: time signal
 
-    @copy_meta
-    def __add__(self, other):
-        return self.spikes.__add__(other)
+    >>> spikes_to_signal(10, [np.array([100]), np.array([200, 300])])
+    array([[0, 0],
+           [1, 0],
+           [0, 1],
+           [0, 1]])
 
-    @copy_meta
-    def __sub__(self, other):
-        return self.spikes.__sub__(other)
+    """
+    if tmax == None:
+        tmax = max( [max(train) for train in spike_trains if len(train)>0] )
 
-    @copy_meta
-    def __mul__(self, other):
-        return self.spikes.__mul__(other)
+    max_len = np.ceil( tmax * fs / 1000 ) + 1
+    signals = np.zeros( (max_len, len(spike_trains)) )
 
+    signals = [_spikes_to_signal_1d(fs, train, tmax) for train in spike_trains]
+    signals = np.array(signals).T
 
+    # import matplotlib.pyplot as plt
+    # plt.imshow(signals, aspect='auto')
+    # plt.show()
+    return signals
 
 
+def accumulate_spikes(spike_trains, cfs):
+    """ Concatenate spike trains of the same CF and sort by increasing CF
 
+    >>> spikes = [np.array([1]), np.array([2]), np.array([3]), np.array([])]
+    >>> cfs = np.array([2,1,2,3])
+    >>> accumulate_spikes(spikes, cfs)
+    ([array([2]), array([1, 3]), array([], dtype=float64)], array([1, 2, 3]))
 
-class Trains(object):
-    def __init__(self, trains=[]):
-        self.trains = []
-        for train in trains:
-            if isinstance(train, Spikes):
-                self.trains.append(train)
-            else:
-                self.trains.append(Spikes(train))
+    """
+    accumulated_trains = []
+    accumulated_cfs = np.unique(cfs)
+    for cf in accumulated_cfs:
+        selected_trains = [spike_trains[i] for i in np.where(cfs==cf)[0]]
+        t = np.concatenate( selected_trains )
+        accumulated_trains.append(t)
 
+    return accumulated_trains, accumulated_cfs
 
-    def __len__(self):
-        return self.trains.__len__()
 
 
 
-    def __setitem__(self, key, value):
-        self.trains.__setitem__(key, value)
+def trim_spikes(spike_trains, start, stop=None):
+    """ Return spike trains with that are between `start' and `stop'.
 
+    >>> spikes = [np.array([1,2,3,4]), np.array([3,4,5,6])]
+    >>> print trim_spikes(spikes, 2, 4)
+    [array([0, 1, 2]), array([1, 2])]
 
+    """
+    all_spikes = np.concatenate(spike_trains)
 
-    def __getitem__(self, key):
-        # print type(key), key
+    if len(all_spikes) == 0:
+        return spike_trains
 
-        if isinstance(key, int):
-            ### Integer indexing
-            item = self.trains.__getitem__(key)
+    if stop is None:
+        stop = all_spikes.max()
 
-        elif isinstance(key, str):
-            ### String gives us an array of attributes
-            item = np.array([spikes[key] for spikes in self.trains])
+    trimmed = []
+    for train in spike_trains:
+        t = train[(train >= start) & (train <= stop)]
+        trimmed.append(t)
 
-        elif isinstance(key, tuple):
-            ### Tuple of attributes
-            item = []
-            for spikes in self.trains:
-                item.append( spikes[key] )
+    shifted = shift_spikes(trimmed, -start)
 
-            item = np.rec.array(item, names=key)
-            return item
+    if isinstance(spike_trains, Trains):
+        shifted = Trains(shifted)
 
+    return shifted
 
-        elif isinstance(key, np.ndarray) and (key.dtype is np.dtype('bool')):
-            ### Indexing using Bool table (a la Numpy)
-            assert len(key) == len(self.trains)
-            idx = np.where(key)[0]
-            item = Trains([self[i] for i in idx])
 
+trim = trim_spikes
 
-        return item
 
+# def remove_empty(spike_trains):
+#     new_trains = []
+#     for train in spike_trains:
+#         if len(train) != 0:
+#             new_trains.append(train)
+#     return new_trains
 
 
-    def __iter__(self):
-        return self.trains.__iter__()
 
+def fold_spikes(spike_trains, period):
+    """ Fold each of the spike trains.
 
+    >>> spike_trains = [np.array([1,2,3,4]), np.array([2,3,4,5])]
+    >>> fold_spikes(spike_trains, 3)
+    [array([1, 2]), array([0, 1]), array([2]), array([0, 1, 2])]
 
-    def __str__(self):
-        s = "[\n"
-        for t in self.trains:
-            s = s + "  " + str(t) + "\n"
-        s += "]"
-        return s
+    >>> spike_trains = [np.array([2.]), np.array([])]
+    >>> fold_spikes(spike_trains, 2)
+    [array([], dtype=float64), array([ 0.]), array([], dtype=float64), array([], dtype=float64)]
 
+    """
+    all_spikes = np.concatenate(tuple(spike_trains))
+    if len(all_spikes) == 0:
+        return spike_trains
 
+    max_spike = all_spikes.max()
+    period_num = int(np.ceil((max_spike+1) / period))
 
-    def append(self, spikes, **kwargs):
-        spikes = Spikes(spikes, **kwargs)
-        self.trains.append(spikes)
+    folded = []
+    for train in spike_trains:
+        for idx in range(period_num):
+            lo = idx * period
+            hi = (idx+1) * period
+            sec = train[(train>=lo) & (train<hi)]
+            sec = np.fmod(sec, period)
+            folded.append(sec)
 
+    return folded
 
+fold = fold_spikes
 
-    def extend(self, L):
-        trains = [Spikes(spikes) for spikes in L]
-        self.trains.extend(trains)
 
 
+def concatenate_spikes(spike_trains):
+    return [np.concatenate(tuple(spike_trains))]
 
-    def where(self, **kwargs):
-        mask = np.ones(len(self.trains), dtype=np.dtype('bool'))
-        meta_values = self[tuple(kwargs.keys())]
+concatenate = concatenate_spikes
+concat = concatenate_spikes
 
-        for key in kwargs:
-            mask = mask & (meta_values[key]==kwargs[key])
 
-        return self[mask]
+def shift_spikes(spike_trains, shift):
+    shifted = [train+shift for train in spike_trains]
 
+    if isinstance(spike_trains, Trains):
+        shifted = Trains(shifted)
 
+    return shifted
 
-    def pop(self, random=False, *args):
-        if random:
-            i = random.randint(0, len(self.trains)-1)
-            train = self.trains.pop(i)
-        else:
-            train = self.trains.pop(*args)
+shift = shift_spikes
 
-        return train
 
+def split_and_fold_trains(long_train,
+                          silence_duration,
+                          tone_duration,
+                          pad_duration,
+                          remove_pads=False):
+    silence = trim(long_train, 0, silence_duration)
 
+    tones_and_pads = trim(long_train, silence_duration)
+    tones_and_pads = fold(tones_and_pads, tone_duration+pad_duration)
 
+    if remove_pads:
+        tones_and_pads = trim(tones_and_pads, 0, tone_duration)
 
-def main():
-    import thorns as th
-    from thorns.spikes import Spikes, Trains
+    return silence, tones_and_pads
 
-    print
-    print "=== Spikes ==="
-    sp = Spikes([1,2,3], cf=12)
-    print sp[1]
-    print sp[0:2]
-    print sp['cf']
-
-
-    print
-    print "=== Trains ==="
-
-    t = Trains()
-    t.append([1,2,3], cf=12000, type='hsr')
-    t.append([4,5,6], cf=12222, type='msr')
-
-    print "trains:", t
-    print "spikes:", t[0]
-    print "spike:", t[0][2]
-
-    print
-    print "trimming"
-    print th.trim_spikes(t, 0, 2)
-
-
+split_and_fold = split_and_fold_trains
 
 
 if __name__ == "__main__":
-    main()
+    import doctest
+
+    print "Doctest start:"
+    doctest.testmod()
+    print "done."
+
+    # test_shuffle_spikes()
+
