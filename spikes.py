@@ -8,6 +8,26 @@ import random
 import numpy as np
 
 
+def dicts_to_trains(dicts):
+    """Convert list of dictionaries to np.rec.array
+
+    >>> dicts = [{'a':1, 'b':2}, {'a':5, 'b':6}]
+    >>> dicts_to_trains(dicts)  #doctest: +NORMALIZE_WHITESPACE
+    rec.array([(1, 2), (5, 6)],
+          dtype=[('a', '<i8'), ('b', '<i8')])
+
+    """
+    keys = dicts[0].keys()
+    types = dicts[0].values()
+    arr = []
+    for d in dicts:
+        assert set(d.keys()) == set(keys)
+        arr.append( [d[k] for k in keys] )
+
+    rec_arr = np.rec.array(arr, names=keys)
+    return rec_arr
+
+
 def _signal_to_spikes_1d(fs, signal):
     """ Convert 1D time function array into array of spike timings.
 
@@ -153,9 +173,6 @@ def trim_spikes(spike_trains, start, stop=None):
 
     shifted = shift_spikes(trimmed, -start)
 
-    if isinstance(spike_trains, Trains):
-        shifted = Trains(shifted)
-
     return shifted
 
 
@@ -214,9 +231,6 @@ concat = concatenate_spikes
 
 def shift_spikes(spike_trains, shift):
     shifted = [train+shift for train in spike_trains]
-
-    if isinstance(spike_trains, Trains):
-        shifted = Trains(shifted)
 
     return shifted
 

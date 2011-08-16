@@ -9,29 +9,36 @@ import biggles
 
 golden = 1.6180339887
 
-def plot_raster(spike_trains, plot=None, backend='biggles', **style):
+def raster(spike_trains, plot=None, backend='biggles', **style):
     """ Plot raster plot. """
 
+    if 'duration' in spike_trains.dtype.names:
+        trains = spike_trains['spikes']
+
+    duration = None
+    if 'duration' in spike_trains.dtype.names:
+        duration = spike_trains['duration'].max()
+
     # Compute trial number
-    L = [ len(train) for train in spike_trains ]
-    r = np.arange(len(spike_trains))
+    L = [ len(train) for train in trains ]
+    r = np.arange(len(trains))
     n = np.repeat(r, L)
 
     # Spike timings
-    s = np.concatenate(tuple(spike_trains))
+    s = np.concatenate(tuple(trains))
 
 
 
     if backend == 'biggles':
-        import biggles
         c = biggles.Points(s, n, type='dot')
         c.style(**style)
 
         if plot is None:
             plot = biggles.FramedPlot()
         plot.xlabel = "Time (ms)"
+        plot.xrange = (0, duration)
         plot.ylabel = "Trial Number"
-        plot.yrange = (-0.5, len(spike_trains)-0.5)
+        plot.yrange = (-0.5, len(trains)-0.5)
         plot.add(c)
 
     elif backend == 'matplotlib':
@@ -41,7 +48,7 @@ def plot_raster(spike_trains, plot=None, backend='biggles', **style):
         plot.plot(s, n, 'k,')
         plot.set_xlabel("Time (ms)")
         plot.set_ylabel("Trial #")
-        plot.set_ylim( (-0.5, len(spike_trains)-0.5) )
+        plot.set_ylim( (-0.5, len(trains)-0.5) )
 
     return plot
 
