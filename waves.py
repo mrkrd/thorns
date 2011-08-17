@@ -73,7 +73,8 @@ t = make_time
 
 
 # TODO: allow values to be 0, change default values
-def generate_ramped_tone(fs, freq,
+def generate_ramped_tone(fs,
+                         freq,
                          tone_duration=50,
                          ramp_duration=2.5,
                          pad_duration=55,
@@ -103,7 +104,9 @@ def generate_ramped_tone(fs, freq,
     return s
 
 
-def generate_amplitude_modulated_tone(fs, fm, fc,
+def generate_amplitude_modulated_tone(fs,
+                                      fm,
+                                      fc,
                                       modulation_depth=1,
                                       tone_duration=100):
     """ Generates amplitude modulated signals.
@@ -177,7 +180,9 @@ def _meta_sub_string(var, value):
 
 
 
-def generate_biphasic_pulse(fs, pulse_width, gap_width,
+def generate_biphasic_pulse(fs,
+                            pulse_width,
+                            gap_width,
                             amplitude=1,
                             fstim=None,
                             stimulus_duration=None,

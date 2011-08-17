@@ -59,7 +59,7 @@ def dicts_to_trains(dicts):
     return rec_arr
 
 
-def _signal_to_spikes_1d(fs, signal):
+def _signal_to_train(signal, fs):
     """ Convert 1D time function array into array of spike timings.
 
     fs: sampling frequency in Hz
@@ -83,7 +83,7 @@ def _signal_to_spikes_1d(fs, signal):
     return spikes
 
 
-def signal_to_spikes(fs, signals):
+def signal_to_trains(signal, fs):
     """ Convert time functions to a list of spike trains.
 
     fs: samping frequency in Hz
@@ -97,44 +97,48 @@ def signal_to_spikes(fs, signals):
     [array([ 300.]), array([ 100.,  100.,  200.])]
 
     """
-    spike_trains = []
+    duration = 1000 * len(signal) / fs
 
-    if signals.ndim == 1:
-        spike_trains = [ _signal_to_spikes_1d(fs, signals) ]
-    elif signals.ndim == 2:
-        spike_trains = [ _signal_to_spikes_1d(fs, signal)
-                         for signal in signals.T ]
+    trains = []
+
+    if signal.ndim == 1:
+        trains = [ _signal_to_train(signal, fs) ]
+    elif signal.ndim == 2:
+        trains = [ _signal_to_train(s, fs) for s in signal.T ]
     else:
         assert False, "Input signal must be 1 or 2 dimensional"
+
+    spike_trains = arrays_to_trains(trains, duration=duration)
 
     return spike_trains
 
 
-def _spikes_to_signal_1d(fs, spikes, tmax=None):
+def _train_to_signal(train, fs):
     """ Convert spike train to its time function. 1D version.
 
     >>> fs = 10
     >>> spikes = np.array([100, 500, 1000, 1000])
-    >>> _spikes_to_signal_1d(fs, spikes)
+    >>> _train_to_signal(fs, spikes)
     array([0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2])
 
     """
-    if tmax == None:
-        tmax = np.max(spikes)
+    tmax = train['duration']
+    spikes = train['spikes']
 
     bins = np.floor(tmax*fs/1000) + 1
     real_tmax = bins * 1000/fs
-    signal, bin_edges = np.histogram(spikes, bins=bins, range=(0,real_tmax))
+    signal, bin_edges = np.histogram(spikes,
+                                     bins=bins,
+                                     range=(0, real_tmax))
 
     return signal
 
 
-def spikes_to_signal(fs, spike_trains, tmax=None):
+def trains_to_signal(spike_trains, fs):
     """ Convert spike trains to theirs time functions.
 
     fs: sampling frequency (Hz)
     spike_trains: trains of spikes to be converted (ms)
-    tmax: length of the output signal (ms)
 
     return: time signal
 
@@ -145,22 +149,16 @@ def spikes_to_signal(fs, spike_trains, tmax=None):
            [0, 1]])
 
     """
-    if tmax == None:
-        tmax = max( [max(train) for train in spike_trains if len(train)>0] )
+    durations = spike_trains['duration']
+    assert np.all(durations == durations[0])
 
-    max_len = np.ceil( tmax * fs / 1000 ) + 1
-    signals = np.zeros( (max_len, len(spike_trains)) )
+    signals = [_train_to_signal(train, fs) for train in spike_trains]
+    signal = np.array(signals).T
 
-    signals = [_spikes_to_signal_1d(fs, train, tmax) for train in spike_trains]
-    signals = np.array(signals).T
-
-    # import matplotlib.pyplot as plt
-    # plt.imshow(signals, aspect='auto')
-    # plt.show()
     return signals
 
 
-def accumulate_spikes(spike_trains, cfs):
+def accumulate_spike_trains(spike_trains, ignore=[]):
     """ Concatenate spike trains of the same CF and sort by increasing CF
 
     >>> spikes = [np.array([1]), np.array([2]), np.array([3]), np.array([])]
@@ -169,14 +167,35 @@ def accumulate_spikes(spike_trains, cfs):
     ([array([2]), array([1, 3]), array([], dtype=float64)], array([1, 2, 3]))
 
     """
-    accumulated_trains = []
-    accumulated_cfs = np.unique(cfs)
-    for cf in accumulated_cfs:
-        selected_trains = [spike_trains[i] for i in np.where(cfs==cf)[0]]
-        t = np.concatenate( selected_trains )
-        accumulated_trains.append(t)
+    keys = list(spike_trains.dtype.names)
+    keys.remove('spikes')
+    for i in ignore:
+        keys.remove(i)
 
-    return accumulated_trains, accumulated_cfs
+    meta = spike_trains[keys]
+
+    unique_meta, indices = np.unique(meta, return_inverse=True)
+
+    trains = []
+    for idx in np.unique(indices):
+        selector = np.where( indices == idx )[0]
+
+        acc_spikes = np.concatenate(tuple( spike_trains['spikes'][selector] ))
+        acc_spikes.sort()
+
+        trains.append( (acc_spikes,) + tuple(unique_meta[idx]) )
+
+    dt = [('spikes', np.ndarray)] + [(name,unique_meta.dtype[name])
+                                     for name in unique_meta.dtype.names]
+
+    trains = np.rec.array(trains, dtype=dt)
+
+    return trains
+
+
+
+accumulate_spikes = accumulate_spike_trains
+accumulate = accumulate_spike_trains
 
 
 
@@ -189,22 +208,49 @@ def trim_spike_trains(spike_trains, start, stop=None):
     [array([0, 1, 2]), array([1, 2])]
 
     """
-    all_spikes = np.concatenate(spike_trains)
+    arrays = []
+    for key in spike_trains.dtype.names:
+        if key == 'spikes':
+            arrays.append(
+                _trim_arrays(spike_trains['spikes'],
+                             spike_trains['duration'],
+                             start,
+                             stop)
+                )
+        elif key == 'duration':
+            tmax = np.array(spike_trains['duration'])
+            if stop is not None:
+                tmax[ tmax>stop ] = stop
 
-    if len(all_spikes) == 0:
-        return spike_trains
+            new_durs = tmax - start
+            new_durs[ new_durs<0 ] = 0
+
+            arrays.append(new_durs)
+        else:
+            arrays.append(spike_trains[key])
+
+    trimmed = np.rec.array(zip(*arrays), dtype=spike_trains.dtype)
+
+    return trimmed
+
+
+def _trim_arrays(arrays, durations, start, stop):
+    """Trim spike trains to (start, stop)"""
+
+    tmin = start
 
     if stop is None:
-        stop = all_spikes.max()
+        tmaxs = durations
+    else:
+        tmaxs = [stop for i in range(len(arrays))]
 
     trimmed = []
-    for train in spike_trains:
-        t = train[(train >= start) & (train <= stop)]
-        trimmed.append(t)
+    for arr,tmax in zip(arrays,tmaxs):
+        a = arr[ (arr >= tmin) & (arr <= tmax) ]
+        a = a - tmin
+        trimmed.append(a)
 
-    shifted = shift_spikes(trimmed, -start)
-
-    return shifted
+    return trimmed
 
 
 trim = trim_spike_trains
