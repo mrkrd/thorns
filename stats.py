@@ -7,35 +7,36 @@ __author__ = "Marek Rudnicki"
 import numpy as np
 
 
-def calc_isih(spike_trains, bin_size=1, trial_num=None):
+def isih(spike_trains, bin_size=1):
     """ Calculate inter-spike interval histogram.
 
     >>> spikes = [np.array([1,2,3]), np.array([2,5,8])]
-    >>> calc_isih(spikes)
+    >>> isih(spikes)
     (array([0, 2, 2]), array([ 0.,  1.,  2.,  3.]))
 
     """
-    isi_trains = [ np.diff(train) for train in spike_trains ]
+    trains = spike_trains['spikes']
+
+    if 'trial_num' in spike_trains.dtype.names:
+        trial_num = sum(spike_trains['trial_num'])
+    else:
+        trial_num = len(trains)
+
+    isi_trains = [ np.diff(train) for train in trains ]
 
     all_isi = np.concatenate(isi_trains)
 
-    if len(all_isi) < 2:
-        return np.array([]), np.array([])
+    if len(all_isi) == 0:
+        return np.array([])
 
-    nbins = np.ceil(all_isi.max() / bin_size)
+    nbins = np.floor(all_isi.max() / bin_size) + 1
 
-    if nbins == 0:              # just in case of two equal spikes
-        nbins = 1
+    hist, bins = np.histogram(all_isi,
+                              bins=nbins,
+                              range=(0, nbins*bin_size),
+                              normed=True)
 
-    values, bins = np.histogram(all_isi, nbins, range=(0,all_isi.max()))
-
-    # # Normalize values
-    # if trial_num == None:
-    #     trial_num = len(spike_trains)
-    # # values = values / bin_size / trial_num
-    # values = values / trial_num
-
-    return values, bins
+    return hist
 
 
 def calc_entrainment(spike_trains, fstim, bin_size=1):

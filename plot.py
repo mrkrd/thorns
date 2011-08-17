@@ -6,18 +6,16 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 import biggles
+from . import spikes as spk
+from . import stats
 
 golden = 1.6180339887
 
 def raster(spike_trains, plot=None, backend='biggles', **style):
-    """ Plot raster plot. """
+    """Plot raster plot."""
 
-    if 'duration' in spike_trains.dtype.names:
-        trains = spike_trains['spikes']
-
-    duration = None
-    if 'duration' in spike_trains.dtype.names:
-        duration = spike_trains['duration'].max()
+    trains = spike_trains['spikes']
+    duration = spike_trains['duration'].max()
 
     # Compute trial number
     L = [ len(train) for train in trains ]
@@ -47,15 +45,15 @@ def raster(spike_trains, plot=None, backend='biggles', **style):
             plot = plt.gca()
         plot.plot(s, n, 'k,')
         plot.set_xlabel("Time (ms)")
+        plot.set_xlim( (0, duration) )
         plot.set_ylabel("Trial #")
         plot.set_ylim( (-0.5, len(trains)-0.5) )
 
     return plot
 
 
-def plot_spikegram(spike_trains, bin_size=1, plot=None, **style):
-    import biggles
-
+def spike_signal(spike_trains, bin_size=1, plot=None, **style):
+    assert False, "not implemented"
     fs = 1000 / bin_size
 
     spikes = spikes_to_signal(fs, spike_trains)
@@ -69,7 +67,7 @@ def plot_spikegram(spike_trains, bin_size=1, plot=None, **style):
     return plot
 
 
-def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
+def psth(spike_trains, bin_size=1, plot=None, **style):
     """ Plots PSTH of spike_trains.
 
     spike_trains: list of spike trains
@@ -78,25 +76,28 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     plot: biggles container
     **style: biggles curve style (e.g., color='red')
     """
-    import biggles
+    trains = spike_trains['spikes']
+    duration = spike_trains['duration'].max()
 
-    all_spikes = np.concatenate(tuple(spike_trains))
+    all_spikes = np.concatenate(tuple(trains))
 
-    assert len(all_spikes)>0, "No spikes!"
+    nbins = np.floor(duration / bin_size) + 1
 
-    nbins = np.ceil(all_spikes.max() / bin_size)
-
-    values, bins = np.histogram(all_spikes, nbins,
-                                range=(0, all_spikes.max()))
-
-
-    # Normalize values for spikes per second
-    if trial_num == None:
-        trial_num = len(spike_trains)
-    values = 1000 * values / bin_size / trial_num
+    hist, bins = np.histogram(all_spikes,
+                              bins=nbins,
+                              range=(0, nbins*bin_size))
 
 
-    c = biggles.Histogram(values, x0=0, binsize=bin_size)
+    # Normalize hist for spikes per second
+    if 'trial_num' in spike_trains.dtype.names:
+        trial_num = sum(spike_trains['trial_num'])
+    else:
+        trial_num = len(trains)
+
+    hist = 1000 * hist / bin_size / trial_num
+
+
+    c = biggles.Histogram(hist, x0=0, binsize=bin_size)
     c.style(**style)
 
     if plot is None:
@@ -110,19 +111,18 @@ def plot_psth(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     return plot
 
 
-def plot_isih(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
-    """ Plot inter-spike interval histogram. """
-    import biggles
+def isih(spike_trains, bin_size=1, plot=None, **style):
+    """Plot inter-spike interval histogram."""
 
-    values, bins = calc_isih(spike_trains, bin_size, trial_num)
+    hist = stats.isih(spike_trains, bin_size)
 
-    c = biggles.Histogram(values, x0=bins[0], binsize=bin_size)
+    c = biggles.Histogram(hist, x0=0, binsize=bin_size)
     c.style(**style)
 
     if plot is None:
         plot = biggles.FramedPlot()
     plot.xlabel = "Inter-Spike Interval (ms)"
-    plot.ylabel = "Interval Count"
+    plot.ylabel = "Probability Density Function"
     plot.add(c)
     plot.xrange = (0, None)
     plot.yrange = (0, None)
@@ -130,50 +130,50 @@ def plot_isih(spike_trains, bin_size=1, trial_num=None, plot=None, **style):
     return plot
 
 
-def plot_period_histogram(spike_trains, fstim,
-                          nbins=64, spike_fs=None,
-                          center=False,
-                          plot=None,
-                          label=None,
-                          **style):
-    """ Plots period histogram. """
-    import biggles
+def period_histogram(spike_trains,
+                     stimulus_freq,
+                     nbins=64,
+                     spike_fs=None,
+                     center=False,
+                     plot=None,
+                     label=None,
+                     **style):
+    """Plots period histogram."""
 
+    trains = spike_trains['spikes']
+
+    # Align bins to sampling frequency, if given
     if spike_fs is not None:
-        nbins = int(spike_fs / fstim)
+        nbins = int(spike_fs / stimulus_freq)
 
+    all_spikes = np.concatenate(tuple(trains))
 
-    fstim = fstim / 1000        # Hz -> kHz; s -> ms
+    folded = np.fmod(all_spikes, 1000/fstim)
 
-    if len(spike_trains) == 0:
-        return 0
+    print "Make sure that np.histogram get the right number of bins"
 
-    all_spikes = np.concatenate(tuple(spike_trains))
+    hist, edges = np.histogram(folded,
+                               bins=nbins,
+                               range=(0, 1/stimulus_freq),
+                               normed=True)
 
-    if len(all_spikes) == 0:
-        return 0
-
-    folded = np.fmod(all_spikes, 1/fstim)
-    ph,edges = np.histogram(folded, bins=nbins, range=(0,1/fstim))
-
-    ### Normalize
-    ph = ph / np.sum(ph)
 
     ### TODO: find the direction instead of max value
     if center:
-        center_idx = ph.argmax()
-        ph = np.roll(ph, nbins//2 - center_idx)
+        center_idx = hist.argmax()
+        hist = np.roll(hist, nbins//2 - center_idx)
 
-    c = biggles.Histogram(ph, x0=0, binsize=1/len(ph))
+    c = biggles.Histogram(hist, x0=0, binsize=1/len(hist))
+
     c.style(**style)
     if label is not None:
-            c.label = label
+        c.label = label
 
 
     if plot is None:
         plot = biggles.FramedPlot()
     plot.xlabel = "Normalized Phase"
-    plot.ylabel = "Normalized Spike Count"
+    plot.ylabel = "Probability Density Function"
     plot.add(c)
 
     return plot

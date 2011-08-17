@@ -8,6 +8,37 @@ import random
 import numpy as np
 
 
+def arrays_to_trains(arrays, duration=None):
+    """Convert list of arrays with spike timings to spike trains
+    rec.array
+
+    """
+
+    if duration is None:
+        duration = np.concatenate(arrays).max()
+
+    t = []
+    for a in arrays:
+        t.append( (a, duration) )
+
+    trains = np.rec.array(t, dtype=[('spikes', np.ndarray),
+                                    ('duration', float)])
+
+    return trains
+
+
+def select_trains(spike_trains, **kwargs):
+
+    trains = spike_trains
+    for key,val in kwargs.items():
+        trains = trains[ spike_trains[key] == val ]
+
+    return trains
+
+select_spike_trains = select_trains
+sel = select_trains
+
+
 def dicts_to_trains(dicts):
     """Convert list of dictionaries to np.rec.array
 
@@ -150,7 +181,7 @@ def accumulate_spikes(spike_trains, cfs):
 
 
 
-def trim_spikes(spike_trains, start, stop=None):
+def trim_spike_trains(spike_trains, start, stop=None):
     """ Return spike trains with that are between `start' and `stop'.
 
     >>> spikes = [np.array([1,2,3,4]), np.array([3,4,5,6])]
@@ -176,7 +207,8 @@ def trim_spikes(spike_trains, start, stop=None):
     return shifted
 
 
-trim = trim_spikes
+trim = trim_spike_trains
+trim_trains = trim_spike_trains
 
 
 # def remove_empty(spike_trains):
