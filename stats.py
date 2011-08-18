@@ -163,7 +163,7 @@ def test_shuffle_spikes():
     print shuffle_spikes(spikes)
 
 
-def calc_average_firing_rate(spike_trains, stimulus_duration=None, trial_num=None):
+def average_firing_rate(spike_trains):
     """ Calculates average firing rate.
 
     spike_trains: trains of spikes
@@ -176,20 +176,25 @@ def calc_average_firing_rate(spike_trains, stimulus_duration=None, trial_num=Non
     15.0
 
     """
-    if len(spike_trains) == 0:
-        return 0
-    all_spikes = np.concatenate(tuple(spike_trains))
-    if stimulus_duration == None:
-        stimulus_duration = all_spikes.max() - all_spikes.min()
-    if trial_num == None:
+    assert np.all(spike_trains['duration'] == spike_trains['duration'][0])
+
+    trains = spike_trains['spikes']
+    duration = spike_trains['duration'][0]
+
+    if 'trial_num' in spike_trains.dtype.names:
+        trial_num = spike_trains['trial_num'].sum()
+    else:
         trial_num = len(spike_trains)
-    r = all_spikes.size / (stimulus_duration * trial_num)
-    r = r * 1000                # kHz -> Hz
+
+    all_spikes = np.concatenate(tuple(trains))
+
+    r = 1000 * all_spikes.size / (duration * trial_num)
+
     return r
 
 
-calc_firing_rate = calc_average_firing_rate
-calc_rate = calc_average_firing_rate
+firing_rate = average_firing_rate
+rate = average_firing_rate
 
 
 def count_spikes(spike_trains):
