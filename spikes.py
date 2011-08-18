@@ -195,6 +195,7 @@ def accumulate_spike_trains(spike_trains, ignore=[]):
 
 
 accumulate_spikes = accumulate_spike_trains
+accumulate_trains = accumulate_spike_trains
 accumulate = accumulate_spike_trains
 
 
