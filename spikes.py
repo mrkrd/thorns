@@ -155,7 +155,7 @@ def trains_to_signal(spike_trains, fs):
     signals = [_train_to_signal(train, fs) for train in spike_trains]
     signal = np.array(signals).T
 
-    return signals
+    return signal
 
 
 def accumulate_spike_trains(spike_trains, ignore=[]):
