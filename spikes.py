@@ -48,15 +48,34 @@ def dicts_to_trains(dicts):
           dtype=[('a', '<i8'), ('b', '<i8')])
 
     """
-    keys = dicts[0].keys()
-    types = dicts[0].values()
+    ### Derive types from the first dictionary
+    types = {}
+    for key,val in dicts[0].items():
+        typ = type(val)
+        if typ is str:
+            cnt = len(val)
+        else:
+            cnt = 1
+        types[key] = [typ, cnt]
+
+
     arr = []
     for d in dicts:
-        assert set(d.keys()) == set(keys)
-        arr.append( [d[k] for k in keys] )
+        assert set(d.keys()) == set(types.keys())
 
-    rec_arr = np.rec.array(arr, names=keys)
-    return rec_arr
+        rec = []
+        for k,t in types.items():
+            if (type(d[k]) is str) and (len(d[k]) > t[1]):
+                t[1] = len(d[k])
+
+            rec.append(d[k])
+
+        arr.append( tuple(rec) )
+
+
+    dt = np.dtype({'names':types.keys(), 'formats':[tuple(each) for each in types.values()]})
+    arr = np.array(arr, dtype=dt)
+    return arr
 
 
 def _signal_to_train(signal, fs):
@@ -335,11 +354,21 @@ split_and_fold = split_and_fold_trains
 
 
 if __name__ == "__main__":
-    import doctest
+    # import doctest
 
-    print "Doctest start:"
-    doctest.testmod()
-    print "done."
+    # print "Doctest start:"
+    # doctest.testmod()
+    # print "done."
 
     # test_shuffle_spikes()
+
+    arr = [
+        {'spikes': np.arange(10),
+         'cf': 2,
+         'bla': 'a'},
+        {'spikes': np.arange(7),
+         'cf': 4,
+         'bla': 'bb'}
+    ]
+    print dicts_to_trains(arr)
 
