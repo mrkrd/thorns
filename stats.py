@@ -6,13 +6,14 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 
-
 def isih(spike_trains, bin_size=1):
     """ Calculate inter-spike interval histogram.
 
+    >>> from thorns import arrays_to_trains
     >>> spikes = [np.array([1,2,3]), np.array([2,5,8])]
-    >>> isih(spikes)
-    (array([0, 2, 2]), array([ 0.,  1.,  2.,  3.]))
+    >>> spike_trains = arrays_to_trains(spikes)
+    >>> isih(spike_trains)
+    array([ 0. ,  0.5,  0. ,  0.5])
 
     """
     trains = spike_trains['spikes']
@@ -39,29 +40,33 @@ def isih(spike_trains, bin_size=1):
     return hist
 
 
-def calc_entrainment(spike_trains, fstim, bin_size=1):
+def entrainment(spike_trains, fstim, bin_size=1):
     """ Calculate entrainment of spike_trains.
 
-    >>> spike_trains = [np.array([2, 4, 6]), np.array([0, 5, 10])]
-    >>> calc_entrainment(spike_trains, fstim=500)
+    >>> from thorns import arrays_to_trains
+    >>> spikes = [np.array([2, 4, 6]), np.array([0, 5, 10])]
+    >>> spike_trains = arrays_to_trains(spikes)
+    >>> entrainment(spike_trains, fstim=500)
     0.5
     """
-    isih, bins = calc_isih(spike_trains, bin_size=bin_size)
+    hist = isih(spike_trains, bin_size=bin_size)
 
-    if len(isih) == 0:
+    if len(hist) == 0:
         return 0
+
+    bins = np.arange( len(hist) ) * bin_size
 
     stim_period = 1000/fstim    # ms
 
-    entrainment_window = (bins[:-1] > stim_period/2) & (bins[:-1] < stim_period*3/2)
+    entrainment_window = (bins > stim_period/2) & (bins < stim_period*3/2)
 
-    entrainment =  np.sum(isih[entrainment_window]) / np.sum(isih)
+    entrainment =  np.sum(hist[entrainment_window]) / np.sum(hist)
 
     return entrainment
 
 
 
-def calc_synchronization_index(spike_trains, fstim):
+def synchronization_index(spike_trains, fstim):
     """ Calculate Synchronization Index.
 
     spike_trains: list of arrays of spiking times
@@ -88,7 +93,7 @@ def calc_synchronization_index(spike_trains, fstim):
     if len(spike_trains) == 0:
         return 0
 
-    all_spikes = np.concatenate(tuple(spike_trains))
+    all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
 
     if len(all_spikes) == 0:
         return 0
@@ -97,6 +102,7 @@ def calc_synchronization_index(spike_trains, fstim):
 
     folded = np.fmod(all_spikes, 1/fstim)
     ph,edges = np.histogram(folded, bins=1000, range=(0, 1/fstim))
+
 
     # indexing trick is necessary, because the sample at 2*pi belongs
     # to the next cycle
@@ -111,9 +117,9 @@ def calc_synchronization_index(spike_trains, fstim):
     return r
 
 
-calc_si = calc_synchronization_index
-calc_vector_strength = calc_synchronization_index
-calc_vs = calc_synchronization_index
+si = synchronization_index
+vector_strength = synchronization_index
+vs = synchronization_index
 
 
 
@@ -287,7 +293,12 @@ calc_sac = calc_shuffled_autocorrelation
 
 
 def main():
-    pass
+    import doctest
+
+    print "Doctest start:"
+    doctest.testmod()
+    print "done."
+
 
 if __name__ == "__main__":
     main()

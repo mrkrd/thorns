@@ -51,12 +51,11 @@ def dicts_to_trains(dicts):
     ### Derive types from the first dictionary
     types = {}
     for key,val in dicts[0].items():
-        typ = type(val)
-        if typ is str:
+        if isinstance(val, str):
             cnt = len(val)
         else:
             cnt = 1
-        types[key] = [typ, cnt]
+        types[key] = [type(val), cnt]
 
 
     arr = []
@@ -65,7 +64,7 @@ def dicts_to_trains(dicts):
 
         rec = []
         for k,t in types.items():
-            if (type(d[k]) is str) and (len(d[k]) > t[1]):
+            if isinstance(d[k], str) and (len(d[k]) > t[1]):
                 t[1] = len(d[k])
 
             rec.append(d[k])
