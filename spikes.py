@@ -285,27 +285,30 @@ trim_trains = trim_spike_trains
 
 
 
-def fold_spikes(spike_trains, period):
+def fold_spike_trains(spike_trains, period):
     """ Fold each of the spike trains.
 
-    >>> spike_trains = [np.array([1,2,3,4]), np.array([2,3,4,5])]
-    >>> fold_spikes(spike_trains, 3)
+    >>> from thorns import arrays_to_trains
+    >>> a = [np.array([1,2,3,4]), np.array([2,3,4,5])]
+    >>> spike_trains = arrays_to_trains(a, duration=9)
+    >>> fold_spike_trains(spike_trains, 3)
     [array([1, 2]), array([0, 1]), array([2]), array([0, 1, 2])]
 
-    >>> spike_trains = [np.array([2.]), np.array([])]
-    >>> fold_spikes(spike_trains, 2)
-    [array([], dtype=float64), array([ 0.]), array([], dtype=float64), array([], dtype=float64)]
+    # >>> spike_trains = [np.array([2.]), np.array([])]
+    # >>> fold_spike_trains(spike_trains, 2)
+    # [array([], dtype=float64), array([ 0.]), array([], dtype=float64), array([], dtype=float64)]
 
     """
-    all_spikes = np.concatenate(tuple(spike_trains))
-    if len(all_spikes) == 0:
-        return spike_trains
+    assert np.all(spike_trains['duration'] == spike_trains['duration'][0])
+    duration = spike_trains['duration'][0]
 
-    max_spike = all_spikes.max()
-    period_num = int(np.ceil((max_spike+1) / period))
+    print "fold_spike_trains() need update: does not copy metadata!"
+    period_num = int( np.ceil(duration / period) )
+
+    just_trains = spike_trains['spikes']
 
     folded = []
-    for train in spike_trains:
+    for train in just_trains:
         for idx in range(period_num):
             lo = idx * period
             hi = (idx+1) * period
@@ -313,9 +316,12 @@ def fold_spikes(spike_trains, period):
             sec = np.fmod(sec, period)
             folded.append(sec)
 
-    return folded
+    folded_trains = arrays_to_trains(folded, duration=period)
 
-fold = fold_spikes
+    return folded_trains
+
+fold = fold_spike_trains
+fold_trains = fold_spike_trains
 
 
 
@@ -353,21 +359,21 @@ split_and_fold = split_and_fold_trains
 
 
 if __name__ == "__main__":
-    # import doctest
+    import doctest
 
-    # print "Doctest start:"
-    # doctest.testmod()
-    # print "done."
+    print "Doctest start:"
+    doctest.testmod()
+    print "done."
 
     # test_shuffle_spikes()
 
-    arr = [
-        {'spikes': np.arange(10),
-         'cf': 2,
-         'bla': 'a'},
-        {'spikes': np.arange(7),
-         'cf': 4,
-         'bla': 'bb'}
-    ]
-    print dicts_to_trains(arr)
+    # arr = [
+    #     {'spikes': np.arange(10),
+    #      'cf': 2,
+    #      'bla': 'a'},
+    #     {'spikes': np.arange(7),
+    #      'cf': 4,
+    #      'bla': 'bb'}
+    # ]
+    # print dicts_to_trains(arr)
 

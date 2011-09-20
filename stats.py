@@ -177,8 +177,10 @@ def average_firing_rate(spike_trains):
 
     return: average firing rate in spikes per second (Hz)
 
-    >>> spike_trains = [range(20), range(10)]
-    >>> calc_average_firing_rate(spike_trains, 1000)
+    >>> from thorns import arrays_to_trains
+    >>> a = [np.arange(20), np.arange(10)]
+    >>> spike_trains = arrays_to_trains(a, duration=1000)
+    >>> average_firing_rate(spike_trains)
     15.0
 
     """
@@ -239,28 +241,34 @@ def calc_correlation_index(spike_trains, coincidence_window=0.05, stimulus_durat
 calc_ci = calc_correlation_index
 
 
-def calc_shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysis_window=5,
-                                  stimulus_duration=None):
-    """ Calculate Shuffled Autocorrelogram (Joris 2006)
+def shuffled_autocorrelation(spike_trains,
+                             coincidence_window=0.05,
+                             analysis_window=5,
+                             stimulus_duration=None):
+    """Calculate Shuffled Autocorrelogram (Joris 2006)
 
+    >>> from thorns import arrays_to_trains
     >>> a = [np.array([1, 2, 3]), np.array([1, 2.01, 2.5])]
-    >>> calc_shuffled_autocorrelation(a, coincidence_window=1, analysis_window=2)
+    >>> spike_trains = arrays_to_trains(a)
+    >>> shuffled_autocorrelation(spike_trains, coincidence_window=1, analysis_window=2)
     (array([-1.2, -0.4,  0.4,  1.2,  2. ]), array([ 0.11111111,  0.55555556,  0.44444444,  0.55555556,  0.11111111]))
 
     """
-    if stimulus_duration == None:
-        all_spikes = np.concatenate(tuple(spike_trains))
-        stimulus_duration = all_spikes.max() - all_spikes.min()
-    firing_rate = calc_average_firing_rate(spike_trains, stimulus_duration)
+    assert np.all(spike_trains['duration'] == spike_trains['duration'][0])
+    duration = spike_trains['duration'][0]
+
+    firing_rate = average_firing_rate(spike_trains)
     firing_rate = firing_rate / 1000
-    # calc_average_firing_rate() takes input in ms and output in sp/s, threfore:
+    # average_firing_rate() takes input in ms and output in sp/s, threfore:
     # Hz -> kHz
 
-    trial_num = len(spike_trains)
+    trains = spike_trains['spikes']
+
+    trial_num = len(trains)
 
     cum = []
-    for i in range(len(spike_trains)):
-        other_trains = list(spike_trains)
+    for i in range(len(trains)):
+        other_trains = list(trains)
         train = other_trains.pop(i)
         almost_all_spikes = np.concatenate(other_trains)
 
@@ -275,14 +283,14 @@ def calc_shuffled_autocorrelation(spike_trains, coincidence_window=0.05, analysi
                                    bins=np.floor(2*analysis_window/coincidence_window)+1,
                                    range=(-analysis_window, analysis_window))
     sac = (hist /
-           ( trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * stimulus_duration))
+           ( trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * duration))
 
     t = bin_edges[0:-1] + (bin_edges[1] - bin_edges[0])
 
     return t, sac
 
 
-calc_sac = calc_shuffled_autocorrelation
+sac = shuffled_autocorrelation
 
 
 

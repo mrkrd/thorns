@@ -33,7 +33,7 @@ def raster(spike_trains, plot=None, backend='biggles', **style):
 
         if plot is None:
             plot = biggles.FramedPlot()
-        plot.xlabel = "Time (ms)"
+        plot.xlabel = "Time [ms]"
         plot.xrange = (0, duration)
         plot.ylabel = "Trial Number"
         plot.yrange = (-0.5, len(trains)-0.5)
@@ -44,7 +44,7 @@ def raster(spike_trains, plot=None, backend='biggles', **style):
         if plot is None:
             plot = plt.gca()
         plot.plot(s, n, 'k,')
-        plot.set_xlabel("Time (ms)")
+        plot.set_xlabel("Time [ms]")
         plot.set_xlim( (0, duration) )
         plot.set_ylabel("Trial #")
         plot.set_ylim( (-0.5, len(trains)-0.5) )
@@ -102,7 +102,7 @@ def psth(spike_trains, bin_size=1, plot=None, **style):
 
     if plot is None:
         plot = biggles.FramedPlot()
-    plot.xlabel = "Time (ms)"
+    plot.xlabel = "Time [ms]"
     plot.ylabel = "Spikes per second"
     plot.add(c)
     plot.xrange = (0, None)
@@ -121,7 +121,7 @@ def isih(spike_trains, bin_size=1, plot=None, **style):
 
     if plot is None:
         plot = biggles.FramedPlot()
-    plot.xlabel = "Inter-Spike Interval (ms)"
+    plot.xlabel = "Inter-Spike Interval [ms]"
     plot.ylabel = "Probability Density Function"
     plot.add(c)
     plot.xrange = (0, None)
@@ -179,20 +179,26 @@ def period_histogram(spike_trains,
     return plot
 
 
-def plot_sac(spike_trains, coincidence_window=0.05, analysis_window=5,
-             stimulus_duration=None, plot=None, **style):
-    """ Plot shuffled autocorrelogram (SAC) (Joris 2006) """
+def sac(spike_trains,
+        coincidence_window=0.05,
+        analysis_window=5,
+        stimulus_duration=None,
+        plot=None,
+        **style):
+    """Plot shuffled autocorrelogram (SAC) (Joris 2006)"""
     import biggles
 
-    t, sac = calc_shuffled_autocorrelation(spike_trains, coincidence_window,
-                                           analysis_window, stimulus_duration)
+    t, sac = stats.shuffled_autocorrelation(spike_trains,
+                                            coincidence_window,
+                                            analysis_window,
+                                            stimulus_duration)
 
     c = biggles.Curve(t, sac)
     c.style(**style)
 
     if plot is None:
         plot = biggles.FramedPlot()
-    plot.xlabel = "Delay (ms)"
+    plot.xlabel = "Delay [ms]"
     plot.ylabel = "Normalized Coincidences Count"
     plot.add(c)
 
