@@ -184,19 +184,12 @@ def average_firing_rate(spike_trains):
     15.0
 
     """
-    assert np.all(spike_trains['duration'] == spike_trains['duration'][0])
+    duration = np.sum( spike_trains['duration'] )
 
     trains = spike_trains['spikes']
-    duration = spike_trains['duration'][0]
+    spike_num = np.concatenate(tuple(trains)).size
 
-    if 'trial_num' in spike_trains.dtype.names:
-        trial_num = spike_trains['trial_num'].sum()
-    else:
-        trial_num = len(spike_trains)
-
-    all_spikes = np.concatenate(tuple(trains))
-
-    r = 1000 * all_spikes.size / (duration * trial_num)
+    r = 1000 * spike_num / duration
 
     return r
 
