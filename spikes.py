@@ -304,11 +304,10 @@ def fold_spike_trains(spike_trains, period):
 
     print "fold_spike_trains() need update: does not copy metadata!"
     period_num = int( np.ceil(duration / period) )
-
-    just_trains = spike_trains['spikes']
+    last_period = np.fmod(duration, period)
 
     folded = []
-    for train in just_trains:
+    for train in spike_trains['spikes']:
         for idx in range(period_num):
             lo = idx * period
             hi = (idx+1) * period
@@ -317,6 +316,7 @@ def fold_spike_trains(spike_trains, period):
             folded.append(sec)
 
     folded_trains = arrays_to_trains(folded, duration=period)
+    folded_trains[-1]['duration'] = last_period
 
     return folded_trains
 
@@ -340,14 +340,14 @@ def shift_spikes(spike_trains, shift):
 shift = shift_spikes
 
 
-def split_and_fold_trains(long_train,
+def split_and_fold_trains(spike_trains,
                           silence_duration,
                           tone_duration,
                           pad_duration,
-                          remove_pads=False):
-    silence = trim(long_train, 0, silence_duration)
+                          remove_pads):
+    silence = trim(spike_trains, 0, silence_duration)
 
-    tones_and_pads = trim(long_train, silence_duration)
+    tones_and_pads = trim(spike_trains, silence_duration)
     tones_and_pads = fold(tones_and_pads, tone_duration+pad_duration)
 
     if remove_pads:
