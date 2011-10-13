@@ -2,5 +2,8 @@ from __future__ import division
 
 from spikes import *
 import waves
-import plot
 
+try:
+    import plot
+except ImportError:
+    print "thorns: no plotting (probably needs biggles)"
