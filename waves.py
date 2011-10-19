@@ -92,7 +92,7 @@ def generate_ramped_tone(fs,
     t = np.arange(0, tone_duration, 1000/fs)
     s = np.sin(2 * np.pi * t * freq/1000)
     if dbspl != None:
-        s = set_dbspl(dbspl, s)
+        s = set_dbspl(s, dbspl)
 
     ramp = np.linspace(0, 1, np.ceil(ramp_duration * fs/1000))
     s[0:len(ramp)] = s[0:len(ramp)] * ramp
