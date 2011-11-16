@@ -219,7 +219,7 @@ accumulate = accumulate_spike_trains
 
 
 
-def trim_spike_trains(spike_trains, start, stop=None):
+def trim_spike_trains(spike_trains, *args):
     """ Return spike trains with that are between `start' and `stop'.
 
     >>> spikes = [np.array([1,2,3,4]), np.array([3,4,5,6])]
@@ -227,6 +227,14 @@ def trim_spike_trains(spike_trains, start, stop=None):
     [array([0, 1, 2]), array([1, 2])]
 
     """
+    if len(args) == 1:
+        start, stop = args[0]
+    elif len(args) == 2:
+        start, stop = args
+    else:
+        assert False, "(start, stop)"
+
+
     arrays = []
     for key in spike_trains.dtype.names:
         if key == 'spikes':

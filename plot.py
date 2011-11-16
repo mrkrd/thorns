@@ -6,7 +6,7 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 import biggles
-from . import spikes as spk
+from . import spikes
 from . import stats
 
 golden = 1.6180339887
@@ -148,15 +148,14 @@ def period_histogram(spike_trains,
 
     all_spikes = np.concatenate(tuple(trains))
 
-    folded = np.fmod(all_spikes, 1000/fstim)
+    folded = np.fmod(all_spikes, 1000/stimulus_freq)
 
     print "Make sure that np.histogram get the right number of bins"
 
     hist, edges = np.histogram(folded,
                                bins=nbins,
-                               range=(0, 1/stimulus_freq),
+                               range=(0, 1000/stimulus_freq),
                                normed=True)
-
 
     ### TODO: find the direction instead of max value
     if center:
@@ -167,7 +166,9 @@ def period_histogram(spike_trains,
 
     c.style(**style)
     if label is not None:
-        c.label = label
+        si = stats.si(spike_trains,
+                      stimulus_freq)
+        c.label = label + "; " + str(si)
 
 
     if plot is None:
