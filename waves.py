@@ -50,7 +50,7 @@ def set_dbspl(*args):
     else:
         r = 10**(dB / 20.0) * p0 / rms;
 
-    return signal * r * 1e6     # uPa
+    return signal * r           # Pa
 
 
 
