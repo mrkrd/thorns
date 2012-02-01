@@ -198,6 +198,8 @@ def generate_biphasic_pulse(fs,
     polarity: 'c': cathodic, 'a': anodic
 
     """
+    assert polarity in ('c', 'a')
+
     def idx(width):
         """ fs: Hz, width: us """
         return np.round(fs*width/1e6)
