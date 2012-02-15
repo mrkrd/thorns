@@ -55,17 +55,15 @@ def set_dbspl(*args):
 
 
 
-def make_time(fs, s):
+def make_time(signal, fs):
     """
-    Return time vector for signal `s' in ms.
+    Return time vector for the signal.
 
+    signal: signal
     fs: sampling frequency in Hz
-    s: signal
 
-    >>> make_time(10, [2,3,4,4,5])
-    array([   0.,  100.,  200.,  300.,  400.])
     """
-    tmax = 1000 * (len(s)-1) / fs
+    tmax = (len(s)-1) / fs
     return np.linspace(0, tmax, len(s))
 
 t = make_time
@@ -75,30 +73,30 @@ t = make_time
 # TODO: allow values to be 0, change default values
 def generate_ramped_tone(fs,
                          freq,
-                         tone_duration=50,
-                         ramp_duration=2.5,
-                         pad_duration=55,
+                         tone_duration=50*1e-3,
+                         ramp_duration=2.5*1e-3,
+                         pad_duration=55*1e-3,
                          dbspl=None):
     """ Generate ramped tone singal.
 
-    fs: sampling frequency (Hz)
-    freq: frequency of the tone (Hz)
-    tone_durations: ms
-    ramp_duration:
-    pad_duration:
+    fs: sampling frequency [Hz]
+    freq: frequency of the tone [Hz]
+    tone_durations: [s]
+    ramp_duration: [s]
+    pad_duration: [s]
     dbspl:
 
     """
-    t = np.arange(0, tone_duration, 1000/fs)
-    s = np.sin(2 * np.pi * t * freq/1000)
+    t = np.arange(0, tone_duration, 1/fs)
+    s = np.sin(2 * np.pi * t * freq)
     if dbspl != None:
         s = set_dbspl(s, dbspl)
 
-    ramp = np.linspace(0, 1, np.ceil(ramp_duration * fs/1000))
+    ramp = np.linspace(0, 1, np.ceil(ramp_duration * fs))
     s[0:len(ramp)] = s[0:len(ramp)] * ramp
     s[-len(ramp):] = s[-len(ramp):] * ramp[::-1]
 
-    pad = np.zeros(pad_duration * fs/1000)
+    pad = np.zeros(pad_duration * fs)
     s = np.concatenate( (s, pad) )
 
     return s

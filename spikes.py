@@ -96,7 +96,7 @@ def _signal_to_train(signal, fs):
     signal = signal.astype(int)
 
     t = np.arange(len(signal))
-    spikes = np.repeat(t, signal) * 1000 / fs
+    spikes = np.repeat(t, signal) * 1 / fs
 
     return spikes
 
@@ -115,7 +115,7 @@ def signal_to_trains(signal, fs):
     [array([ 300.]), array([ 100.,  100.,  200.])]
 
     """
-    duration = 1000 * len(signal) / fs
+    duration = len(signal) / fs
 
     trains = []
 
@@ -143,8 +143,8 @@ def _train_to_signal(train, fs):
     tmax = train['duration']
     spikes = train['spikes']
 
-    bins = np.floor(tmax*fs/1000) + 1
-    real_tmax = bins * 1000/fs
+    bins = np.floor(tmax*fs) + 1
+    real_tmax = bins * 1/fs
     signal, bin_edges = np.histogram(spikes,
                                      bins=bins,
                                      range=(0, real_tmax))
@@ -227,8 +227,11 @@ def trim_spike_trains(spike_trains, *args):
     [array([0, 1, 2]), array([1, 2])]
 
     """
-    if len(args) == 1:
+    if len(args) == 1 and isinstance(args[0], tuple):
         start, stop = args[0]
+    elif len(args) == 1:
+        start = 0
+        stop = args[0]
     elif len(args) == 2:
         start, stop = args
     else:
