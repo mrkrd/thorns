@@ -63,8 +63,8 @@ def make_time(signal, fs):
     fs: sampling frequency in Hz
 
     """
-    tmax = (len(s)-1) / fs
-    return np.linspace(0, tmax, len(s))
+    tmax = (len(signal)-1) / fs
+    return np.linspace(0, tmax, len(signal))
 
 t = make_time
 
