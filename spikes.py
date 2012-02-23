@@ -230,13 +230,12 @@ def trim_spike_trains(spike_trains, *args):
     if len(args) == 1 and isinstance(args[0], tuple):
         start, stop = args[0]
     elif len(args) == 1:
-        start = 0
-        stop = args[0]
+        start = args[0]
+        stop = None
     elif len(args) == 2:
         start, stop = args
     else:
         assert False, "(start, stop)"
-
 
     arrays = []
     for key in spike_trains.dtype.names:
@@ -249,6 +248,7 @@ def trim_spike_trains(spike_trains, *args):
                 )
         elif key == 'duration':
             tmax = np.array(spike_trains['duration'])
+
             if stop is not None:
                 tmax[ tmax>stop ] = stop
 
@@ -315,6 +315,7 @@ def fold_spike_trains(spike_trains, period):
 
     print "fold_spike_trains() need update: does not copy metadata!"
     period_num = int( np.ceil(duration / period) )
+
     last_period = np.fmod(duration, period)
 
     folded = []
@@ -327,7 +328,9 @@ def fold_spike_trains(spike_trains, period):
             folded.append(sec)
 
     folded_trains = arrays_to_trains(folded, duration=period)
-    folded_trains[-1]['duration'] = last_period
+
+    if last_period != 0:
+        folded_trains[-1]['duration'] = last_period
 
     return folded_trains
 

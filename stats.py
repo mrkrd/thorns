@@ -56,7 +56,7 @@ def entrainment(spike_trains, fstim, bin_size=1):
 
     bins = np.arange( len(hist) ) * bin_size
 
-    stim_period = 1000/fstim    # ms
+    stim_period = 1/fstim    # ms
 
     entrainment_window = (bins > stim_period/2) & (bins < stim_period*3/2)
 
@@ -87,8 +87,6 @@ def synchronization_index(spike_trains, fstim):
     >>> si1 == 1
     True
     """
-
-    fstim = fstim / 1000        # Hz -> kHz; s -> ms
 
     if len(spike_trains) == 0:
         return 0
@@ -189,7 +187,7 @@ def average_firing_rate(spike_trains):
     trains = spike_trains['spikes']
     spike_num = np.concatenate(tuple(trains)).size
 
-    r = 1000 * spike_num / duration
+    r = spike_num / duration
 
     return r
 
@@ -218,7 +216,6 @@ def calc_correlation_index(spike_trains, coincidence_window=0.05, stimulus_durat
         stimulus_duration = all_spikes.max() - all_spikes.min()
 
     firing_rate = calc_average_firing_rate(spike_trains, stimulus_duration)
-    firing_rate = firing_rate / 1000
     # calc_average_firing_rate() takes input in ms and output in sp/s, threfore:
     # Hz -> kHz
 
@@ -251,7 +248,6 @@ def shuffled_autocorrelation(spike_trains,
     duration = spike_trains['duration'][0]
 
     firing_rate = average_firing_rate(spike_trains)
-    firing_rate = firing_rate / 1000
     # average_firing_rate() takes input in ms and output in sp/s, threfore:
     # Hz -> kHz
 
