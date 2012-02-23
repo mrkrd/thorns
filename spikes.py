@@ -230,13 +230,12 @@ def trim_spike_trains(spike_trains, *args):
     if len(args) == 1 and isinstance(args[0], tuple):
         start, stop = args[0]
     elif len(args) == 1:
-        start = 0
-        stop = args[0]
+        start = args[0]
+        stop = None
     elif len(args) == 2:
         start, stop = args
     else:
         assert False, "(start, stop)"
-
 
     arrays = []
     for key in spike_trains.dtype.names:
@@ -279,7 +278,7 @@ def _trim_arrays(arrays, durations, start, stop):
         a = arr[ (arr >= tmin) & (arr <= tmax) ]
         a = a - tmin
         trimmed.append(a)
-
+    print tmin, tmax
     return trimmed
 
 
@@ -358,8 +357,13 @@ def split_and_fold_trains(spike_trains,
                           remove_pads):
     silence = trim(spike_trains, 0, silence_duration)
 
+
     tones_and_pads = trim(spike_trains, silence_duration)
+    print 'split_and_fold_trains', tones_and_pads['spikes'].size
     tones_and_pads = fold(tones_and_pads, tone_duration+pad_duration)
+
+    # import plot
+    # plot.raster(tones_and_pads).show()
 
     if remove_pads:
         tones_and_pads = trim(tones_and_pads, 0, tone_duration)
