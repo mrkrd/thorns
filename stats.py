@@ -40,7 +40,7 @@ def isih(spike_trains, bin_size=1):
     return hist
 
 
-def entrainment(spike_trains, fstim, bin_size=1):
+def entrainment(spike_trains, fstim, bin_size=1e-3):
     """ Calculate entrainment of spike_trains.
 
     >>> from thorns import arrays_to_trains
