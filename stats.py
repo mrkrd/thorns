@@ -6,7 +6,7 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 
-def isih(spike_trains, bin_size=1):
+def isih(spike_trains, bin_size=1e-3):
     """ Calculate inter-spike interval histogram.
 
     >>> from thorns import arrays_to_trains

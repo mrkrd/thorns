@@ -54,7 +54,7 @@ def raster(spike_trains, plot=None, backend='biggles', **style):
 
 def spike_signal(spike_trains, bin_size=1, plot=None, **style):
     assert False, "not implemented"
-    fs = 1000 / bin_size
+    fs = 1 / bin_size
 
     spikes = spikes_to_signal(fs, spike_trains)
     spikes = 1 - spikes/spikes.max()
@@ -67,7 +67,7 @@ def spike_signal(spike_trains, bin_size=1, plot=None, **style):
     return plot
 
 
-def psth(spike_trains, bin_size=1, plot=None, **style):
+def psth(spike_trains, bin_size=1e-3, plot=None, **style):
     """ Plots PSTH of spike_trains.
 
     spike_trains: list of spike trains
@@ -94,7 +94,7 @@ def psth(spike_trains, bin_size=1, plot=None, **style):
     else:
         trial_num = len(trains)
 
-    hist = 1000 * hist / bin_size / trial_num
+    hist =  hist / bin_size / trial_num
 
 
     c = biggles.Histogram(hist, x0=0, binsize=bin_size)
@@ -111,7 +111,7 @@ def psth(spike_trains, bin_size=1, plot=None, **style):
     return plot
 
 
-def isih(spike_trains, bin_size=1, plot=None, **style):
+def isih(spike_trains, bin_size=1e-3, plot=None, **style):
     """Plot inter-spike interval histogram."""
 
     hist = stats.isih(spike_trains, bin_size)
@@ -148,13 +148,13 @@ def period_histogram(spike_trains,
 
     all_spikes = np.concatenate(tuple(trains))
 
-    folded = np.fmod(all_spikes, 1000/stimulus_freq)
+    folded = np.fmod(all_spikes, 1/stimulus_freq)
 
     print "Make sure that np.histogram get the right number of bins"
 
     hist, edges = np.histogram(folded,
                                bins=nbins,
-                               range=(0, 1000/stimulus_freq),
+                               range=(0, 1/stimulus_freq),
                                normed=True)
 
     ### TODO: find the direction instead of max value

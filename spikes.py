@@ -279,7 +279,7 @@ def _trim_arrays(arrays, durations, start, stop):
         a = arr[ (arr >= tmin) & (arr <= tmax) ]
         a = a - tmin
         trimmed.append(a)
-    print tmin, tmax
+
     return trimmed
 
 
@@ -363,7 +363,6 @@ def split_and_fold_trains(spike_trains,
 
 
     tones_and_pads = trim(spike_trains, silence_duration)
-    print 'split_and_fold_trains', tones_and_pads['spikes'].size
     tones_and_pads = fold(tones_and_pads, tone_duration+pad_duration)
 
     # import plot
