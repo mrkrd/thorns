@@ -147,15 +147,17 @@ def period_histogram(spike_trains,
         nbins = int(spike_fs / stimulus_freq)
 
     all_spikes = np.concatenate(tuple(trains))
-
     folded = np.fmod(all_spikes, 1/stimulus_freq)
+    normalized = folded * stimulus_freq
 
     print "Make sure that np.histogram get the right number of bins"
 
-    hist, edges = np.histogram(folded,
-                               bins=nbins,
-                               range=(0, 1/stimulus_freq),
-                               normed=True)
+    hist, edges = np.histogram(
+        normalized,
+        bins=nbins,
+        range=(0, 1),
+        normed=True
+    )
 
     ### TODO: find the direction instead of max value
     if center:
@@ -166,9 +168,7 @@ def period_histogram(spike_trains,
 
     c.style(**style)
     if label is not None:
-        si = stats.si(spike_trains,
-                      stimulus_freq)
-        c.label = label + "; " + str(si)
+        c.label = label
 
 
     if plot is None:
