@@ -73,9 +73,9 @@ t = make_time
 # TODO: allow values to be 0, change default values
 def generate_ramped_tone(fs,
                          freq,
-                         tone_duration=50*1e-3,
-                         ramp_duration=2.5*1e-3,
-                         pad_duration=55*1e-3,
+                         tone_duration=50e-3,
+                         ramp_duration=2.5e-3,
+                         pad_duration=55e-3,
                          dbspl=None):
     """ Generate ramped tone singal.
 
