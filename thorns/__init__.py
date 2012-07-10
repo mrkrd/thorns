@@ -8,6 +8,11 @@ import random
 import numpy as np
 
 
+import stats
+import plot
+
+
+
 def arrays_to_trains(arrays, duration=None):
     """Convert list of arrays with spike timings to spike trains
     rec.array
