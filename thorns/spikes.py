@@ -7,26 +7,7 @@ __author__ = "Marek Rudnicki"
 import random
 import numpy as np
 
-
-
-
-def arrays_to_trains(arrays, duration=None):
-    """Convert list of arrays with spike timings to spike trains
-    rec.array
-
-    """
-
-    if duration is None:
-        duration = np.concatenate(arrays).max()
-
-    t = []
-    for a in arrays:
-        t.append( (a, duration) )
-
-    trains = np.rec.array(t, dtype=[('spikes', np.ndarray),
-                                    ('duration', float)])
-
-    return trains
+from collections import Iterable
 
 
 def select_trains(spike_trains, **kwargs):
@@ -38,10 +19,94 @@ def select_trains(spike_trains, **kwargs):
     return trains
 
 select_spike_trains = select_trains
-sel = select_trains
+select = select_trains
 
 
-def dicts_to_trains(dicts):
+
+def make_trains(data, **kwargs):
+    assert isinstance(data, Iterable)
+
+    if 'fs' in kwargs:
+        assert 'duration' not in kwargs
+
+
+    meta = {}
+    for k,v in kwargs.items():
+        if k == 'fs':
+            continue
+
+        if isinstance(v, Iterable):
+            assert len(v) == len(data)
+            meta[k] = v
+        else:
+            meta[k] = [v] * len(data)
+
+
+
+
+    if isinstance(data, np.ndarray) and (data.ndim == 2) and ('fs' in kwargs):
+        trains = _array_to_trains(data, kwargs['fs'])
+
+    elif isinstance(data[0], Iterable):
+        trains = _arrays_to_trains(data, **kwargs)
+
+
+    return trains
+
+
+
+
+
+def _arrays_to_trains(arrays, **kwargs):
+
+
+    ### Meta data for each train
+    meta = {}
+    for k,v in kwargs.items():
+        if isinstance(v, Iterable):
+            assert len(v) == len(arrays)
+            meta[k] = v
+        else:
+            meta[k] = [v] * len(arrays)
+
+
+    ### Types of the metadata
+    types = [('spikes', np.ndarray)]
+    for key,val in meta.items():
+        field_name = key
+        field_dtype = type(val[0])
+
+        if field_dtype is str:
+            field_shape = max( [len(s) for s in val] )
+        else:
+            field_shape = 1
+
+        types.append(
+            (field_name, field_dtype, field_shape)
+        )
+
+
+
+    ### Make sure we have duration
+    if 'duration' not in meta:
+        duration = max([np.max(a) for a in arrays])
+        meta['duration'] = [duration] * len(arrays)
+        types.append(('duration', float))
+
+
+    trains = zip(arrays, *meta.values())
+
+
+    trains = np.array(
+        trains,
+        dtype=types
+    )
+
+    return trains
+
+
+
+def _dicts_to_trains(dicts):
     """Convert list of dictionaries to np.rec.array
 
     >>> dicts = [{'a':1, 'b':2}, {'a':5, 'b':6}]
@@ -79,7 +144,9 @@ def dicts_to_trains(dicts):
     return arr
 
 
-def _signal_to_train(signal, fs):
+
+
+def _array1d_to_train(signal, fs):
     """ Convert 1D time function array into array of spike timings.
 
     fs: sampling frequency in Hz
@@ -103,37 +170,35 @@ def _signal_to_train(signal, fs):
     return spikes
 
 
-def signal_to_trains(signal, fs):
+
+
+def _array_to_trains(a, fs):
     """ Convert time functions to a list of spike trains.
 
     fs: samping frequency in Hz
-    signals: input signals
+    a: input array
 
     return: spike trains with spike timings
 
-    >>> fs = 10
-    >>> s = np.array([[0,0,0,1,0,0], [0,2,1,0,0,0]]).T
-    >>> signal_to_spikes(fs, s)
-    [array([ 300.]), array([ 100.,  100.,  200.])]
-
     """
-    duration = len(signal) / fs
+    assert a.ndim == 2
 
-    trains = []
+    duration = len(a) / fs
 
-    if signal.ndim == 1:
-        trains = [ _signal_to_train(signal, fs) ]
-    elif signal.ndim == 2:
-        trains = [ _signal_to_train(s, fs) for s in signal.T ]
-    else:
-        assert False, "Input signal must be 1 or 2 dimensional"
+    trains = [ (_array1d_to_train(s, fs), duration) for s in a.T ]
 
-    spike_trains = arrays_to_trains(trains, duration=duration)
+    spike_trains = np.array(
+        trains,
+        dtype=[('spikes', np.ndarray),
+               ('duration', float)]
+    )
 
     return spike_trains
 
 
-def _train_to_signal(train, fs):
+
+
+def _train_to_array1d(train, fs):
     """ Convert spike train to its time function. 1D version.
 
     >>> fs = 10
@@ -147,14 +212,16 @@ def _train_to_signal(train, fs):
 
     bins = np.floor(tmax*fs) + 1
     real_tmax = bins * 1/fs
-    signal, bin_edges = np.histogram(spikes,
-                                     bins=bins,
-                                     range=(0, real_tmax))
+    signal, bin_edges = np.histogram(
+        spikes,
+        bins=bins,
+        range=(0, real_tmax)
+    )
 
     return signal
 
 
-def trains_to_signal(spike_trains, fs):
+def trains_to_array(trains, fs):
     """ Convert spike trains to theirs time functions.
 
     fs: sampling frequency (Hz)
@@ -169,10 +236,15 @@ def trains_to_signal(spike_trains, fs):
            [0, 1]])
 
     """
-    durations = spike_trains['duration']
+    durations = trains['duration']
     assert np.all(durations == durations[0])
 
-    signals = [_train_to_signal(train, fs) for train in spike_trains]
+    signals = []
+    for train in trains:
+        signals.append(
+            _train_to_array1d(train, fs)
+        )
+
     signal = np.array(signals).T
 
     return signal

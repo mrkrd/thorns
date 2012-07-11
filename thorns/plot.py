@@ -6,8 +6,9 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 import biggles
+
 from . import spikes
-from . import stats
+from . import calc
 
 golden = 1.6180339887
 

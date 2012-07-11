@@ -1,4 +1,8 @@
 
-from spikes import *
-from calc import *
-from plot import *
+from spikes import (
+    make_trains
+)
+
+
+#from calc import *
+#from plot import *
