@@ -176,7 +176,7 @@ def test_shuffle_spikes():
     print shuffle_spikes(spikes)
 
 
-def calc_average_firing_rate(spike_trains):
+def calc_firing_rate(spike_trains):
     """ Calculates average firing rate.
 
     spike_trains: trains of spikes
@@ -201,8 +201,7 @@ def calc_average_firing_rate(spike_trains):
     return r
 
 
-calc_firing_rate = calc_average_firing_rate
-calc_rate = calc_average_firing_rate
+calc_rate = calc_firing_rate
 
 
 def count_spikes(spike_trains):
@@ -212,27 +211,44 @@ def count_spikes(spike_trains):
 count = count_spikes
 
 
-def calc_correlation_index(spike_trains, coincidence_window=0.05, stimulus_duration=None):
-    """ Compute correlation index (Joris 2006) """
+def calc_correlation_index(
+        spike_trains,
+        coincidence_window=50e-6,
+        normalize=True):
+    """Compute correlation index (Joris 2006)"""
+
     if len(spike_trains) == 0:
         return 0
 
-    all_spikes = np.concatenate(tuple(spike_trains))
+    all_spikes = np.concatenate(tuple(spike_trains['spikes']))
+
     if len(all_spikes) == 0:
         return 0
 
-    if stimulus_duration == None:
-        stimulus_duration = all_spikes.max() - all_spikes.min()
 
-    firing_rate = calc_average_firing_rate(spike_trains, stimulus_duration)
-    # calc_average_firing_rate() takes input in ms and output in sp/s, threfore:
-    # Hz -> kHz
+    Nc = 0                      # Total number of coincidences
 
-    trial_num = len(spike_trains)
+    for spike in all_spikes:
+        hits = all_spikes[
+            (all_spikes >= spike) &
+            (all_spikes <= spike+coincidence_window)
+        ]
+        Nc += len(hits) - 1
 
-    # Compute raw CI and normalize it
-    ci = (_raw_correlation_index(spike_trains) /
-          ( trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * stimulus_duration))
+
+
+    if normalize:
+        trial_num = len(spike_trains)
+        firing_rate = calc_firing_rate(spike_trains)
+        duration = get_duration(spike_trains)
+
+        norm = trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * duration
+
+        ci = Nc / norm
+
+    else:
+        ci = Nc
+
 
     return ci
 
@@ -240,7 +256,7 @@ def calc_correlation_index(spike_trains, coincidence_window=0.05, stimulus_durat
 calc_ci = calc_correlation_index
 
 
-def calc_shuffled_autocorrelation(
+def calc_shuffled_autocorrelogram(
         spike_trains,
         coincidence_window=0.05,
         analysis_window=5,
@@ -248,13 +264,7 @@ def calc_shuffled_autocorrelation(
     """Calculate Shuffled Autocorrelogram (Joris 2006)"""
 
     duration = get_duration(spike_trains)
-
-
-    firing_rate = calc_firing_rate(spike_trains)
-
-
     trains = spike_trains['spikes']
-
     trial_num = len(trains)
 
     cum = []
@@ -265,7 +275,9 @@ def calc_shuffled_autocorrelation(
 
         for spike in train:
             centered = almost_all_spikes - spike
-            trimmed = centered[(centered > -analysis_window) & (centered < analysis_window)]
+            trimmed = centered[
+                (centered > -analysis_window) & (centered < analysis_window)
+            ]
             cum.append(trimmed)
 
     cum = np.concatenate(cum)
@@ -277,6 +289,7 @@ def calc_shuffled_autocorrelation(
     )
 
     if normalize:
+        firing_rate = calc_firing_rate(spike_trains)
         norm = trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * duration
         sac = hist / norm
     else:
@@ -287,7 +300,7 @@ def calc_shuffled_autocorrelation(
     return sac, t
 
 
-calc_sac = calc_shuffled_autocorrelation
+calc_sac = calc_shuffled_autocorrelogram
 
 
 

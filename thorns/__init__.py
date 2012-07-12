@@ -5,7 +5,13 @@ from spikes import (
 
 
 from calc import (
-    calc_sac
+    calc_shuffled_autocorrelogram,
+    calc_sac,
+
+    calc_correlation_index,
+    calc_ci,
+
+    calc_firing_rate
 )
 
 #from calc import *
