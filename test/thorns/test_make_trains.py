@@ -11,6 +11,22 @@ import numpy as np
 import marlib.thorns as th
 
 
+def assert_trains_equal(a,b):
+
+    assert len(a) == len(b)
+
+    ### Assert if spike trains are equal
+    for ta,tb in zip(a['spikes'], b['spikes']):
+        assert np.all(ta == tb)
+
+
+    ### Assert if meta data is equal
+    assert a.dtype == b.dtype
+    meta = list(a.dtype.names)
+    meta.remove('spikes')
+    assert_array_equal(a[meta], b[meta])
+
+
 
 def test_from_array():
 
@@ -30,28 +46,11 @@ def test_from_array():
     )
 
 
-    print expected['duration']
-    print result['duration']
-    # assert_array_equal(
-    #     expected['duration'],
-    #     result['duration']
-    # )
+    assert_trains_equal(
+        expected,
+        result
+    )
 
-    # assert len(result) == 2
-
-    # assert_array_equal(
-    #     result['duration'],
-    #     [6/fs, 6/fs]
-    # )
-
-    # assert_array_equal(
-    #     result['spikes'][0],
-    #     [3/fs]
-    # )
-    # assert_array_equal(
-    #     result['spikes'][1],
-    #     [1/fs, 1/fs, 2/fs]
-    # )
 
 
 
@@ -87,12 +86,7 @@ def test_from_arrays():
             ('duration', float)
         ]
     )
-
-    print expected
-    print e
-    print expected == e
-
-    assert_array_equal(
+    assert_trains_equal(
         result,
         expected
     )
@@ -100,14 +94,14 @@ def test_from_arrays():
 
 
 
-    # result = th.make_trains(
-    #     arrays,
-    #     duration=10.0
-    # )
-    # assert_array_equal(
-    #     expected,
-    #     result
-    # )
+    result = th.make_trains(
+        arrays,
+        duration=10.0
+    )
+    assert_trains_equal(
+        expected,
+        result
+    )
 
 
 

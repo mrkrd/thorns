@@ -6,6 +6,15 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 
+
+def get_duration(spike_trains):
+    assert np.all(spike_trains['duration'] == spike_trains['duration'][0])
+    duration = spike_trains['duration'][0]
+
+    return duration
+
+
+
 def calc_isih(spike_trains, bin_size=1e-3):
     """ Calculate inter-spike interval histogram.
 
@@ -167,7 +176,7 @@ def test_shuffle_spikes():
     print shuffle_spikes(spikes)
 
 
-def average_firing_rate(spike_trains):
+def calc_average_firing_rate(spike_trains):
     """ Calculates average firing rate.
 
     spike_trains: trains of spikes
@@ -192,8 +201,8 @@ def average_firing_rate(spike_trains):
     return r
 
 
-firing_rate = average_firing_rate
-rate = average_firing_rate
+calc_firing_rate = calc_average_firing_rate
+calc_rate = calc_average_firing_rate
 
 
 def count_spikes(spike_trains):
@@ -231,25 +240,18 @@ def calc_correlation_index(spike_trains, coincidence_window=0.05, stimulus_durat
 calc_ci = calc_correlation_index
 
 
-def shuffled_autocorrelation(spike_trains,
-                             coincidence_window=0.05,
-                             analysis_window=5,
-                             stimulus_duration=None):
-    """Calculate Shuffled Autocorrelogram (Joris 2006)
+def calc_shuffled_autocorrelation(
+        spike_trains,
+        coincidence_window=0.05,
+        analysis_window=5,
+        normalize=True):
+    """Calculate Shuffled Autocorrelogram (Joris 2006)"""
 
-    >>> from thorns import arrays_to_trains
-    >>> a = [np.array([1, 2, 3]), np.array([1, 2.01, 2.5])]
-    >>> spike_trains = arrays_to_trains(a)
-    >>> shuffled_autocorrelation(spike_trains, coincidence_window=1, analysis_window=2)
-    (array([-1.2, -0.4,  0.4,  1.2,  2. ]), array([ 0.11111111,  0.55555556,  0.44444444,  0.55555556,  0.11111111]))
+    duration = get_duration(spike_trains)
 
-    """
-    assert np.all(spike_trains['duration'] == spike_trains['duration'][0])
-    duration = spike_trains['duration'][0]
 
-    firing_rate = average_firing_rate(spike_trains)
-    # average_firing_rate() takes input in ms and output in sp/s, threfore:
-    # Hz -> kHz
+    firing_rate = calc_firing_rate(spike_trains)
+
 
     trains = spike_trains['spikes']
 
@@ -268,18 +270,24 @@ def shuffled_autocorrelation(spike_trains,
 
     cum = np.concatenate(cum)
 
-    hist, bin_edges = np.histogram(cum,
-                                   bins=np.floor(2*analysis_window/coincidence_window)+1,
-                                   range=(-analysis_window, analysis_window))
-    sac = (hist /
-           ( trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * duration))
+    hist, bin_edges = np.histogram(
+        cum,
+        bins=np.floor(2*analysis_window/coincidence_window)+1,
+        range=(-analysis_window, analysis_window)
+    )
+
+    if normalize:
+        norm = trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * duration
+        sac = hist / norm
+    else:
+        sac = hist
 
     t = bin_edges[0:-1] + (bin_edges[1] - bin_edges[0])
 
-    return t, sac
+    return sac, t
 
 
-sac = shuffled_autocorrelation
+calc_sac = calc_shuffled_autocorrelation
 
 
 
