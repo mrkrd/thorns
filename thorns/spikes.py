@@ -94,6 +94,7 @@ def _arrays_to_trains(arrays, **kwargs):
         types.append(('duration', float))
 
 
+    arrays = (np.array(a) for a in arrays)
     trains = zip(arrays, *meta.values())
 
 
