@@ -56,7 +56,7 @@ def test_calc_sac():
          [1,2,3]]
     )
 
-    sac, t = th.calc_sac(
+    sac, bin_edges = th.calc_sac(
         trains,
         coincidence_window=1,
         analysis_window=3,
@@ -64,13 +64,13 @@ def test_calc_sac():
     )
 
 
-
     assert_array_almost_equal(
-        t,
-        [-1.2e-3, -0.4e-3,  0.4e-3,  1.2e-3,  2e-3 ]
+        bin_edges,
+        [-2., -1.,  0.,  1.,  2.,  3.]
     )
-
     assert_array_equal(
         sac,
-        [ 0.11111111,  0.55555556,  0.44444444,  0.55555556,  0.11111111]
+        [2, 2, 4, 2, 2]
     )
+
+

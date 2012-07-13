@@ -268,16 +268,18 @@ def calc_shuffled_autocorrelogram(
     trains = spike_trains['spikes']
     trial_num = len(trains)
 
+    nbins = np.ceil(analysis_window / coincidence_window)
+
     cum = []
-    for i in range(len(trains)):
+    for train in trains:
         other_trains = list(trains)
-        train = other_trains.pop(i)
+        other_trains.remove(train)
         almost_all_spikes = np.concatenate(other_trains)
 
         for spike in train:
             centered = almost_all_spikes - spike
             trimmed = centered[
-                (centered > -analysis_window) & (centered < analysis_window)
+                (centered >= 0) & (centered < nbins*coincidence_window)
             ]
             cum.append(trimmed)
 
@@ -285,23 +287,22 @@ def calc_shuffled_autocorrelogram(
 
     hist, bin_edges = np.histogram(
         cum,
-        bins=np.floor(2*analysis_window/coincidence_window)+1,
-        range=(-analysis_window, analysis_window)
+        bins=nbins,
+        range=(0, nbins*coincidence_window)
     )
 
     if normalize:
         firing_rate = calc_firing_rate(spike_trains)
         norm = trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * duration
-        sac = hist / norm
+        sac_half = hist / norm
     else:
-        sac = hist
+        sac_half = hist
 
-    t = bin_edges[0:-1] + (bin_edges[1] - bin_edges[0])
+    sac = np.concatenate( (sac_half[::-1][0:-1], sac_half) )
+    bin_edges = np.concatenate( (-bin_edges[::-1][1:-1], bin_edges) )
 
-    print hist
-    print bin_edges
 
-    return sac, t
+    return sac, bin_edges
 
 
 calc_sac = calc_shuffled_autocorrelogram
