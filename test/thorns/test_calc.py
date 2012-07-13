@@ -64,9 +64,7 @@ def test_calc_sac():
     )
 
 
-    print
-    print t
-    print sac
+
     assert_array_almost_equal(
         t,
         [-1.2e-3, -0.4e-3,  0.4e-3,  1.2e-3,  2e-3 ]

@@ -209,6 +209,7 @@ def count_spikes(spike_trains):
     return len(all_spikes)
 
 count = count_spikes
+calc_spike_count = count_spikes
 
 
 def calc_correlation_index(
@@ -258,8 +259,8 @@ calc_ci = calc_correlation_index
 
 def calc_shuffled_autocorrelogram(
         spike_trains,
-        coincidence_window=0.05,
-        analysis_window=5,
+        coincidence_window=50e-6,
+        analysis_window=5e-3,
         normalize=True):
     """Calculate Shuffled Autocorrelogram (Joris 2006)"""
 
@@ -296,6 +297,9 @@ def calc_shuffled_autocorrelogram(
         sac = hist
 
     t = bin_edges[0:-1] + (bin_edges[1] - bin_edges[0])
+
+    print hist
+    print bin_edges
 
     return sac, t
 
