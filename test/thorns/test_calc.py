@@ -64,7 +64,7 @@ def test_calc_sac():
     )
 
 
-    assert_array_almost_equal(
+    assert_array_equal(
         bin_edges,
         [-2., -1.,  0.,  1.,  2.,  3.]
     )
@@ -73,4 +73,29 @@ def test_calc_sac():
         [2, 2, 4, 2, 2]
     )
 
+
+
+
+def test_calc_psth():
+    trains = th.make_trains(
+        [[0.5, 1.5, 2.5],
+         [0.5, 2.5]]
+    )
+
+
+    psth, bin_edges = th.calc_psth(
+        trains,
+        bin_size=1,
+        normalize=False
+    )
+
+
+    assert_array_equal(
+        psth,
+        [2, 1, 2]
+    )
+    assert_array_equal(
+        bin_edges,
+        [0, 1, 2, 3]
+    )
 

@@ -34,25 +34,6 @@ rms = root_mean_square
 
 
 
-def set_dbspl(*args):
-    if np.isscalar(args[0]) and isinstance(args[1], np.ndarray):
-        dB, signal = args
-    elif isinstance(args[0], np.ndarray) and np.isscalar(args[1]):
-        signal, dB = args
-    else:
-        assert False, "Input not correct, must be scalar and array"
-
-    p0 = 2e-5                   # Pa
-    rms = np.sqrt( np.sum(signal**2) / len(signal) )
-
-    if rms == 0:
-        r = 0
-    else:
-        r = 10**(dB / 20.0) * p0 / rms;
-
-    return signal * r           # Pa
-
-
 
 
 def make_time(signal, fs):

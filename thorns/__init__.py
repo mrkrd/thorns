@@ -11,8 +11,12 @@ from calc import (
     calc_correlation_index,
     calc_ci,
 
-    calc_firing_rate
+    calc_firing_rate,
+
+    calc_psth
 )
 
-#from calc import *
-#from plot import *
+from plot import (
+    plot_raster,
+    plot_psth
+)

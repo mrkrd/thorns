@@ -15,6 +15,33 @@ def get_duration(spike_trains):
 
 
 
+def calc_psth(spike_trains, bin_size, normalize=True):
+
+    duration = get_duration(spike_trains)
+    trial_num = len(spike_trains)
+
+    trains = spike_trains['spikes']
+    all_spikes = np.concatenate(tuple(trains))
+
+    nbins = np.ceil(duration / bin_size)
+
+    hist, bin_edges = np.histogram(
+        all_spikes,
+        bins=nbins,
+        range=(0, nbins*bin_size)
+    )
+
+
+    if normalize:
+        psth = hist / bin_size / trial_num
+    else:
+        psth = hist
+
+
+    return psth, bin_edges
+
+
+
 def calc_isih(spike_trains, bin_size=1e-3):
     """ Calculate inter-spike interval histogram.
 

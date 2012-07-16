@@ -5,18 +5,18 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import numpy as np
-import biggles
+import matplotlib.pyplot as plt
 
 from . import spikes
 from . import calc
 
 golden = 1.6180339887
 
-def raster(spike_trains, plot=None, backend='biggles', **style):
+def plot_raster(spike_trains, axis=None, style='k,', **kwargs):
     """Plot raster plot."""
 
     trains = spike_trains['spikes']
-    duration = spike_trains['duration'].max()
+    duration = np.max( spike_trains['duration'] )
 
     # Compute trial number
     L = [ len(train) for train in trains ]
@@ -27,30 +27,17 @@ def raster(spike_trains, plot=None, backend='biggles', **style):
     s = np.concatenate(tuple(trains))
 
 
+    if axis is None:
+        axis = plt.gca()
 
-    if backend == 'biggles':
-        c = biggles.Points(s, n, type='dot')
-        c.style(**style)
+    axis.plot(s, n, style, **kwargs)
+    axis.set_xlabel("Time [ms]")
+    axis.set_xlim( (0, duration) )
+    axis.set_ylabel("Trial #")
+    axis.set_ylim( (-0.5, len(trains)-0.5) )
 
-        if plot is None:
-            plot = biggles.FramedPlot()
-        plot.xlabel = "Time [ms]"
-        plot.xrange = (0, duration)
-        plot.ylabel = "Trial Number"
-        plot.yrange = (-0.5, len(trains)-0.5)
-        plot.add(c)
 
-    elif backend == 'matplotlib':
-        import matplotlib.pyplot as plt
-        if plot is None:
-            plot = plt.gca()
-        plot.plot(s, n, 'k,')
-        plot.set_xlabel("Time [ms]")
-        plot.set_xlim( (0, duration) )
-        plot.set_ylabel("Trial #")
-        plot.set_ylim( (-0.5, len(trains)-0.5) )
-
-    return plot
+    return axis
 
 
 def spike_signal(spike_trains, bin_size=1, plot=None, **style):
@@ -68,48 +55,33 @@ def spike_signal(spike_trains, bin_size=1, plot=None, **style):
     return plot
 
 
-def psth(spike_trains, bin_size=1e-3, plot=None, **style):
-    """ Plots PSTH of spike_trains.
-
-    spike_trains: list of spike trains
-    bin_size: bin size in ms
-    trial_num: total number of trials
-    plot: biggles container
-    **style: biggles curve style (e.g., color='red')
-    """
-    trains = spike_trains['spikes']
-    duration = spike_trains['duration'].max()
-
-    all_spikes = np.concatenate(tuple(trains))
-
-    nbins = np.floor(duration / bin_size) + 1
-
-    hist, bins = np.histogram(all_spikes,
-                              bins=nbins,
-                              range=(0, nbins*bin_size))
+def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
+    """Plots PSTH of spike_trains."""
 
 
-    # Normalize hist for spikes per second
-    if 'trial_num' in spike_trains.dtype.names:
-        trial_num = sum(spike_trains['trial_num'])
-    else:
-        trial_num = len(trains)
-
-    hist =  hist / bin_size / trial_num
+    psth, bin_edges = calc.calc_psth(
+        spike_trains,
+        bin_size
+    )
 
 
-    c = biggles.Histogram(hist, x0=0, binsize=bin_size)
-    c.style(**style)
+    if axis is None:
+        plot = plt.gca()
 
-    if plot is None:
-        plot = biggles.FramedPlot()
-    plot.xlabel = "Time [ms]"
-    plot.ylabel = "Spikes per second"
-    plot.add(c)
-    plot.xrange = (0, None)
-    plot.yrange = (0, None)
 
-    return plot
+    axis.plot(
+        bin_edges[:-1],
+        psth,
+        drawstyle='steps-post',
+        **kwargs
+    )
+
+
+    axis.set_xlabel("Time [ms]")
+    axis.set_ylabel("Spikes per second")
+
+
+    return axis
 
 
 def isih(spike_trains, bin_size=1e-3, plot=None, **style):
