@@ -1,4 +1,4 @@
-import generators
+import waves
 
-from generators import set_dbspl
+from waves import set_dbspl
 
