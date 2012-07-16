@@ -110,18 +110,15 @@ def test_from_arrays():
 
 def test_trains_to_array():
 
-    fs = 1e3
-    trains = np.array(
-        [(np.array([1/fs]), 5/fs),
-         (np.array([2/fs, 3/fs]), 5/fs)],
-        dtype=[('spikes', np.ndarray),
-               ('duration', float)]
-    )
 
+    trains = th.make_trains(
+        [[1], [2,3]],
+        duration=5
+    )
 
     result = th.spikes.trains_to_array(
         trains,
-        fs
+        fs=1
     )
 
 
@@ -131,7 +128,6 @@ def test_trains_to_array():
          [1,0],
          [0,1],
          [0,1],
-         [0,0],
          [0,0]]
     )
 
@@ -140,3 +136,79 @@ def test_trains_to_array():
 
 
 
+def test_accumulate_spike_trains():
+
+    trains = th.make_trains(
+        [[1], [2], [3], []],
+        cfs=[2,1,2,3]
+    )
+
+    accumulated = th.accumulate_spikes(trains)
+
+    expected = th.make_trains(
+        [[2], [1,3], []],
+        cfs=[1,2,3]
+    )
+
+    assert_trains_equal(accumulated, expected)
+
+
+
+
+def test_select_trains():
+
+    trains = th.make_trains(
+        [[1], [2], [3], [4]],
+        duration=4,
+        cfs=[0,0,1,1],
+        idx=[0,1,0,1]
+    )
+
+
+
+    selected = th.sel(
+        trains,
+        cfs=1,
+        idx=1
+    )
+
+    expected = th.make_trains(
+        [[4]],
+        duration=4,
+        cfs=[1],
+        idx=[1]
+    )
+
+
+    assert_trains_equal(
+        selected,
+        expected
+    )
+
+
+
+
+def test_trim():
+
+    trains = th.make_trains(
+        [[1,2,3,4],
+         [3,4,5,6]],
+        duration=8,
+        type='hsr'
+    )
+
+
+    trimmed = th.trim(trains, 2, 4)
+
+
+    expected = th.make_trains(
+        [[0,1,2], [1,2]],
+        duration=2,
+        type='hsr'
+    )
+
+
+    assert_trains_equal(
+        trimmed,
+        expected
+    )

@@ -10,6 +10,9 @@ import numpy as np
 
 def set_dbspl(signal, dbspl):
 
+    if np.issubdtype(signal.dtype, int):
+        signal = signal.astype(float)
+
     p0 = 2e-5
     rms = np.sqrt( np.sum(signal**2) / len(signal) )
 

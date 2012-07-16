@@ -12,6 +12,29 @@ from . import calc
 
 golden = 1.6180339887
 
+
+def plot_neurogram(spike_trains, fs, axis=None, ignore=[], **kwargs):
+
+    accumulated = spikes.accumulate_spikes(
+        spike_trains,
+        ignore=ignore
+    )
+
+    neurogram = spikes.trains_to_array(
+        accumulated,
+        fs
+    )
+
+    if axis is None:
+        axis = plt.gca()
+
+    axis.imshow(neurogram.T, aspect='auto')
+
+    return axis
+
+
+
+
 def plot_raster(spike_trains, axis=None, style='k,', **kwargs):
     """Plot raster plot."""
 
@@ -31,7 +54,7 @@ def plot_raster(spike_trains, axis=None, style='k,', **kwargs):
         axis = plt.gca()
 
     axis.plot(s, n, style, **kwargs)
-    axis.set_xlabel("Time [ms]")
+    axis.set_xlabel("Time [s]")
     axis.set_xlim( (0, duration) )
     axis.set_ylabel("Trial #")
     axis.set_ylim( (-0.5, len(trains)-0.5) )
@@ -77,7 +100,7 @@ def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
     )
 
 
-    axis.set_xlabel("Time [ms]")
+    axis.set_xlabel("Time [s]")
     axis.set_ylabel("Spikes per second")
 
 
@@ -153,30 +176,40 @@ def period_histogram(spike_trains,
     return plot
 
 
-def sac(spike_trains,
-        coincidence_window=0.05,
-        analysis_window=5,
-        stimulus_duration=None,
-        plot=None,
+def plot_sac(
+        spike_trains,
+        coincidence_window=50e-6,
+        analysis_window=5e-3,
+        normalize=True,
+        axis=None,
         **style):
     """Plot shuffled autocorrelogram (SAC) (Joris 2006)"""
-    import biggles
 
-    t, sac = stats.shuffled_autocorrelation(spike_trains,
-                                            coincidence_window,
-                                            analysis_window,
-                                            stimulus_duration)
+    sac, bin_edges = calc.calc_sac(
+        spike_trains,
+        coincidence_window=coincidence_window,
+        analysis_window=analysis_window,
+        normalize=normalize
+    )
 
-    c = biggles.Curve(t, sac)
-    c.style(**style)
 
-    if plot is None:
-        plot = biggles.FramedPlot()
-    plot.xlabel = "Delay [ms]"
-    plot.ylabel = "Normalized Coincidences Count"
-    plot.add(c)
+    if axis is None:
+        plot = plt.gca()
 
-    return plot
+
+    axis.plot(
+        bin_edges[:-1],
+        sac,
+        drawstyle='steps-post',
+        **kwargs
+    )
+
+
+    axis.set_xlabel("Delay [s]")
+    axis.set_ylabel("Normalized Coincidences Count")
+
+    return axis
+
 
 
 def main():

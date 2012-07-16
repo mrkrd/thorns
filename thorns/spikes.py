@@ -9,17 +9,27 @@ import numpy as np
 
 from collections import Iterable
 
+from . import calc
+
+
+
 
 def select_trains(spike_trains, **kwargs):
 
-    trains = spike_trains
+    mask = np.ones(len(spike_trains), dtype=bool)
     for key,val in kwargs.items():
-        trains = trains[ spike_trains[key] == val ]
+        mask = mask & (spike_trains[key] == val)
 
-    return trains
+    selected = spike_trains[mask]
+
+    return selected
+
 
 select_spike_trains = select_trains
 select = select_trains
+sel = select_trains
+
+
 
 
 
@@ -35,7 +45,7 @@ def make_trains(data, **kwargs):
         if k == 'fs':
             continue
 
-        if isinstance(v, Iterable):
+        if isinstance(v, Iterable) and not isinstance(v, basestring):
             assert len(v) == len(data)
             meta[k] = v
         else:
@@ -43,12 +53,11 @@ def make_trains(data, **kwargs):
 
 
 
-
     if isinstance(data, np.ndarray) and (data.ndim == 2) and ('fs' in kwargs):
-        trains = _array_to_trains(data, kwargs['fs'])
+        trains = _array_to_trains(data, kwargs['fs'], **meta)
 
     elif isinstance(data[0], Iterable):
-        trains = _arrays_to_trains(data, **kwargs)
+        trains = _arrays_to_trains(data, **meta)
 
 
     return trains
@@ -74,7 +83,11 @@ def _arrays_to_trains(arrays, **kwargs):
     types = [('spikes', np.ndarray)]
     for key,val in meta.items():
         field_name = key
-        field_dtype = type(val[0])
+
+        if key == 'duration':
+            field_dtype = float
+        else:
+            field_dtype = type(val[0])
 
         if field_dtype is str:
             field_shape = max( [len(s) for s in val] )
@@ -89,7 +102,7 @@ def _arrays_to_trains(arrays, **kwargs):
 
     ### Make sure we have duration
     if 'duration' not in meta:
-        duration = max([np.max(a) for a in arrays])
+        duration = max([np.max(a) for a in arrays if len(a)>0])
         meta['duration'] = [duration] * len(arrays)
         types.append(('duration', float))
 
@@ -107,73 +120,48 @@ def _arrays_to_trains(arrays, **kwargs):
 
 
 
-def _dicts_to_trains(dicts):
-    """Convert list of dictionaries to np.rec.array
+# def _dicts_to_trains(dicts):
+#     """Convert list of dictionaries to np.rec.array
 
-    >>> dicts = [{'a':1, 'b':2}, {'a':5, 'b':6}]
-    >>> dicts_to_trains(dicts)  #doctest: +NORMALIZE_WHITESPACE
-    rec.array([(1, 2), (5, 6)],
-          dtype=[('a', '<i8'), ('b', '<i8')])
+#     >>> dicts = [{'a':1, 'b':2}, {'a':5, 'b':6}]
+#     >>> dicts_to_trains(dicts)  #doctest: +NORMALIZE_WHITESPACE
+#     rec.array([(1, 2), (5, 6)],
+#           dtype=[('a', '<i8'), ('b', '<i8')])
 
-    """
-    ### Derive types from the first dictionary
-    types = {}
-    for key,val in dicts[0].items():
-        if isinstance(val, str):
-            cnt = len(val)
-        else:
-            cnt = 1
-        types[key] = [type(val), cnt]
-
-
-    arr = []
-    for d in dicts:
-        assert set(d.keys()) == set(types.keys())
-
-        rec = []
-        for k,t in types.items():
-            if isinstance(d[k], str) and (len(d[k]) > t[1]):
-                t[1] = len(d[k])
-
-            rec.append(d[k])
-
-        arr.append( tuple(rec) )
+#     """
+#     ### Derive types from the first dictionary
+#     types = {}
+#     for key,val in dicts[0].items():
+#         if isinstance(val, str):
+#             cnt = len(val)
+#         else:
+#             cnt = 1
+#         types[key] = [type(val), cnt]
 
 
-    dt = np.dtype({'names':types.keys(), 'formats':[tuple(each) for each in types.values()]})
-    arr = np.array(arr, dtype=dt)
-    return arr
+#     arr = []
+#     for d in dicts:
+#         assert set(d.keys()) == set(types.keys())
+
+#         rec = []
+#         for k,t in types.items():
+#             if isinstance(d[k], str) and (len(d[k]) > t[1]):
+#                 t[1] = len(d[k])
+
+#             rec.append(d[k])
+
+#         arr.append( tuple(rec) )
 
 
-
-
-def _array1d_to_train(signal, fs):
-    """ Convert 1D time function array into array of spike timings.
-
-    fs: sampling frequency in Hz
-    signal: input signal
-
-    return: spike timings in ms
-
-    >>> fs = 10
-    >>> signal = np.array([0,2,0,0,1,0])
-    >>> _signal_to_spikes_1d(fs, signal)
-    array([ 100.,  100.,  400.])
-
-    """
-    assert signal.ndim == 1
-
-    signal = signal.astype(int)
-
-    t = np.arange(len(signal))
-    spikes = np.repeat(t, signal) * 1 / fs
-
-    return spikes
+#     dt = np.dtype({'names':types.keys(), 'formats':[tuple(each) for each in types.values()]})
+#     arr = np.array(arr, dtype=dt)
+#     return arr
 
 
 
 
-def _array_to_trains(a, fs):
+
+def _array_to_trains(array, fs, **kwargs):
     """ Convert time functions to a list of spike trains.
 
     fs: samping frequency in Hz
@@ -182,16 +170,24 @@ def _array_to_trains(a, fs):
     return: spike trains with spike timings
 
     """
-    assert a.ndim == 2
+    assert array.ndim == 2
 
-    duration = len(a) / fs
+    trains = []
+    for a in array.T:
+        a = a.astype(int)
+        t = np.arange(len(a))
+        spikes = np.repeat(t, a) / fs
 
-    trains = [ (_array1d_to_train(s, fs), duration) for s in a.T ]
+        trains.append( spikes )
 
-    spike_trains = np.array(
+
+    assert 'duration' not in kwargs
+
+    kwargs['duration'] = len(array) / fs
+
+    spike_trains = _arrays_to_trains(
         trains,
-        dtype=[('spikes', np.ndarray),
-               ('duration', float)]
+        **kwargs
     )
 
     return spike_trains
@@ -199,71 +195,49 @@ def _array_to_trains(a, fs):
 
 
 
-def _train_to_array1d(train, fs):
-    """ Convert spike train to its time function. 1D version.
-
-    >>> fs = 10
-    >>> spikes = np.array([100, 500, 1000, 1000])
-    >>> _train_to_signal(fs, spikes)
-    array([0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 2])
-
-    """
-    tmax = train['duration']
-    spikes = train['spikes']
-
-    bins = np.floor(tmax*fs) + 1
-    real_tmax = bins * 1/fs
-    signal, bin_edges = np.histogram(
-        spikes,
-        bins=bins,
-        range=(0, real_tmax)
-    )
-
-    return signal
 
 
-def trains_to_array(trains, fs):
-    """ Convert spike trains to theirs time functions.
 
-    fs: sampling frequency (Hz)
-    spike_trains: trains of spikes to be converted (ms)
 
-    return: time signal
+def trains_to_array(spike_trains, fs):
+    """Convert spike trains to signals."""
 
-    >>> spikes_to_signal(10, [np.array([100]), np.array([200, 300])])
-    array([[0, 0],
-           [1, 0],
-           [0, 1],
-           [0, 1]])
+    duration = calc.get_duration(spike_trains)
 
-    """
-    durations = trains['duration']
-    assert np.all(durations == durations[0])
+    nbins = np.ceil(duration * fs)
+    tmax = nbins / fs
 
     signals = []
-    for train in trains:
+    for spikes in spike_trains['spikes']:
+        signal, bin_edges = np.histogram(
+            spikes,
+            bins=nbins,
+            range=(0, tmax)
+        )
         signals.append(
-            _train_to_array1d(train, fs)
+            signal
         )
 
-    signal = np.array(signals).T
+    signals = np.array(signals).T
 
-    return signal
+    return signals
+
+
+
+
 
 
 def accumulate_spike_trains(spike_trains, ignore=[]):
-    """ Concatenate spike trains of the same CF and sort by increasing CF
 
-    >>> spikes = [np.array([1]), np.array([2]), np.array([3]), np.array([])]
-    >>> cfs = np.array([2,1,2,3])
-    >>> accumulate_spikes(spikes, cfs)
-    ([array([2]), array([1, 3]), array([], dtype=float64)], array([1, 2, 3]))
+    """Concatenate spike trains with the same meta data. Trains will
+    be sorted by the metadata.
 
     """
+
     keys = list(spike_trains.dtype.names)
     keys.remove('spikes')
-    for i in ignore:
-        keys.remove(i)
+    for key in ignore:
+        keys.remove(key)
 
     meta = spike_trains[keys]
 
@@ -281,7 +255,7 @@ def accumulate_spike_trains(spike_trains, ignore=[]):
     dt = [('spikes', np.ndarray)] + [(name,unique_meta.dtype[name])
                                      for name in unique_meta.dtype.names]
 
-    trains = np.rec.array(trains, dtype=dt)
+    trains = np.array(trains, dtype=dt)
 
     return trains
 
@@ -294,68 +268,62 @@ accumulate = accumulate_spike_trains
 
 
 
-def trim_spike_trains(spike_trains, *args):
-    """ Return spike trains with that are between `start' and `stop'.
-
-    >>> spikes = [np.array([1,2,3,4]), np.array([3,4,5,6])]
-    >>> print trim_spikes(spikes, 2, 4)
-    [array([0, 1, 2]), array([1, 2])]
+def trim_spike_trains(spike_trains, start, stop):
+    """Return spike trains with that are between `start' and
+    `stop'.
 
     """
-    if len(args) == 1 and isinstance(args[0], tuple):
-        start, stop = args[0]
-    elif len(args) == 1:
-        start = args[0]
-        stop = None
-    elif len(args) == 2:
-        start, stop = args
+
+    assert start < stop
+
+    if start is None:
+        tmin = 0
     else:
-        assert False, "(start, stop)"
-
-    arrays = []
-    for key in spike_trains.dtype.names:
-        if key == 'spikes':
-            arrays.append(
-                _trim_arrays(spike_trains['spikes'],
-                             spike_trains['duration'],
-                             start,
-                             stop)
-                )
-        elif key == 'duration':
-            tmax = np.array(spike_trains['duration'])
-
-            if stop is not None:
-                tmax[ tmax>stop ] = stop
-
-            new_durs = tmax - start
-            new_durs[ new_durs<0 ] = 0
-
-            arrays.append(new_durs)
-        else:
-            arrays.append(spike_trains[key])
-
-    trimmed = np.rec.array(zip(*arrays), dtype=spike_trains.dtype)
-
-    return trimmed
-
-
-def _trim_arrays(arrays, durations, start, stop):
-    """Trim spike trains to (start, stop)"""
-
-    tmin = start
+        tmin = start
 
     if stop is None:
-        tmaxs = durations
+        tmaxs = spike_trains['duration']
     else:
-        tmaxs = [stop for i in range(len(arrays))]
+        tmaxs = np.ones(len(spike_trains)) * stop
 
-    trimmed = []
-    for arr,tmax in zip(arrays,tmaxs):
-        a = arr[ (arr >= tmin) & (arr <= tmax) ]
-        a = a - tmin
-        trimmed.append(a)
 
-    return trimmed
+    trimmed_trains = []
+    for key in spike_trains.dtype.names:
+        if key == 'spikes':
+            trimmed_spikes = []
+            for spikes,tmax in zip(spike_trains['spikes'], tmaxs):
+
+                spikes = spikes[ (spikes >= tmin) & (spikes <= tmax)]
+                spikes -= tmin
+
+                trimmed_spikes.append(spikes)
+
+
+            trimmed_trains.append(
+                trimmed_spikes
+            )
+
+
+        elif key == 'duration':
+            durations = np.array(spike_trains['duration'])
+
+            durations[ durations>tmaxs ] = tmaxs[ durations>tmaxs ]
+            durations -= tmin
+
+            trimmed_trains.append(durations)
+
+
+        else:
+            trimmed_trains.append(spike_trains[key])
+
+    trimmed_trains = np.array(
+        zip(*trimmed_trains),
+        dtype=spike_trains.dtype
+    )
+
+    return trimmed_trains
+
+
 
 
 trim = trim_spike_trains
