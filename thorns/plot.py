@@ -182,7 +182,7 @@ def plot_sac(
         analysis_window=5e-3,
         normalize=True,
         axis=None,
-        **style):
+        **kwargs):
     """Plot shuffled autocorrelogram (SAC) (Joris 2006)"""
 
     sac, bin_edges = calc.calc_sac(
@@ -194,7 +194,7 @@ def plot_sac(
 
 
     if axis is None:
-        plot = plt.gca()
+        axis = plt.gca()
 
 
     axis.plot(

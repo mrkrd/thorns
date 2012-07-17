@@ -298,9 +298,9 @@ def calc_shuffled_autocorrelogram(
     nbins = np.ceil(analysis_window / coincidence_window)
 
     cum = []
-    for train in trains:
+    for i,train in enumerate(trains):
         other_trains = list(trains)
-        other_trains.remove(train)
+        other_trains.pop(i)
         almost_all_spikes = np.concatenate(other_trains)
 
         for spike in train:
