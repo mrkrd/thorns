@@ -353,27 +353,42 @@ def fold_spike_trains(spike_trains, period):
     # [array([], dtype=float64), array([ 0.]), array([], dtype=float64), array([], dtype=float64)]
 
     """
-    assert np.all(spike_trains['duration'] == spike_trains['duration'][0])
-    duration = spike_trains['duration'][0]
+    data = {key:[] for key in spike_trains.dtype.names}
 
-    print "fold_spike_trains() need update: does not copy metadata!"
-    period_num = int( np.ceil(duration / period) )
+    for train in spike_trains:
+        period_num = int( np.ceil(train['duration'] / period) )
+        last_period = np.fmod(train['duration'], period)
 
-    last_period = np.fmod(duration, period)
-
-    folded = []
-    for train in spike_trains['spikes']:
+        spikes = train['spikes']
         for idx in range(period_num):
             lo = idx * period
             hi = (idx+1) * period
-            sec = train[(train>=lo) & (train<hi)]
+            sec = spikes[(spikes>=lo) & (spikes<hi)]
             sec = np.fmod(sec, period)
-            folded.append(sec)
+            data['spikes'].append(sec)
 
-    folded_trains = arrays_to_trains(folded, duration=period)
+            data['duration'].append(period)
 
-    if last_period != 0:
-        folded_trains[-1]['duration'] = last_period
+        if last_period > 0:
+            data['duration'][-1] = last_period
+
+
+        for key in spike_trains.dtype.names:
+            if key in ('spikes', 'duration'):
+                continue
+
+            data[key].extend(
+                [train[key]] * period_num
+            )
+
+
+    arrays = (data[key] for key in spike_trains.dtype.names)
+
+    folded_trains = np.array(
+        zip(*arrays),
+        dtype=spike_trains.dtype
+    )
+
 
     return folded_trains
 
@@ -382,59 +397,41 @@ fold_trains = fold_spike_trains
 
 
 
-def concatenate_spikes(spike_trains):
-    return [np.concatenate(tuple(spike_trains))]
+# def concatenate_spikes(spike_trains):
+#     return [np.concatenate(tuple(spike_trains))]
 
-concatenate = concatenate_spikes
-concat = concatenate_spikes
-
-
-def shift_spikes(spike_trains, shift):
-    shifted = [train+shift for train in spike_trains]
-
-    return shifted
-
-shift = shift_spikes
+# concatenate = concatenate_spikes
+# concat = concatenate_spikes
 
 
-def split_and_fold_trains(spike_trains,
-                          silence_duration,
-                          tone_duration,
-                          pad_duration,
-                          remove_pads):
-    silence = trim(spike_trains, 0, silence_duration)
+# def shift_spikes(spike_trains, shift):
+#     shifted = [train+shift for train in spike_trains]
+
+#     return shifted
+
+# shift = shift_spikes
 
 
-    tones_and_pads = trim(spike_trains, silence_duration)
-    tones_and_pads = fold(tones_and_pads, tone_duration+pad_duration)
-
-    # import plot
-    # plot.raster(tones_and_pads).show()
-
-    if remove_pads:
-        tones_and_pads = trim(tones_and_pads, 0, tone_duration)
-
-    return silence, tones_and_pads
-
-split_and_fold = split_and_fold_trains
+# def split_and_fold_trains(spike_trains,
+#                           silence_duration,
+#                           tone_duration,
+#                           pad_duration,
+#                           remove_pads):
+#     silence = trim(spike_trains, 0, silence_duration)
 
 
-if __name__ == "__main__":
-    import doctest
+#     tones_and_pads = trim(spike_trains, silence_duration)
+#     tones_and_pads = fold(tones_and_pads, tone_duration+pad_duration)
 
-    print "Doctest start:"
-    doctest.testmod()
-    print "done."
+#     # import plot
+#     # plot.raster(tones_and_pads).show()
 
-    # test_shuffle_spikes()
+#     if remove_pads:
+#         tones_and_pads = trim(tones_and_pads, 0, tone_duration)
 
-    # arr = [
-    #     {'spikes': np.arange(10),
-    #      'cf': 2,
-    #      'bla': 'a'},
-    #     {'spikes': np.arange(7),
-    #      'cf': 4,
-    #      'bla': 'bb'}
-    # ]
-    # print dicts_to_trains(arr)
+#     return silence, tones_and_pads
+
+# split_and_fold = split_and_fold_trains
+
+
 

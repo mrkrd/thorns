@@ -16,6 +16,10 @@ from spikes import (
     trim_spike_trains,
     trim_trains,
     trim,
+
+    fold_spike_trains,
+    fold_trains,
+    fold,
 )
 
 

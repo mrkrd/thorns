@@ -7,17 +7,21 @@ __author__ = "Marek Rudnicki"
 from numpy.testing import *
 
 import numpy as np
+from pprint import pprint
 
 import marlib.thorns as th
 
 
-def assert_trains_equal(a,b):
+def assert_trains_equal(a,b, almost=False):
 
     assert len(a) == len(b)
 
     ### Assert if spike trains are equal
     for ta,tb in zip(a['spikes'], b['spikes']):
-        assert np.all(ta == tb)
+        if almost:
+            assert_array_almost_equal(ta, tb)
+        else:
+            assert_array_equal(ta, tb)
 
 
     ### Assert if meta data is equal
@@ -25,6 +29,7 @@ def assert_trains_equal(a,b):
     meta = list(a.dtype.names)
     meta.remove('spikes')
     assert_array_equal(a[meta], b[meta])
+
 
 
 
@@ -212,3 +217,36 @@ def test_trim():
         trimmed,
         expected
     )
+
+
+
+def test_fold_trains():
+    trains = th.make_trains(
+        [[1.1, 2.1, 3.1], [2.1, 3.1, 5.1]],
+        duration=6.5,
+        cf=[1,2]
+    )
+
+    folded = th.fold_trains(trains, 1)
+
+
+    expected = th.make_trains(
+        [[  ], [.1], [.1], [.1], [  ], [  ], [  ],
+         [  ], [  ], [.1], [.1], [  ], [.1], [  ]],
+        duration=[1, 1, 1, 1, 1, 1, 0.5,
+                  1, 1, 1, 1, 1, 1, 0.5],
+        cf=[1, 1, 1, 1, 1, 1, 1,
+            2, 2, 2, 2, 2, 2, 2]
+    )
+
+
+    assert_trains_equal(
+        folded,
+        expected,
+        almost=True
+    )
+
+
+
+
+
