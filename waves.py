@@ -41,7 +41,7 @@ def make_ramped_tone(
     dbspl: dB SPL
 
     """
-    t = np.arange(0, tone_duration, 1/fs)
+    t = np.arange(0, duration, 1/fs)
     s = np.sin(2 * np.pi * t * freq)
     if dbspl != None:
         s = set_dbspl(s, dbspl)
