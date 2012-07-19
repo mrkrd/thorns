@@ -97,41 +97,21 @@ def calc_entrainment(spike_trains, freq, bin_size=1e-3):
 
 
 
-def synchronization_index(spike_trains, fstim):
-    """ Calculate Synchronization Index.
-
-    spike_trains: list of arrays of spiking times
-    fstim: stimulus frequency in Hz
-
-    return: synchronization index
-
-    >>> fs = 36000.0
-    >>> fstim = 100.0
-
-    >>> test0 = [np.arange(0, 0.1, 1/fs)*1000, np.arange(0, 0.1, 1/fs)*1000]
-    >>> si0 = calc_synchronization_index(test0, fstim)
-    >>> si0 < 1e-4   # numerical errors
-    True
-
-    >>> test1 = [np.zeros(fs)]
-    >>> si1 = calc_synchronization_index(test1, fstim)
-    >>> si1 == 1
-    True
-    """
-
-    if len(spike_trains) == 0:
-        return 0
+def calc_synchronization_index(spike_trains, freq):
+    """Calculate synchronization index aka vector strength."""
 
     all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
 
     if len(all_spikes) == 0:
-        return 0
+        return np.nan
 
-    all_spikes = all_spikes - all_spikes.min()
 
-    folded = np.fmod(all_spikes, 1/fstim)
-    ph,edges = np.histogram(folded, bins=1000, range=(0, 1/fstim))
-
+    folded = np.fmod(all_spikes, 1/freq)
+    ph, edges = np.histogram(
+        folded,
+        bins=1000,
+        range=(0, 1/freq)
+    )
 
     # indexing trick is necessary, because the sample at 2*pi belongs
     # to the next cycle
@@ -146,10 +126,7 @@ def synchronization_index(spike_trains, fstim):
     return r
 
 
-si = synchronization_index
-vector_strength = synchronization_index
-vs = synchronization_index
-
+calc_si = calc_synchronization_index
 
 
 

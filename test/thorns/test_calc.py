@@ -8,7 +8,8 @@ import numpy as np
 from numpy.testing import (
     assert_array_equal,
     assert_array_almost_equal,
-    assert_equal
+    assert_equal,
+    assert_almost_equal
 )
 
 import mrlib.thorns as th
@@ -149,7 +150,7 @@ def test_firint_rate():
     rate = th.calc_rate(trains)
 
 
-    assert rate == 1
+    assert_equal(rate, 1.)
 
 
 
@@ -162,7 +163,7 @@ def test_count_spikes():
 
     count = th.count_spikes(trains)
 
-    assert count == 6
+    assert_equal(count, 6)
 
 
 
@@ -202,12 +203,12 @@ def test_calc_entrainment():
         bin_size=0.1
     )
 
-    assert ent == 0.5
+    assert_equal(ent, 0.5)
 
 
 
 
-    ### Next test
+    ### NaN test
     trains = th.make_trains(
         [[1], []]
     )
@@ -221,4 +222,28 @@ def test_calc_entrainment():
     assert np.isnan(ent)
 
 
+
+def test_calc_si():
+
+    trains = th.make_trains(
+        [np.linspace(0, 1, 1000)]
+    )
+
+    si = th.calc_si(
+        trains,
+        freq=10
+    )
+    assert_almost_equal(si, 0)
+
+
+
+    ### Next test
+    trains = th.make_trains(
+        [np.zeros(100)]
+    )
+    si = th.calc_si(
+        trains,
+        freq=10
+    )
+    assert_equal(si, 1)
 

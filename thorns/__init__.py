@@ -39,6 +39,9 @@ from calc import (
 
     calc_entrainment,
 
+    calc_synchronization_index,
+    calc_si,
+
     count_spikes,
     count
 )
