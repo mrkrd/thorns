@@ -102,7 +102,11 @@ def _arrays_to_trains(arrays, **kwargs):
 
     ### Make sure we have duration
     if 'duration' not in meta:
-        duration = max([np.max(a) for a in arrays if len(a)>0])
+        max_spikes = [np.max(a) for a in arrays if len(a)>0]
+        if max_spikes:
+            duration = max( max_spikes )
+        else:
+            duration = 0
         meta['duration'] = [duration] * len(arrays)
         types.append(('duration', float))
 

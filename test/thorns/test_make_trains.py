@@ -9,7 +9,7 @@ from numpy.testing import *
 import numpy as np
 from pprint import pprint
 
-import marlib.thorns as th
+import mrlib.thorns as th
 
 
 def assert_trains_equal(a,b, almost=False):
@@ -83,9 +83,8 @@ def test_from_arrays():
         ]
     )
 
-    e = [(np.array(a),10) for a in arrays]
     e = np.array(
-        e,
+        [(np.array(a),10) for a in arrays],
         dtype=[
             ('spikes', np.ndarray),
             ('duration', float)
@@ -108,6 +107,52 @@ def test_from_arrays():
         result
     )
 
+
+
+
+def test_make_empty_trains():
+
+    trains = th.make_trains(
+        [[], []]
+    )
+
+    expected = np.array(
+        [(np.array([]), 0.),
+         (np.array([]), 0.)],
+        dtype=[
+            ('spikes', np.ndarray),
+            ('duration', float)
+        ]
+    )
+
+
+    assert_trains_equal(
+        trains,
+        expected
+    )
+
+
+
+
+    trains = th.make_trains(
+        [[], []],
+        duration=10
+    )
+
+    expected = np.array(
+        [(np.array([]), 10.),
+         (np.array([]), 10.)],
+        dtype=[
+            ('spikes', np.ndarray),
+            ('duration', float)
+        ]
+    )
+
+
+    assert_trains_equal(
+        trains,
+        expected
+    )
 
 
 

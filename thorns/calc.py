@@ -15,6 +15,7 @@ def get_duration(spike_trains):
 
 
 
+
 def calc_psth(spike_trains, bin_size, normalize=True):
 
     duration = get_duration(spike_trains)
@@ -24,6 +25,9 @@ def calc_psth(spike_trains, bin_size, normalize=True):
     all_spikes = np.concatenate(tuple(trains))
 
     nbins = np.ceil(duration / bin_size)
+
+    if nbins == 0:
+        return None, None
 
     hist, bin_edges = np.histogram(
         all_spikes,
@@ -42,61 +46,52 @@ def calc_psth(spike_trains, bin_size, normalize=True):
 
 
 
-def calc_isih(spike_trains, bin_size=1e-3):
-    """ Calculate inter-spike interval histogram.
 
-    >>> from thorns import arrays_to_trains
-    >>> spikes = [np.array([1,2,3]), np.array([2,5,8])]
-    >>> spike_trains = arrays_to_trains(spikes)
-    >>> isih(spike_trains)
-    array([ 0. ,  0.5,  0. ,  0.5])
+def calc_isih(spike_trains, bin_size=1e-3, normalize=True):
+    """Calculate inter-spike interval histogram."""
 
-    """
-    trains = spike_trains['spikes']
+    isis = np.concatenate(
+        tuple( np.diff(train) for train in spike_trains['spikes'] )
+    )
 
-    if 'trial_num' in spike_trains.dtype.names:
-        trial_num = sum(spike_trains['trial_num'])
-    else:
-        trial_num = len(trains)
+    if len(isis) == 0:
+        return None, None
 
-    isi_trains = [ np.diff(train) for train in trains ]
+    nbins = np.ceil(np.max(isis) / bin_size)
 
-    all_isi = np.concatenate(isi_trains)
+    hist, bin_edges = np.histogram(
+        isis,
+        bins=nbins,
+        range=(0, nbins*bin_size),
+        normed=normalize
+    )
 
-    if len(all_isi) == 0:
-        return np.array([])
-
-    nbins = np.floor(all_isi.max() / bin_size) + 1
-
-    hist, bins = np.histogram(all_isi,
-                              bins=nbins,
-                              range=(0, nbins*bin_size),
-                              normed=True)
-
-    return hist
+    return hist, bin_edges
 
 
-def entrainment(spike_trains, fstim, bin_size=1e-3):
-    """ Calculate entrainment of spike_trains.
 
-    >>> from thorns import arrays_to_trains
-    >>> spikes = [np.array([2, 4, 6]), np.array([0, 5, 10])]
-    >>> spike_trains = arrays_to_trains(spikes)
-    >>> entrainment(spike_trains, fstim=500)
-    0.5
-    """
-    hist = isih(spike_trains, bin_size=bin_size)
 
-    if len(hist) == 0:
-        return 0
+def calc_entrainment(spike_trains, freq, bin_size=1e-3):
+    """Calculate entrainment."""
 
-    bins = np.arange( len(hist) ) * bin_size
+    hist, bin_edges = calc_isih(
+        spike_trains,
+        bin_size=bin_size
+    )
 
-    stim_period = 1/fstim    # ms
+    if hist is None:
+        return np.nan
 
-    entrainment_window = (bins > stim_period/2) & (bins < stim_period*3/2)
 
-    entrainment =  np.sum(hist[entrainment_window]) / np.sum(hist)
+    stim_period = 1 / freq
+
+    ent_win = (
+        (bin_edges[:-1] > 0.5*stim_period)
+        &
+        (bin_edges[:-1] < 1.5*stim_period)
+    )
+
+    entrainment = np.sum(hist[ent_win]) / np.sum(hist)
 
     return entrainment
 
@@ -157,86 +152,55 @@ vs = synchronization_index
 
 
 
-def _raw_correlation_index(spike_trains, window_len=0.05):
-    """ Computes unnormalized correlation index. (Joris et al. 2006)
+
+# def shuffle_spikes(spike_trains):
+#     """ Get input spikes.  Randomly permute inter spikes intervals.
+#     Return new spike trains.
+
+#     """
+#     new_trains = []
+#     for train in spike_trains:
+#         isi = np.diff(np.append(0, train)) # Append 0 in order to vary
+#                                            # the onset
+#         shuffle(isi)
+#         shuffled_train = np.cumsum(isi)
+#         new_trains.append(shuffled_train)
+
+#     return new_trains
 
 
-    >>> trains = [np.array([1, 2]), np.array([1.03, 2, 3])]
-    >>> _raw_correlation_index(trains)
-    3
+# def test_shuffle_spikes():
+#     print "test_shuffle_spikes():"
+#     spikes = [np.array([2, 3, 4]),
+#               np.array([1, 3, 6])]
 
-    """
-    all_spikes = np.concatenate(tuple(spike_trains))
-
-    Nc = 0                      # Total number of coincidences
-
-    for spike in all_spikes:
-        hits = all_spikes[(all_spikes >= spike) &
-                          (all_spikes <= spike+window_len)]
-        Nc += len(hits) - 1
-
-    return Nc
-
-
-def shuffle_spikes(spike_trains):
-    """ Get input spikes.  Randomly permute inter spikes intervals.
-    Return new spike trains.
-
-    """
-    new_trains = []
-    for train in spike_trains:
-        isi = np.diff(np.append(0, train)) # Append 0 in order to vary
-                                           # the onset
-        shuffle(isi)
-        shuffled_train = np.cumsum(isi)
-        new_trains.append(shuffled_train)
-
-    return new_trains
-
-
-def test_shuffle_spikes():
-    print "test_shuffle_spikes():"
-    spikes = [np.array([2, 3, 4]),
-              np.array([1, 3, 6])]
-
-    print spikes
-    print shuffle_spikes(spikes)
+#     print spikes
+#     print shuffle_spikes(spikes)
 
 
 def calc_firing_rate(spike_trains):
-    """ Calculates average firing rate.
+    """Calculates average firing rate."""
 
-    spike_trains: trains of spikes
-    stimulus_duration: in ms, if None, then calculated from spike timeings
-
-    return: average firing rate in spikes per second (Hz)
-
-    >>> from thorns import arrays_to_trains
-    >>> a = [np.arange(20), np.arange(10)]
-    >>> spike_trains = arrays_to_trains(a, duration=1000)
-    >>> average_firing_rate(spike_trains)
-    15.0
-
-    """
     duration = np.sum( spike_trains['duration'] )
 
     trains = spike_trains['spikes']
     spike_num = np.concatenate(tuple(trains)).size
 
-    r = spike_num / duration
+    rate = spike_num / duration
 
-    return r
+    return rate
 
 
 calc_rate = calc_firing_rate
 
 
+
 def count_spikes(spike_trains):
-    all_spikes = np.concatenate(tuple(spike_trains))
+    all_spikes = np.concatenate(tuple(spike_trains['spikes']))
     return len(all_spikes)
 
 count = count_spikes
-calc_spike_count = count_spikes
+
 
 
 def calc_correlation_index(

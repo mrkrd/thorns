@@ -31,8 +31,16 @@ from calc import (
     calc_ci,
 
     calc_firing_rate,
+    calc_rate,
 
-    calc_psth
+    calc_psth,
+
+    calc_isih,
+
+    calc_entrainment,
+
+    count_spikes,
+    count
 )
 
 from plot import (

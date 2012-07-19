@@ -11,7 +11,7 @@ from numpy.testing import (
     assert_equal
 )
 
-import marlib.thorns as th
+import mrlib.thorns as th
 
 
 
@@ -98,4 +98,127 @@ def test_calc_psth():
         bin_edges,
         [0, 1, 2, 3]
     )
+
+
+
+def test_calc_psth_with_empty_trains():
+    trains = th.make_trains(
+        [[], []]
+    )
+    psth, bin_edges = th.calc_psth(
+        trains,
+        bin_size=1,
+        normalize=False
+    )
+
+
+    assert psth is None
+    assert bin_edges is None
+
+
+    ### duration != 0
+    trains = th.make_trains(
+        [[], []],
+        duration=2
+    )
+    psth, bin_edges = th.calc_psth(
+        trains,
+        bin_size=1,
+        normalize=False
+    )
+
+    assert_array_equal(
+        psth,
+        [0,0]
+    )
+    assert_array_equal(
+        bin_edges,
+        [0,1,2]
+    )
+
+
+
+def test_firint_rate():
+
+    trains = th.make_trains(
+        [[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]],
+        duration=[2, 4]
+    )
+
+
+    rate = th.calc_rate(trains)
+
+
+    assert rate == 1
+
+
+
+
+def test_count_spikes():
+    trains = th.make_trains(
+        [[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]],
+        duration=[2, 4]
+    )
+
+    count = th.count_spikes(trains)
+
+    assert count == 6
+
+
+
+
+def test_calc_isih():
+
+    trains = th.make_trains(
+        [[1,2,3], [2,5,8]]
+    )
+
+    isih, bin_edges = th.calc_isih(
+        trains,
+        bin_size=1,
+        normalize=False
+    )
+
+    assert_array_equal(
+        isih,
+        [ 0, 2, 2]
+    )
+    assert_array_equal(
+        bin_edges,
+        [ 0, 1, 2, 3]
+    )
+
+
+
+def test_calc_entrainment():
+
+    trains = th.make_trains(
+        [[1, 2, 3], [0, 2, 4]]
+    )
+
+    ent = th.calc_entrainment(
+        trains,
+        freq=1,
+        bin_size=0.1
+    )
+
+    assert ent == 0.5
+
+
+
+
+    ### Next test
+    trains = th.make_trains(
+        [[1], []]
+    )
+
+    ent = th.calc_entrainment(
+        trains,
+        freq=1,
+        bin_size=0.1
+    )
+
+    assert np.isnan(ent)
+
+
 
