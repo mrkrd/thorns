@@ -5,7 +5,6 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 from . import spikes
 from . import calc
@@ -26,16 +25,21 @@ def plot_neurogram(spike_trains, fs, axis=None, ignore=[], **kwargs):
     )
 
     if axis is None:
+        import matplotlib.pyplot as plt
         axis = plt.gca()
 
-    axis.imshow(neurogram.T, aspect='auto')
+    axis.imshow(
+        neurogram.T,
+        aspect='auto',
+        **kwargs
+    )
 
     return axis
 
 
 
 
-def plot_raster(spike_trains, axis=None, style='k,', **kwargs):
+def plot_raster(spike_trains, axis=None, fmt='k.', **kwargs):
     """Plot raster plot."""
 
     trains = spike_trains['spikes']
@@ -51,31 +55,20 @@ def plot_raster(spike_trains, axis=None, style='k,', **kwargs):
 
 
     if axis is None:
+        import matplotlib.pyplot as plt
         axis = plt.gca()
 
-    axis.plot(s, n, style, **kwargs)
+    axis.plot(s, n, fmt, **kwargs)
     axis.set_xlabel("Time [s]")
     axis.set_xlim( (0, duration) )
-    axis.set_ylabel("Trial #")
+    axis.set_ylabel("Trial Number")
     axis.set_ylim( (-0.5, len(trains)-0.5) )
 
 
     return axis
 
 
-def spike_signal(spike_trains, bin_size=1, plot=None, **style):
-    assert False, "not implemented"
-    fs = 1 / bin_size
 
-    spikes = spikes_to_signal(fs, spike_trains)
-    spikes = 1 - spikes/spikes.max()
-    d = biggles.Density(spikes, [[0,0],[1,1]])
-
-    if plot is None:
-        plot = biggles.FramedPlot()
-    plot.add(d)
-
-    return plot
 
 
 def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
@@ -89,6 +82,7 @@ def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
 
 
     if axis is None:
+        import matplotlib.pyplot as plt
         plot = plt.gca()
 
 
@@ -101,79 +95,79 @@ def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
 
 
     axis.set_xlabel("Time [s]")
-    axis.set_ylabel("Spikes per second")
+    axis.set_ylabel("Spikes per Second")
 
 
     return axis
 
 
-def isih(spike_trains, bin_size=1e-3, plot=None, **style):
-    """Plot inter-spike interval histogram."""
+# def isih(spike_trains, bin_size=1e-3, plot=None, **style):
+#     """Plot inter-spike interval histogram."""
 
-    hist = stats.isih(spike_trains, bin_size)
+#     hist = stats.isih(spike_trains, bin_size)
 
-    c = biggles.Histogram(hist, x0=0, binsize=bin_size)
-    c.style(**style)
+#     c = biggles.Histogram(hist, x0=0, binsize=bin_size)
+#     c.style(**style)
 
-    if plot is None:
-        plot = biggles.FramedPlot()
-    plot.xlabel = "Inter-Spike Interval [ms]"
-    plot.ylabel = "Probability Density Function"
-    plot.add(c)
-    plot.xrange = (0, None)
-    plot.yrange = (0, None)
+#     if plot is None:
+#         plot = biggles.FramedPlot()
+#     plot.xlabel = "Inter-Spike Interval [ms]"
+#     plot.ylabel = "Probability Density Function"
+#     plot.add(c)
+#     plot.xrange = (0, None)
+#     plot.yrange = (0, None)
 
-    return plot
-
-
-def period_histogram(spike_trains,
-                     stimulus_freq,
-                     nbins=64,
-                     spike_fs=None,
-                     center=False,
-                     plot=None,
-                     label=None,
-                     **style):
-    """Plots period histogram."""
-
-    trains = spike_trains['spikes']
-
-    # Align bins to sampling frequency, if given
-    if spike_fs is not None:
-        nbins = int(spike_fs / stimulus_freq)
-
-    all_spikes = np.concatenate(tuple(trains))
-    folded = np.fmod(all_spikes, 1/stimulus_freq)
-    normalized = folded * stimulus_freq
-
-    print "Make sure that np.histogram get the right number of bins"
-
-    hist, edges = np.histogram(
-        normalized,
-        bins=nbins,
-        range=(0, 1),
-        normed=True
-    )
-
-    ### TODO: find the direction instead of max value
-    if center:
-        center_idx = hist.argmax()
-        hist = np.roll(hist, nbins//2 - center_idx)
-
-    c = biggles.Histogram(hist, x0=0, binsize=1/len(hist))
-
-    c.style(**style)
-    if label is not None:
-        c.label = label
+#     return plot
 
 
-    if plot is None:
-        plot = biggles.FramedPlot()
-    plot.xlabel = "Normalized Phase"
-    plot.ylabel = "Probability Density Function"
-    plot.add(c)
+# def period_histogram(spike_trains,
+#                      stimulus_freq,
+#                      nbins=64,
+#                      spike_fs=None,
+#                      center=False,
+#                      plot=None,
+#                      label=None,
+#                      **style):
+#     """Plots period histogram."""
 
-    return plot
+#     trains = spike_trains['spikes']
+
+#     # Align bins to sampling frequency, if given
+#     if spike_fs is not None:
+#         nbins = int(spike_fs / stimulus_freq)
+
+#     all_spikes = np.concatenate(tuple(trains))
+#     folded = np.fmod(all_spikes, 1/stimulus_freq)
+#     normalized = folded * stimulus_freq
+
+#     print "Make sure that np.histogram get the right number of bins"
+
+#     hist, edges = np.histogram(
+#         normalized,
+#         bins=nbins,
+#         range=(0, 1),
+#         normed=True
+#     )
+
+#     ### TODO: find the direction instead of max value
+#     if center:
+#         center_idx = hist.argmax()
+#         hist = np.roll(hist, nbins//2 - center_idx)
+
+#     c = biggles.Histogram(hist, x0=0, binsize=1/len(hist))
+
+#     c.style(**style)
+#     if label is not None:
+#         c.label = label
+
+
+#     if plot is None:
+#         plot = biggles.FramedPlot()
+#     plot.xlabel = "Normalized Phase"
+#     plot.ylabel = "Probability Density Function"
+#     plot.add(c)
+
+#     return plot
 
 
 def plot_sac(
@@ -194,6 +188,7 @@ def plot_sac(
 
 
     if axis is None:
+        import matplotlib.pyplot as plt
         axis = plt.gca()
 
 
@@ -206,7 +201,7 @@ def plot_sac(
 
 
     axis.set_xlabel("Delay [s]")
-    axis.set_ylabel("Normalized Coincidences Count")
+    axis.set_ylabel("Normalized Number of Coincidences")
 
     return axis
 
