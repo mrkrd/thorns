@@ -24,6 +24,8 @@ from spikes import (
 
 
 from calc import (
+    get_duration,
+
     calc_shuffled_autocorrelogram,
     calc_sac,
 
