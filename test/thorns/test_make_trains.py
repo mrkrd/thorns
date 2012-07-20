@@ -9,7 +9,7 @@ from numpy.testing import *
 import numpy as np
 from pprint import pprint
 
-import mrlib.thorns as th
+import marlib.thorns as th
 
 
 def assert_trains_equal(a,b, almost=False):
