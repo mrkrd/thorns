@@ -176,6 +176,7 @@ def plot_sac(
         analysis_window=5e-3,
         normalize=True,
         axis=None,
+        fmt='k-',
         **kwargs):
     """Plot shuffled autocorrelogram (SAC) (Joris 2006)"""
 
@@ -195,6 +196,7 @@ def plot_sac(
     axis.plot(
         bin_edges[:-1],
         sac,
+        fmt,
         drawstyle='steps-post',
         **kwargs
     )
