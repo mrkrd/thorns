@@ -5,7 +5,7 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import os
-import glob
+from glob import glob
 import gzip
 import cPickle
 import string
@@ -15,68 +15,86 @@ import numpy as np
 
 
 
-def dump(data, dbdir='tmp/dumpdb'):
+
+def dump(x, y=None, dbdir='tmp/dumpdb'):
     if not os.path.exists(dbdir):
         os.makedirs(dbdir)
 
-    if isinstance(data, dict):
-        data = [data]
+
+    if y is None:
+        data = x
+    else:
+        data = []
+        for a,b in zip(x,y):
+            d = dict(a)
+            d.update(b)
+            data.append(d)
+
+    xkeys = x[0].keys()
 
 
     names_str = string.join(data[0], '-')
-    time_str = str(time.time())
+
+    time_str = "{!r}".format(time.time())
     fname = os.path.join(
         dbdir,
         time_str + "__" + names_str + ".pkl.gz"
     )
     tmp_fname = fname + ".tmp"
 
+    print "dumping:", fname
     with gzip.open(tmp_fname, 'wb', compresslevel=9) as f:
-        cPickle.dump(data, f, -1)
+        cPickle.dump((data, xkeys), f, -1)
 
+    assert not os.path.exists(fname)
     os.rename(tmp_fname, fname)
 
 
 
 
 
-
 class DumpDB(object):
-    def __init__(self, x, y, data=None, dbdir='tmp/dumpdb'):
+    def __init__(self, data=None, dbdir='tmp/dumpdb'):
 
         self.dbdir = dbdir
-        self.x = x
-        self.y = y
 
         if data is None:
             self.data = []
-            for fname in glob.glob( os.path.join(self.dbdir, '*.pkl.gz') ):
+            self.xkeys = None
+            pathname = os.path.join(self.dbdir, '*.pkl.gz')
+
+            for fname in sorted(glob(pathname)):
+
                 with gzip.open(fname, 'rb') as f:
-                    d = cPickle.load(f)
-                self._update_data(d)
+                    dicts, xkeys = cPickle.load(f)
+
+                if self.xkeys is None:
+                    self.xkeys = xkeys
+                else:
+                    assert self.xkeys == xkeys
+
+                self._update_data(dicts)
+
         else:
             self.data = data
+            self.xkeys = data.keys()
+
 
 
 
     def _update_data(self, new_dicts):
-        for cur in new_dicts:
-
-            ### Select keys for the new dict
-            new = {}
-            for k in (self.x + self.y):
-                new[k] = cur[k]
-
+        for new in new_dicts:
 
             ### Remove old dictionary if a new is compatible
             for old in self.data:
-                if self._are_dicts_equal(new, old, self.x):
+                if self._are_dicts_equal(new, old, self.xkeys):
                     self.data.remove( old )
                     break
 
 
             ### Store the new dict
             self.data.append( new )
+
 
 
 
