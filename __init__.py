@@ -11,63 +11,61 @@ import dumpdb
 import functools
 
 
-def _func_wrap(data):
-    global _func
-
-    if isinstance(data, tuple):
-        result = _func(*data)
-
-    elif isinstance(data, dict):
-        result = _func(**data)
-
-    return result
 
 
+class _MapWrap(object):
+    def __init__(self, func):
+        self.func = func
 
-def _decor(func):
-    @functools.wraps(func)
-    def wrapped(data):
+    def __call__(self, data):
         if isinstance(data, tuple):
-            result = func(*data)
+            result = self.func(*data)
 
         elif isinstance(data, dict):
-            result = func(**data)
+            result = self.func(**data)
+
+        else:
+            raise RuntimeError, "Arguments must be stored as tuple or dict."
 
         return result
 
-    return wrapped
 
 
 
-def map(func, iterable):
 
-    backend = 'm'
-
-    global _func
-    _func = func
-
-
-    if backend == 'm':
-        import multiprocessing
-
-        wrapped = _decor(func)
-
-        pool = multiprocessing.Pool()
-        results = pool.map(wrapped, iterable)
+def map(func, iterable, backend='multiprocessing'):
 
 
     if backend == 'multiprocessing':
         import multiprocessing
 
+        wrapped = _MapWrap(func)
+
 
         pool = multiprocessing.Pool()
-        results = pool.map(_func_wrap, iterable)
+        results = pool.map(wrapped, iterable)
+
 
     elif backend == 'joblib':
         import joblib
 
-        results = joblib.Parallel(n_jobs=-1)(
-            _func_wrap(i) for i in iterable
+
+        def func_args_kwargs(func, data):
+            if isinstance(data, tuple):
+                out = (func, data, {})
+
+            elif isinstance(data, dict):
+                out = (func, (), data)
+
+            else:
+                raise RuntimeError, "Arguments must be stored as tuple or dict."
+
+            return out
+
+
+
+        results = joblib.Parallel(n_jobs=-1, verbose=5)(
+            func_args_kwargs(func, i) for i in iterable
         )
 
 
