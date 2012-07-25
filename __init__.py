@@ -8,6 +8,8 @@ import waves
 import dumpdb
 
 
+import functools
+
 
 def _func_wrap(data):
     global _func
@@ -22,13 +24,37 @@ def _func_wrap(data):
 
 
 
+def _decor(func):
+    @functools.wraps(func)
+    def wrapped(data):
+        if isinstance(data, tuple):
+            result = func(*data)
+
+        elif isinstance(data, dict):
+            result = func(**data)
+
+        return result
+
+    return wrapped
+
+
 
 def map(func, iterable):
 
-    backend = 'joblib'
+    backend = 'm'
 
     global _func
     _func = func
+
+
+    if backend == 'm':
+        import multiprocessing
+
+        wrapped = _decor(func)
+
+        pool = multiprocessing.Pool()
+        results = pool.map(wrapped, iterable)
+
 
     if backend == 'multiprocessing':
         import multiprocessing
