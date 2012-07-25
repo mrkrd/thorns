@@ -120,17 +120,23 @@ class DumpDB(object):
         return True
 
 
-    def get_col(self, name, raw=False, **kwargs):
+    def get_col(self, name, **kwargs):
         data = []
         for d in self.data:
-            sel = np.all( [d[k] == kwargs[k] for k in kwargs] )
+            sel = np.all( [np.all(d[k] == kwargs[k]) for k in kwargs] )
             if sel:
                 data.append( d[name] )
 
-        if not raw:
-            data = np.array( data )
-
         return data
+
+
+    def get_val(self, name, **kwargs):
+        col = self.get_col(name, **kwargs)
+
+        assert len(col) == 1, "Selected value not unique"
+
+        return col[0]
+
 
 
     def print_table(self, keys=None):
