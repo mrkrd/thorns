@@ -25,20 +25,29 @@ def _func_wrap(data):
 
 def map(func, iterable):
 
-    backend = 'multiprocessing'
+    backend = 'joblib'
+
+    global _func
+    _func = func
 
     if backend == 'multiprocessing':
         import multiprocessing
 
-        global _func
-        _func = func
 
         pool = multiprocessing.Pool()
-        results = pool.map(_func, iterable)
+        results = pool.map(_func_wrap, iterable)
 
     elif backend == 'joblib':
+        import joblib
 
-        pass
+        results = joblib.Parallel(n_jobs=-1)(
+            _func_wrap(i) for i in iterable
+        )
+
+
+    else:
+        raise RuntimeError, "Unknown map() backend: {}".format(backend)
+
 
 
     return results
