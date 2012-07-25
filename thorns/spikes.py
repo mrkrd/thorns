@@ -278,7 +278,8 @@ def trim_spike_trains(spike_trains, start, stop):
 
     """
 
-    assert start < stop
+    if start is not None and stop is not None:
+        assert start < stop
 
     if start is None:
         tmin = 0
@@ -289,6 +290,9 @@ def trim_spike_trains(spike_trains, start, stop):
         tmaxs = spike_trains['duration']
     else:
         tmaxs = np.ones(len(spike_trains)) * stop
+
+
+    assert np.all(tmin < tmaxs)
 
 
     trimmed_trains = []
