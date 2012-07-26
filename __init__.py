@@ -9,8 +9,8 @@ import dumpdb
 
 
 import functools
-
-
+import inspect
+import sys
 
 
 class _MapWrap(object):
@@ -39,11 +39,12 @@ def map(func, iterable, backend='multiprocessing'):
     if backend == 'multiprocessing':
         import multiprocessing
 
-        wrapped = _MapWrap(func)
-
-
         pool = multiprocessing.Pool()
-        results = pool.map(wrapped, iterable)
+
+        results = pool.map(
+            _MapWrap(func),
+            iterable
+        )
 
 
     elif backend == 'joblib':
@@ -68,6 +69,44 @@ def map(func, iterable, backend='multiprocessing'):
             func_args_kwargs(func, i) for i in iterable
         )
 
+
+    elif backend == 'pp':
+        import pp
+
+
+        def wrap(func, data):
+            if isinstance(data, tuple):
+                result = func(*data)
+            elif isinstance(data, dict):
+                result = func(**data)
+            else:
+                raise RuntimeError, "Arguments must be stored as tuple or dict."
+            return result
+
+
+        job_server = pp.Server( ppservers=("*",), ncpus=0 )
+
+        modules = []
+        depfuncs = []
+        for k,v in func.func_globals.items():
+            if inspect.ismodule(v):
+                modules.append( "import " + v.__name__ + " as " + k )
+
+            if inspect.isfunction(v):
+                depfuncs.append(v)
+
+        jobs = []
+        for i in iterable:
+            job = job_server.submit(
+                func=wrap,
+                args=(func,i),
+                modules=tuple(modules),
+                depfuncs=tuple(depfuncs),
+                globals=func.func_globals
+            )
+            jobs.append(job)
+
+        results = [job() for job in jobs]
 
     else:
         raise RuntimeError, "Unknown map() backend: {}".format(backend)
