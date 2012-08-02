@@ -5,6 +5,7 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import os
+import sys
 from glob import glob
 import gzip
 import cPickle
@@ -16,7 +17,15 @@ import numpy as np
 
 
 
-def dump(x, y=None, dbdir='tmp/dumpdb'):
+def dump(x, y=None, dbdir=None):
+
+    if dbdir is None:
+        d = os.path.splitext(
+            os.path.basename(sys.argv[0])
+        )[0]
+        dbdir = os.path.join('tmp', d)
+
+
     if not os.path.exists(dbdir):
         os.makedirs(dbdir)
 
@@ -54,7 +63,7 @@ def dump(x, y=None, dbdir='tmp/dumpdb'):
 
 
 class DumpDB(object):
-    def __init__(self, data=None, dbdir='tmp/dumpdb'):
+    def __init__(self, dbdir, data=None):
 
         self.dbdir = dbdir
 

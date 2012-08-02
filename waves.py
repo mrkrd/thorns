@@ -28,16 +28,16 @@ def make_ramped_tone(
         fs,
         freq,
         duration=50e-3,
-        ramp_duration=2.5e-3,
-        pad_duration=0,
+        ramp=2.5e-3,
+        pad=0,
         dbspl=None):
     """ Generate ramped tone singal.
 
     fs: sampling frequency [Hz]
     freq: frequency of the tone [Hz]
     tone_durations: [s]
-    ramp_duration: [s]
-    pad_duration: [s]
+    ramp: [s]
+    pad: [s]
     dbspl: dB SPL
 
     """
@@ -46,12 +46,12 @@ def make_ramped_tone(
     if dbspl != None:
         s = set_dbspl(s, dbspl)
 
-    ramp = np.linspace(0, 1, np.ceil(ramp_duration * fs))
-    s[0:len(ramp)] = s[0:len(ramp)] * ramp
-    s[-len(ramp):] = s[-len(ramp):] * ramp[::-1]
+    ramp_signal = np.linspace(0, 1, np.ceil(ramp * fs))
+    s[0:len(ramp_signal)] = s[0:len(ramp_signal)] * ramp_signal
+    s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
 
-    pad = np.zeros(pad_duration * fs)
-    s = np.concatenate( (s, pad) )
+    pad_signal = np.zeros(pad * fs)
+    s = np.concatenate( (s, pad_signal) )
 
     return s
 
@@ -62,8 +62,8 @@ def make_white_noise(
         duration,
         band,
         seed,
-        ramp_duration=2.5e-3,
-        pad_duration=0,
+        ramp=2.5e-3,
+        pad=0,
         dbspl=None
     ):
 
@@ -91,14 +91,48 @@ def make_white_noise(
 
 
     ### Ramping
-    ramp = np.linspace(0, 1, np.round(ramp_duration*fs))
-    s[0:len(ramp)] = s[0:len(ramp)] * ramp
-    s[-len(ramp):] = s[-len(ramp):] * ramp[::-1]
+    ramp_signal = np.linspace(0, 1, np.round(ramp*fs))
+    s[0:len(ramp_signal)] = s[0:len(ramp_signal)] * ramp_signal
+    s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
 
 
     ### Padding
-    pad = np.zeros(pad_duration * fs)
-    s = np.concatenate( (s, pad) )
+    pad_signal = np.zeros(pad * fs)
+    s = np.concatenate( (s, pad_signal) )
 
 
     return s
+
+
+
+
+
+def make_electrical_pulse(
+        fs,
+        amplitudes,
+        durations,
+        gap=0,
+        pad=0):
+
+
+    assert len(amplitudes) == len(durations)
+
+    gap_signal = np.zeros(gap * fs)
+    pad_signal = np.zeros(pad * fs)
+
+    signals = []
+    for amp,dur in zip(amplitudes, durations):
+
+        signals.append( amp * np.ones(dur * fs) )
+        signals.append( gap_signal )
+
+    # Remove the last gap
+    signals.pop(-1)
+
+
+    signals.append( pad_signal )
+
+    signal = np.concatenate( signals )
+
+    return signal
+
