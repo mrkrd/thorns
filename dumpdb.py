@@ -65,6 +65,8 @@ def dump(x, y=None, dbdir=None):
 class DumpDB(object):
     def __init__(self, dbdir, data=None):
 
+        assert os.path.exists(dbdir)
+
         self.dbdir = dbdir
 
         if data is None:
