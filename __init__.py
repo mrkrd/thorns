@@ -33,8 +33,16 @@ class _MapWrap(object):
 
 
 
-def map(func, iterable, backend='multiprocessing'):
+def map(func, iterable, backend='serial'):
 
+
+    if backend == 'serial':
+        import __builtin__
+
+        results = __builtin__.map(
+            _MapWrap(func),
+            iterable
+        )
 
     if backend == 'multiprocessing':
         import multiprocessing
@@ -43,7 +51,7 @@ def map(func, iterable, backend='multiprocessing'):
 
         results = pool.map(
             _MapWrap(func),
-            iterable
+            iterable,
         )
 
 
@@ -65,7 +73,7 @@ def map(func, iterable, backend='multiprocessing'):
 
 
 
-        results = joblib.Parallel(n_jobs=-1, verbose=5)(
+        results = joblib.Parallel(n_jobs=-1, verbose=100)(
             func_args_kwargs(func, i) for i in iterable
         )
 
@@ -114,4 +122,3 @@ def map(func, iterable, backend='multiprocessing'):
 
 
     return results
-
