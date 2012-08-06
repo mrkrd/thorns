@@ -94,6 +94,7 @@ class DumpDB(object):
 
 
     def _update_data(self, new_dicts):
+
         for new in new_dicts:
 
             ### Remove old dictionary if a new is compatible
@@ -103,8 +104,7 @@ class DumpDB(object):
                     break
 
 
-            ### Store the new dict
-            self.data.append( new )
+        self.data.extend( new_dicts )
 
 
 
