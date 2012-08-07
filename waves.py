@@ -8,13 +8,21 @@ import numpy as np
 
 
 
+def root_mean_square(s):
+    return np.sqrt( np.sum(s**2) / s.size )
+
+rms = root_mean_square
+
+
+
+
 def set_dbspl(signal, dbspl):
 
     if np.issubdtype(signal.dtype, int):
         signal = signal.astype(float)
 
     p0 = 2e-5
-    rms = np.sqrt( np.sum(signal**2) / len(signal) )
+    rms = np.sqrt( np.sum(signal**2) / signal.size )
 
     scalled = signal * 10**(dbspl / 20.0) * p0 / rms
 
@@ -135,4 +143,3 @@ def make_electrical_pulse(
     signal = np.concatenate( signals )
 
     return signal
-
