@@ -47,7 +47,7 @@ def map(func, iterable, backend='serial'):
             iterable
         )
 
-    if backend == 'multiprocessing':
+    elif backend == 'multiprocessing':
         import multiprocessing
 
         pool = multiprocessing.Pool()
