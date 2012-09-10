@@ -54,21 +54,22 @@ def test_dump_and_load():
 
 
 
-    db = dumpdb.DumpDB(
+    db = dumpdb.load(
         dbdir=dbdir
     )
 
 
-    assert len(db.data) == 2
+    assert len(db) == 2
 
+    assert_array_equal(
+        db.dbspl.values,
+        [50, 60]
+    )
 
-    dbspls = db.get_col('dbspl')
-    assert_array_equal(dbspls, [50, 60])
-
-
-    sacs, = db.get_col('sac', dbspl=60)
-    assert_array_equal(sacs, np.array([20,30]))
+    assert_array_equal(
+        db.sac.values.tolist(),
+        [[1,2], [20,30]]
+    )
 
 
     shutil.rmtree(dbdir)
-
