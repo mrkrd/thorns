@@ -10,7 +10,8 @@ import dumpdb
 
 import inspect
 import sys
-
+import cPickle as pickle
+import hashlib
 
 
 
@@ -36,7 +37,62 @@ class _MapWrap(object):
 
 
 
+def _calc_pkl_name(obj):
+    pkl = pickle.dumps(obj, -1)
+    h = hashlib.sha1(pkl).hexdigest()
+
+    pkl_name = os.path.join(
+        'tmp',
+        'cache',
+        h + '.pkl.gz'
+    )
+
+    return pkl_name
+
+
+def _load_cache(fname):
+    with gzip.open(fname, 'rb') as f:
+        data = pickle.load(f)
+    return data
+
+
+
+class Mapper(object):
+    def __init__(self, func, backend):
+        self.func = func
+        self.backend = backend
+        self.results = None
+
+    def apply(self, i, args):
+        if self.backend == 'serial':
+            if self.results is None:
+                self.results = []
+
+
+
+
+
+
 def map(func, iterable, backend='serial'):
+
+    arguments = []
+    results = []
+    for i,args in enumerate(iterable):
+
+        fname = _calc_pkl_name(args)
+
+        if os.path.exists(fname):
+            results.append( (i, _load_cache(fname)) )
+
+        else:
+            arguments.append( (i, args) )
+
+
+
+
+
+
+
 
 
     if backend == 'serial':
