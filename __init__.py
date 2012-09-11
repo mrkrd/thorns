@@ -12,12 +12,12 @@ import inspect
 import sys
 import cPickle as pickle
 import hashlib
+import os
+import gzip
 
 
 
-
-
-class _MapWrap(object):
+class _FuncWrap(object):
     def __init__(self, func):
         self.func = func
 
@@ -56,17 +56,47 @@ def _load_cache(fname):
     return data
 
 
+def _dump_cache(obj, fname):
+    dirname = os.path.dirname(fname)
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+    print "dump:", obj, fname
+    tmp_fname = fname + ".tmp"
+    f = gzip.open(tmp_fname, 'wb', compresslevel=9)
+    pickle.dump(obj, f, -1)
+    os.rename(tmp_fname, fname)
 
-class Mapper(object):
-    def __init__(self, func, backend):
-        self.func = func
-        self.backend = backend
-        self.results = None
 
-    def apply(self, i, args):
-        if self.backend == 'serial':
-            if self.results is None:
-                self.results = []
+
+
+def _serial_map(func, iterable):
+
+    wrap = _FuncWrap(func)
+
+    for i,args in iterable:
+        result = wrap(args)
+        yield i,result
+
+
+
+def _multiprocessing_map(func, iterable):
+
+    import multiprocessing
+
+    wrap = _FuncWrap(func)
+
+    pool = multiprocessing.Pool()
+
+
+    results = []
+    idx = []
+    for i,args in iterable:
+        results.append( pool.apply_async(wrap, args) )
+        idx.append( i )
+
+
+    for i,result in zip(idx,results):
+        yield i,result.get()
 
 
 
@@ -75,109 +105,37 @@ class Mapper(object):
 
 def map(func, iterable, backend='serial'):
 
-    arguments = []
-    results = []
-    for i,args in enumerate(iterable):
 
+    todos = []
+    done = []
+    for i,args in enumerate(iterable):
         fname = _calc_pkl_name(args)
 
         if os.path.exists(fname):
-            results.append( (i, _load_cache(fname)) )
+            done.append( (i, _load_cache(fname)) )
 
         else:
-            arguments.append( (i, args) )
-
-
-
-
-
-
+            todos.append( (i, args) )
 
 
 
     if backend == 'serial':
-        import __builtin__
-
-        results = __builtin__.map(
-            _MapWrap(func),
-            iterable
-        )
-
+        results = _serial_map(func, todos)
     elif backend == 'multiprocessing':
-        import multiprocessing
-
-        pool = multiprocessing.Pool()
-
-        results = pool.map(
-            _MapWrap(func),
-            iterable,
-        )
-
-
-    elif backend == 'joblib':
-        import joblib
-
-
-        def func_args_kwargs(func, data):
-            if isinstance(data, tuple):
-                out = (func, data, {})
-
-            elif isinstance(data, dict):
-                out = (func, (), data)
-
-            else:
-                raise RuntimeError, "Arguments must be stored as tuple or dict."
-
-            return out
-
-
-
-        results = joblib.Parallel(n_jobs=-1, verbose=100)(
-            func_args_kwargs(func, i) for i in iterable
-        )
-
-
-    elif backend == 'pp':
-        import pp
-
-
-        def wrap(func, data):
-            if isinstance(data, tuple):
-                result = func(*data)
-            elif isinstance(data, dict):
-                result = func(**data)
-            else:
-                raise RuntimeError, "Arguments must be stored as tuple or dict."
-            return result
-
-
-        job_server = pp.Server( ppservers=("*",), ncpus=0 )
-
-        modules = []
-        depfuncs = []
-        for k,v in func.func_globals.items():
-            if inspect.ismodule(v):
-                modules.append( "import " + v.__name__ + " as " + k )
-
-            if inspect.isfunction(v):
-                depfuncs.append(v)
-
-        jobs = []
-        for i in iterable:
-            job = job_server.submit(
-                func=wrap,
-                args=(func,i),
-                modules=tuple(modules),
-                depfuncs=tuple(depfuncs),
-                globals=func.func_globals
-            )
-            jobs.append(job)
-
-        results = [job() for job in jobs]
-
+        results = _multiprocessing_map(func, todos)
     else:
         raise RuntimeError, "Unknown map() backend: {}".format(backend)
 
 
+    for todo,result in zip(todos,results):
+        i,args = todo
+        fname = _calc_pkl_name(args)
+        _dump_cache(result[1], fname)
+        done.append(result)
 
-    return results
+
+    done.sort()
+    done = [d for i,d in done]
+
+
+    return done
