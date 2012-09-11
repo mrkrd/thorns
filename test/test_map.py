@@ -4,6 +4,10 @@ from __future__ import division
 
 __author__ = "Marek Rudnicki"
 
+
+import tempfile
+import shutil
+
 import numpy as np
 from numpy.testing import (
     assert_array_equal
@@ -18,25 +22,63 @@ def square(x):
 
 def test_serial_map():
 
+    cachedir = tempfile.mkdtemp()
+
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results = mar.map(square, dicts, backend='serial')
+    results1 = mar.map(
+        square,
+        dicts,
+        backend='serial',
+        cachedir=cachedir
+    )
+    results2 = mar.map(
+        square,
+        dicts,
+        backend='serial',
+        cachedir=cachedir
+    )
+
+    shutil.rmtree(cachedir)
 
     assert_array_equal(
         data**2,
-        results
+        results1
+    )
+    assert_array_equal(
+        data**2,
+        results2
     )
 
 
 def test_multiprocessing_map():
 
+    cachedir = tempfile.mkdtemp()
+
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results = mar.map(square, dicts, backend='multiprocessing')
+    results1 = mar.map(
+        square,
+        dicts,
+        backend='multiprocessing',
+        cachedir=cachedir
+    )
+    results2 = mar.map(
+        square,
+        dicts,
+        backend='multiprocessing',
+        cachedir=cachedir
+    )
+
+    shutil.rmtree(cachedir)
 
     assert_array_equal(
         data**2,
-        results
+        results1
+    )
+    assert_array_equal(
+        data**2,
+        results2
     )
