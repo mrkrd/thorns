@@ -16,7 +16,7 @@ import pandas as pd
 
 
 
-def dump(x, y=None, dbdir=None):
+def dumpdb(x, y=None, dbdir=None):
 
     if dbdir is None:
         dbdir = os.path.join('tmp', 'dumpdb')
@@ -50,7 +50,7 @@ def dump(x, y=None, dbdir=None):
 
 
 
-def load(dbdir=None):
+def loaddb(dbdir=None):
 
     if dbdir is None:
         dbdir = os.path.join('tmp', 'dumpdb')
