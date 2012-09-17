@@ -9,6 +9,7 @@ import cPickle as pickle
 import hashlib
 import os
 import gzip
+from itertools import izip
 
 
 class _FuncWrap(object):
@@ -123,7 +124,7 @@ def map(func, iterable, backend='serial', cachedir='tmp/cache'):
         raise RuntimeError, "Unknown map() backend: {}".format(backend)
 
 
-    for todo,result in zip(todos,results):
+    for todo,result in izip(todos,results):
         i,args = todo
         fname = _calc_pkl_name(args, cachedir)
         _dump_cache(result[1], fname)
