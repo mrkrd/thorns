@@ -77,9 +77,10 @@ def loaddb(dbdir=None):
         ignore_index=True
     )
 
-    data = data.drop_duplicates(
-        list(xkeys),
-        take_last=True
+    data.drop_duplicates(
+        cols=list(xkeys),
+        take_last=True,
+        inplace=True
     )
 
     return data
