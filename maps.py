@@ -100,7 +100,7 @@ def _multiprocessing_map(func, iterable):
 
 
 
-def map(func, iterable, backend='serial', cachedir='tmp/cache'):
+def map(func, iterable, backend='serial', cachedir='work/map_cache'):
 
 
     todos = []

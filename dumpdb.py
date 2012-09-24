@@ -16,10 +16,10 @@ import pandas as pd
 
 
 
-def dumpdb(x, y=None, dbdir=None):
+def dumpdb(x, y=None, dbdir=None, **kwargs):
 
     if dbdir is None:
-        dbdir = os.path.join('tmp', 'dumpdb')
+        dbdir = os.path.join('work', 'dumpdb')
 
 
     if not os.path.exists(dbdir):
@@ -28,6 +28,10 @@ def dumpdb(x, y=None, dbdir=None):
 
     data = pd.DataFrame(x)
     xkeys = data.keys()
+
+    if kwargs:
+        pars = [kwargs for d in x]
+        data = data.join( pd.DataFrame(pars) )
 
     if y is not None:
         data = data.join( pd.DataFrame(y) )
@@ -53,7 +57,7 @@ def dumpdb(x, y=None, dbdir=None):
 def loaddb(dbdir=None):
 
     if dbdir is None:
-        dbdir = os.path.join('tmp', 'dumpdb')
+        dbdir = os.path.join('work', 'dumpdb')
 
 
     pathname = os.path.join(dbdir, '*.pkl.gz')

@@ -12,7 +12,7 @@ from numpy.testing import (
     assert_array_equal
 )
 
-from marlib import dumpdb
+import marlib as mar
 
 
 
@@ -43,18 +43,18 @@ def test_dump_and_load():
     dbdir = tempfile.mkdtemp()
 
 
-    dumpdb.dump(
+    mar.dumpdb(
         x1,y1,
         dbdir=dbdir
     )
-    dumpdb.dump(
+    mar.dumpdb(
         x2,y2,
         dbdir=dbdir
     )
 
 
 
-    db = dumpdb.load(
+    db = mar.loaddb(
         dbdir=dbdir
     )
 
@@ -71,5 +71,55 @@ def test_dump_and_load():
         [[1,2], [20,30]]
     )
 
+
+    shutil.rmtree(dbdir)
+
+
+def test_kwargs():
+
+    x1 = [
+        {'dbspl': 50, 'cf': 400},
+        {'dbspl': 60, 'cf': 400}
+    ]
+    y1 = [
+        {'sac': np.array([1,2])},
+        {'sac': np.array([2,3])}
+    ]
+
+
+
+
+    dbdir = tempfile.mkdtemp()
+
+
+    mar.dumpdb(
+        x1,
+        y=y1,
+        bla='anf',
+        dbdir=dbdir
+    )
+
+
+    db = mar.loaddb(
+        dbdir=dbdir
+    )
+
+
+    assert len(db) == 2
+
+    assert_array_equal(
+        db.dbspl.values,
+        [50, 60]
+    )
+
+    assert_array_equal(
+        db.sac.values.tolist(),
+        [[1,2], [2,3]]
+    )
+
+    assert_array_equal(
+        db.bla.values.tolist(),
+        ['anf', 'anf']
+    )
 
     shutil.rmtree(dbdir)
