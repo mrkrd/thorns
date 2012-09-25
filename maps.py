@@ -98,11 +98,14 @@ def _multiprocessing_map(func, iterable):
 
 
 
+def _publish_progress(progress):
+    pass
 
 
 def map(func, iterable, backend='serial', cachedir='work/map_cache'):
 
 
+    progress = ''
     todos = []
     done = []
     for i,args in enumerate(iterable):
@@ -110,9 +113,11 @@ def map(func, iterable, backend='serial', cachedir='work/map_cache'):
 
         if os.path.exists(fname):
             done.append( (i, _load_cache(fname)) )
+            progress += 'x'
 
         else:
             todos.append( (i, args) )
+            progress += '.'
 
 
 
@@ -129,6 +134,8 @@ def map(func, iterable, backend='serial', cachedir='work/map_cache'):
         fname = _calc_pkl_name(args, cachedir)
         _dump_cache(result[1], fname)
         done.append(result)
+
+        progress[result[0]] = 'x'
 
 
     done.sort()
