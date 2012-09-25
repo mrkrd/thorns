@@ -27,11 +27,12 @@ def dumpdb(x, y=None, dbdir=None, **kwargs):
 
 
     data = pd.DataFrame(x)
-    xkeys = data.keys()
+    xkeys = list(data.keys())
 
     if kwargs:
         pars = [kwargs for d in x]
         data = data.join( pd.DataFrame(pars) )
+        xkeys.extend( kwargs.keys() )
 
     if y is not None:
         data = data.join( pd.DataFrame(y) )
