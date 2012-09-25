@@ -16,7 +16,7 @@ import pandas as pd
 
 
 
-def dumpdb(x, y=None, dbdir=None, **kwargs):
+def dumpdb(xx, yy=None, dbdir=None, **kwargs):
 
     if dbdir is None:
         dbdir = os.path.join('work', 'dumpdb')
@@ -26,16 +26,16 @@ def dumpdb(x, y=None, dbdir=None, **kwargs):
         os.makedirs(dbdir)
 
 
-    data = pd.DataFrame(x)
-    xkeys = list(data.keys())
+    data = pd.DataFrame(xx)
+    xxkeys = list(data.keys())
 
     if kwargs:
-        pars = [kwargs for d in x]
+        pars = [kwargs for d in xx]
         data = data.join( pd.DataFrame(pars) )
-        xkeys.extend( kwargs.keys() )
+        xxkeys.extend( kwargs.keys() )
 
-    if y is not None:
-        data = data.join( pd.DataFrame(y) )
+    if yy is not None:
+        data = data.join( pd.DataFrame(yy) )
 
 
     keys_str = string.join(data.keys(), '-')
@@ -48,7 +48,7 @@ def dumpdb(x, y=None, dbdir=None, **kwargs):
 
     print "dumping:", fname
     with gzip.open(tmp_fname, 'wb', compresslevel=9) as f:
-        cPickle.dump((data, xkeys), f, -1)
+        cPickle.dump((data, xxkeys), f, -1)
 
     assert not os.path.exists(fname)
     os.rename(tmp_fname, fname)
@@ -63,16 +63,16 @@ def loaddb(dbdir=None):
 
     pathname = os.path.join(dbdir, '*.pkl.gz')
 
-    xkeys = None
+    xxkeys = None
     data = []
     for fname in sorted(glob(pathname)):
 
         with gzip.open(fname, 'rb') as f:
             d, xk = cPickle.load(f)
 
-        if xkeys is not None:
-            assert np.all(xkeys == xk)
-        xkeys = xk
+        if xxkeys is not None:
+            assert np.all(xxkeys == xk)
+        xxkeys = xk
 
         data.append(d)
 
@@ -83,7 +83,7 @@ def loaddb(dbdir=None):
     )
 
     data.drop_duplicates(
-        cols=list(xkeys),
+        cols=list(xxkeys),
         take_last=True,
         inplace=True
     )

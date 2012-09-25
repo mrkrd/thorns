@@ -56,7 +56,7 @@ def _dump_cache(obj, fname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-    print "dumping:", fname
+    print "MAP: dumping", fname
 
     tmp_fname = fname + ".tmp"
     f = gzip.open(tmp_fname, 'wb', compresslevel=9)
@@ -112,6 +112,7 @@ def map(func, iterable, backend='serial', cachedir='work/map_cache'):
         fname = _calc_pkl_name(args, cachedir)
 
         if os.path.exists(fname):
+            print "MAP: loading", fname
             done.append( (i, _load_cache(fname)) )
             progress += 'x'
 
@@ -135,7 +136,7 @@ def map(func, iterable, backend='serial', cachedir='work/map_cache'):
         _dump_cache(result[1], fname)
         done.append(result)
 
-        progress[result[0]] = 'x'
+        # progress[result[0]] = 'x'
 
 
     done.sort()
