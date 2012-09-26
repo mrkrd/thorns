@@ -46,7 +46,7 @@ def dumpdb(xx, yy=None, dbdir=None, **kwargs):
     )
     tmp_fname = fname + ".tmp"
 
-    print "dumping:", fname
+    print "DUMPDB: dumping", fname
     with gzip.open(tmp_fname, 'wb', compresslevel=9) as f:
         cPickle.dump((data, xxkeys), f, -1)
 
