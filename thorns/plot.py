@@ -208,6 +208,11 @@ def plot_sac(
     return axis
 
 
+def show():
+    import matplotlib.pyplot as plt
+    plt.show()
+
+
 
 def main():
     pass

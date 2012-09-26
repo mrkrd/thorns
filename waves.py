@@ -17,11 +17,7 @@ rms = root_mean_square
 
 
 def set_dbspl(signal, dbspl):
-
-    if np.issubdtype(signal.dtype, int):
-        signal = signal.astype(float)
-
-    p0 = 2e-5
+    p0 = 20e-6
     rms = np.sqrt( np.sum(signal**2) / signal.size )
 
     scalled = signal * 10**(dbspl / 20.0) * p0 / rms

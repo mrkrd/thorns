@@ -52,5 +52,6 @@ from plot import (
     plot_raster,
     plot_psth,
     plot_neurogram,
-    plot_sac
+    plot_sac,
+    show
 )
