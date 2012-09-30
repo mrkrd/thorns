@@ -1,13 +1,13 @@
 #!/usr/bin/env python
 
 from __future__ import division
+from __future__ import print_function
 
 __author__ = "Marek Rudnicki"
 
 import os
 from glob import glob
-import gzip
-import cPickle
+import cPickle as pickle
 import string
 import time
 
@@ -42,13 +42,13 @@ def dumpdb(xx, yy=None, dbdir=None, **kwargs):
     time_str = "{!r}".format(time.time())
     fname = os.path.join(
         dbdir,
-        time_str + "__" + keys_str + ".pkl.gz"
+        time_str + "__" + keys_str + ".pkl"
     )
     tmp_fname = fname + ".tmp"
 
-    print "DUMPDB: dumping", fname
-    with gzip.open(tmp_fname, 'wb', compresslevel=9) as f:
-        cPickle.dump((data, xxkeys), f, -1)
+    print("DUMPDB: dumping", fname)
+    with open(tmp_fname, 'wb') as f:
+        pickle.dump((data, xxkeys), f, -1)
 
     assert not os.path.exists(fname)
     os.rename(tmp_fname, fname)
@@ -61,21 +61,18 @@ def loaddb(dbdir=None):
         dbdir = os.path.join('work', 'dumpdb')
 
 
-    pathname = os.path.join(dbdir, '*.pkl.gz')
+    pathname = os.path.join(dbdir, '*.pkl')
 
-    xxkeys = None
+    xxkeys = set()
     data = []
     for fname in sorted(glob(pathname)):
+        print("LOADDB: loading", fname)
 
-        with gzip.open(fname, 'rb') as f:
-            d, xk = cPickle.load(f)
+        with open(fname, 'rb') as f:
+            d, xk = pickle.load(f)
 
-        if xxkeys is not None:
-            assert np.all(xxkeys == xk)
-        xxkeys = xk
-
+        xxkeys.update(xk)
         data.append(d)
-
 
     data = pd.concat(
         data,

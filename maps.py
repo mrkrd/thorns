@@ -8,7 +8,6 @@ __author__ = "Marek Rudnicki"
 import cPickle as pickle
 import hashlib
 import os
-import gzip
 from itertools import izip
 
 
@@ -39,14 +38,14 @@ def _calc_pkl_name(obj, cachedir):
 
     pkl_name = os.path.join(
         cachedir,
-        h + '.pkl.gz'
+        h + '.pkl'
     )
 
     return pkl_name
 
 
 def _load_cache(fname):
-    with gzip.open(fname, 'rb') as f:
+    with open(fname, 'rb') as f:
         data = pickle.load(f)
     return data
 
@@ -59,7 +58,7 @@ def _dump_cache(obj, fname):
     print "MAP: dumping", fname
 
     tmp_fname = fname + ".tmp"
-    f = gzip.open(tmp_fname, 'wb', compresslevel=9)
+    f = open(tmp_fname, 'wb')
     pickle.dump(obj, f, -1)
     os.rename(tmp_fname, fname)
 
