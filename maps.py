@@ -98,13 +98,32 @@ def _multiprocessing_map(func, iterable):
 
 
 def _publish_progress(progress):
-    pass
+    dirname = 'work'
+    fname = os.path.join(dirname, 'status_' + str(os.getpid()))
+
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
+
+    bar = "#" * progress['done'] + "." * (progress['all'] - progress['done'])
+    msg = "{} / {}\n\n{}\n".format(
+        str(progress['done']),
+        str(progress['all']),
+        bar
+    )
+
+
+    f = open(fname, 'w')
+    f.write(msg)
+    f.close()
+
+
+
 
 
 def map(func, iterable, backend='serial', cachedir='work/map_cache'):
 
 
-    progress = ''
+    progress = {'done':0, 'all':0}
     todos = []
     done = []
     for i,args in enumerate(iterable):
@@ -113,12 +132,15 @@ def map(func, iterable, backend='serial', cachedir='work/map_cache'):
         if os.path.exists(fname):
             print "MAP: loading", fname
             done.append( (i, _load_cache(fname)) )
-            progress += 'x'
+            progress['done'] += 1
+            progress['all'] += 1
 
         else:
             todos.append( (i, args) )
-            progress += '.'
+            progress['all'] += 1
 
+
+    _publish_progress(progress)
 
 
     if backend == 'serial':
@@ -135,7 +157,9 @@ def map(func, iterable, backend='serial', cachedir='work/map_cache'):
         _dump_cache(result[1], fname)
         done.append(result)
 
-        # progress[result[0]] = 'x'
+        progress['done'] += 1
+
+        _publish_progress(progress)
 
 
     done.sort()
