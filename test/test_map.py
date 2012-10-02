@@ -13,7 +13,7 @@ from numpy.testing import (
     assert_array_equal
 )
 
-import marlib as mar
+import marlib as mr
 
 
 def square(x):
@@ -27,13 +27,13 @@ def test_serial_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mar.map(
+    results1 = mr.map(
         square,
         dicts,
         backend='serial',
         cachedir=cachedir
     )
-    results2 = mar.map(
+    results2 = mr.map(
         square,
         dicts,
         backend='serial',
@@ -59,16 +59,49 @@ def test_multiprocessing_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mar.map(
+    results1 = mr.map(
         square,
         dicts,
         backend='multiprocessing',
         cachedir=cachedir
     )
-    results2 = mar.map(
+    results2 = mr.map(
         square,
         dicts,
         backend='multiprocessing',
+        cachedir=cachedir
+    )
+
+    shutil.rmtree(cachedir)
+
+    assert_array_equal(
+        data**2,
+        results1
+    )
+    assert_array_equal(
+        data**2,
+        results2
+    )
+
+
+
+def test_playdoh_map():
+
+    cachedir = tempfile.mkdtemp()
+
+    data = np.arange(10)
+    dicts = [{'x':i} for i in data]
+
+    results1 = mr.map(
+        square,
+        dicts,
+        backend='playdoh',
+        cachedir=cachedir
+    )
+    results2 = mr.map(
+        square,
+        dicts,
+        backend='playdoh',
         cachedir=cachedir
     )
 

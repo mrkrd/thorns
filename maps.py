@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import division
+from __future__ import print_function
 
 __author__ = "Marek Rudnicki"
 
@@ -9,6 +10,7 @@ import cPickle as pickle
 import hashlib
 import os
 from itertools import izip
+import argparse
 
 
 class _FuncWrap(object):
@@ -16,18 +18,31 @@ class _FuncWrap(object):
         self.func = func
 
     def __call__(self, data):
-        if isinstance(data, tuple):
-            result = self.func(*data)
-
-        elif isinstance(data, dict):
-            result = self.func(**data)
-
-        else:
-            print data
-            raise RuntimeError, "Arguments must be stored as tuple or dict: {}".format(type(data))
-
+        result = _apply_data(self.func, data)
         return result
 
+
+def _func_wrap(func):
+    def wrap(data):
+        result = _apply_data(func, data)
+        return result
+
+    return wrap
+
+
+
+def _apply_data(func, data):
+    if isinstance(data, tuple):
+        result = func(*data)
+
+    elif isinstance(data, dict):
+        result = func(**data)
+
+    else:
+        print(data)
+        raise RuntimeError, "Arguments must be stored as tuple or dict: {}".format(type(data))
+
+    return result
 
 
 
@@ -55,7 +70,7 @@ def _dump_cache(obj, fname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-    print "MAP: dumping", fname
+    print("MAP: dumping", fname)
 
     tmp_fname = fname + ".tmp"
     f = open(tmp_fname, 'wb')
@@ -65,7 +80,7 @@ def _dump_cache(obj, fname):
 
 
 
-def _serial_map(func, iterable):
+def _serial_map(func, iterable, opts):
 
     wrap = _FuncWrap(func)
 
@@ -75,7 +90,7 @@ def _serial_map(func, iterable):
 
 
 
-def _multiprocessing_map(func, iterable):
+def _multiprocessing_map(func, iterable, opts):
 
     import multiprocessing
 
@@ -94,6 +109,25 @@ def _multiprocessing_map(func, iterable):
     for i,result in zip(idx,results):
         yield i,result.get()
 
+
+
+def _playdoh_map(func, iterable, opts):
+
+    import playdoh
+
+    wrap = _func_wrap(func)
+
+    idx,args = zip(*iterable)
+
+    jobrun = playdoh.map_async(
+        wrap,
+        args,
+        machines=opts['machines']
+    )
+    results = jobrun.get_results()
+
+    for i,result in zip(idx,results):
+        yield i,result
 
 
 
@@ -118,37 +152,76 @@ def _publish_progress(progress):
 
 
 
+def _get_options(backend='serial'):
+
+    opts = {}
+
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument(
+        '--map-backend',
+        dest='map_backend',
+        nargs=1
+    )
+
+    parser.add_argument(
+        '--machines',
+        dest='machines',
+        nargs='+',
+        default=[]
+    )
+
+
+    ns = parser.parse_known_args()[0]
+    print(ns)
+
+    if ns.map_backend is None:
+        opts['map_backend'] = backend
+    else:
+        opts['map_backend'] = ns.map_backend[0]
+
+    if ns.machines is not None:
+        opts['machines'] = ns.machines
+
+
+
+    return opts
+
+
 
 
 def map(func, iterable, backend='serial', cachedir='work/map_cache'):
 
+    opts = _get_options(backend)
 
-    progress = {'done':0, 'all':0}
+    status = {'done':0, 'all':0}
     todos = []
     done = []
     for i,args in enumerate(iterable):
         fname = _calc_pkl_name(args, cachedir)
 
         if os.path.exists(fname):
-            print "MAP: loading", fname
+            print("MAP: loading", fname)
             done.append( (i, _load_cache(fname)) )
-            progress['done'] += 1
-            progress['all'] += 1
+            status['done'] += 1
+            status['all'] += 1
 
         else:
             todos.append( (i, args) )
-            progress['all'] += 1
+            status['all'] += 1
 
 
-    _publish_progress(progress)
+    _publish_progress(status)
 
 
-    if backend == 'serial':
-        results = _serial_map(func, todos)
-    elif backend == 'multiprocessing':
-        results = _multiprocessing_map(func, todos)
+    if opts['map_backend'] == 'serial':
+        results = _serial_map(func, todos, opts)
+    elif opts['map_backend'] == 'multiprocessing':
+        results = _multiprocessing_map(func, todos, opts)
+    elif opts['map_backend'] == 'playdoh':
+        results = _playdoh_map(func, todos, opts)
     else:
-        raise RuntimeError, "Unknown map() backend: {}".format(backend)
+        raise RuntimeError, "Unknown map() backend: {}".format(opts['map_backend'])
 
 
     for todo,result in izip(todos,results):
@@ -157,9 +230,9 @@ def map(func, iterable, backend='serial', cachedir='work/map_cache'):
         _dump_cache(result[1], fname)
         done.append(result)
 
-        progress['done'] += 1
+        status['done'] += 1
 
-        _publish_progress(progress)
+        _publish_progress(status)
 
 
     done.sort()
