@@ -11,6 +11,9 @@ import hashlib
 import os
 from itertools import izip
 import argparse
+import time
+import datetime
+import numpy as np
 
 
 class _FuncWrap(object):
@@ -32,6 +35,8 @@ def _func_wrap(func):
 
 
 def _apply_data(func, data):
+
+    start = time.time()
     if isinstance(data, tuple):
         result = func(*data)
 
@@ -39,10 +44,11 @@ def _apply_data(func, data):
         result = func(**data)
 
     else:
-        print(data)
-        raise RuntimeError, "Arguments must be stored as tuple or dict: {}".format(type(data))
+        result = func(data)
 
-    return result
+    dt = time.time() - start
+
+    return result, dt
 
 
 
@@ -60,6 +66,7 @@ def _calc_pkl_name(obj, cachedir):
 
 
 def _load_cache(fname):
+    print("MAP: loading", fname)
     with open(fname, 'rb') as f:
         data = pickle.load(f)
     return data
@@ -80,17 +87,17 @@ def _dump_cache(obj, fname):
 
 
 
-def _serial_map(func, iterable, opts):
+def _serial_map(func, iterable, cfg):
 
     wrap = _FuncWrap(func)
 
     for i,args in iterable:
-        result = wrap(args)
-        yield i,result
+        result,dt = wrap(args)
+        yield i,result,dt
 
 
 
-def _multiprocessing_map(func, iterable, opts):
+def _multiprocessing_map(func, iterable, cfg):
 
     import multiprocessing
 
@@ -106,12 +113,12 @@ def _multiprocessing_map(func, iterable, opts):
         idx.append( i )
 
 
-    for i,result in zip(idx,results):
-        yield i,result.get()
+    for i,(result,dt) in zip(idx,results):
+        yield i,result.get(),dt
 
 
 
-def _playdoh_map(func, iterable, opts):
+def _playdoh_map(func, iterable, cfg):
 
     import playdoh
 
@@ -122,26 +129,31 @@ def _playdoh_map(func, iterable, opts):
     jobrun = playdoh.map_async(
         wrap,
         args,
-        machines=opts['machines']
+        machines=cfg['machines']
     )
     results = jobrun.get_results()
 
-    for i,result in zip(idx,results):
-        yield i,result
+    for i,(result,dt) in zip(idx,results):
+        yield i,result,dt
 
 
 
-def _publish_progress(progress):
+def _publish_progress(status):
     dirname = 'work'
     fname = os.path.join(dirname, 'status_' + str(os.getpid()))
 
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-    bar = "#" * progress['done'] + "." * (progress['all'] - progress['done'])
-    msg = "{} / {}\n\n{}\n".format(
-        str(progress['done']),
-        str(progress['all']),
+    bar = (
+        "L" * status['loaded'] +
+        "P" * status['processed'] +
+        "." * (status['all'] - status['loaded'] - status['processed'])
+    )
+    msg = "{} + {} / {}\n\n{}\n".format(
+        str(status['loaded']),
+        str(status['processed']),
+        str(status['all']),
         bar
     )
 
@@ -152,18 +164,48 @@ def _publish_progress(progress):
 
 
 
+def _print_summary(status):
+
+    print()
+    print("Summary:")
+    print()
+
+    if status['times']:
+        hist,edges = np.histogram(
+            status['times'],
+            bins=10,
+        )
+
+        for h,e in zip(hist,edges):
+            dt = datetime.timedelta(seconds=e)
+            height = h / hist.max() * 20
+            print(dt, '|', '#'*int(height))
+
+        print()
+
+    print("Mapping time: {}".format(
+        datetime.timedelta(seconds=(time.time() - status['start_time']))
+    ))
+    print()
+    print("All: {}".format(status['all']))
+    print("Loaded: {}".format(status['loaded']))
+    print("Processed: {}".format(status['processed']))
+    print()
+
+
+
+
 def _get_options(backend='serial'):
 
-    opts = {}
+    cfg = {}
 
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
         '--map-backend',
-        dest='map_backend',
+        dest='backend',
         nargs=1
     )
-
     parser.add_argument(
         '--machines',
         dest='machines',
@@ -171,40 +213,72 @@ def _get_options(backend='serial'):
         default=[]
     )
 
+    cache_args = parser.add_mutually_exclusive_group()
+    cache_args.add_argument(
+        '--map-cache',
+        dest='cache',
+        action='store_const',
+        const='yes',
+        default='yes'
+    )
+    cache_args.add_argument(
+        '--no-map-cache',
+        dest='cache',
+        action='store_const',
+        const='no',
+        default='yes'
+    )
+    cache_args.add_argument(
+        '--refresh-map-cache',
+        dest='cache',
+        action='store_const',
+        const='refresh',
+        default='yes'
+    )
+
 
     ns = parser.parse_known_args()[0]
     print(ns)
 
-    if ns.map_backend is None:
-        opts['map_backend'] = backend
+    if ns.backend is None:
+        cfg['backend'] = backend
     else:
-        opts['map_backend'] = ns.map_backend[0]
+        cfg['backend'] = ns.backend[0]
 
     if ns.machines is not None:
-        opts['machines'] = ns.machines
+        cfg['machines'] = ns.machines
+
+    cfg['cache'] = ns.cache
 
 
+    return cfg
 
-    return opts
+
 
 
 
 
 def map(func, iterable, backend='serial', cachedir='work/map_cache'):
 
-    opts = _get_options(backend)
+    cfg = _get_options(backend)
 
-    status = {'done':0, 'all':0}
+    status = {
+        'all':0,
+        'loaded':0,
+        'processed':0,
+        'times':[],
+        'start_time':time.time()
+    }
+
     todos = []
     done = []
     for i,args in enumerate(iterable):
         fname = _calc_pkl_name(args, cachedir)
 
-        if os.path.exists(fname):
-            print("MAP: loading", fname)
+        if (cfg['cache'] == 'yes') and os.path.exists(fname):
             done.append( (i, _load_cache(fname)) )
-            status['done'] += 1
             status['all'] += 1
+            status['loaded'] += 1
 
         else:
             todos.append( (i, args) )
@@ -214,23 +288,30 @@ def map(func, iterable, backend='serial', cachedir='work/map_cache'):
     _publish_progress(status)
 
 
-    if opts['map_backend'] == 'serial':
-        results = _serial_map(func, todos, opts)
-    elif opts['map_backend'] == 'multiprocessing':
-        results = _multiprocessing_map(func, todos, opts)
-    elif opts['map_backend'] == 'playdoh':
-        results = _playdoh_map(func, todos, opts)
+    if cfg['backend'] == 'serial':
+        results = _serial_map(func, todos, cfg)
+    elif cfg['backend'] == 'multiprocessing':
+        results = _multiprocessing_map(func, todos, cfg)
+    elif cfg['backend'] == 'playdoh':
+        results = _playdoh_map(func, todos, cfg)
     else:
-        raise RuntimeError, "Unknown map() backend: {}".format(opts['map_backend'])
+        raise RuntimeError, "Unknown map() backend: {}".format(cfg['backend'])
 
 
     for todo,result in izip(todos,results):
         i,args = todo
-        fname = _calc_pkl_name(args, cachedir)
-        _dump_cache(result[1], fname)
-        done.append(result)
+        j,r,dt = result
+        assert i == j
 
-        status['done'] += 1
+        done.append( (i,r) )
+
+        if cfg['cache'] in ('yes', 'refresh'):
+            fname = _calc_pkl_name(args, cachedir)
+            _dump_cache(result[1], fname)
+
+
+        status['processed'] += 1
+        status['times'].append(dt)
 
         _publish_progress(status)
 
@@ -238,5 +319,6 @@ def map(func, iterable, backend='serial', cachedir='work/map_cache'):
     done.sort()
     done = [d for i,d in done]
 
+    _print_summary(status)
 
     return done
