@@ -113,8 +113,9 @@ def _multiprocessing_map(func, iterable, cfg):
         idx.append( i )
 
 
-    for i,(result,dt) in zip(idx,results):
-        yield i,result.get(),dt
+    for i,result in izip(idx,results):
+        ans,dt = result.get()
+        yield i,ans,dt
 
 
 
@@ -133,8 +134,10 @@ def _playdoh_map(func, iterable, cfg):
     )
     results = jobrun.get_results()
 
-    for i,(result,dt) in zip(idx,results):
-        yield i,result,dt
+    for i,result in zip(idx,results):
+        print('XXXXX',result)
+        ans,dt = result
+        yield i,ans,dt
 
 
 
