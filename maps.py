@@ -14,6 +14,7 @@ import argparse
 import time
 import datetime
 import numpy as np
+import sys
 
 
 class _FuncWrap(object):
@@ -135,7 +136,6 @@ def _playdoh_map(func, iterable, cfg):
     results = jobrun.get_results()
 
     for i,result in zip(idx,results):
-        print('XXXXX',result)
         ans,dt = result
         yield i,ans,dt
 
@@ -143,7 +143,11 @@ def _playdoh_map(func, iterable, cfg):
 
 def _publish_progress(status):
     dirname = 'work'
-    fname = os.path.join(dirname, 'status_' + str(os.getpid()))
+    sufix = os.path.splitext(
+        os.path.basename(sys.argv[0])
+    )[0]
+    fname = os.path.join(dirname, 'status_' + sufix)
+
 
     if not os.path.exists(dirname):
         os.makedirs(dirname)
