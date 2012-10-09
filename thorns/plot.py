@@ -28,11 +28,22 @@ def plot_neurogram(spike_trains, fs, axis=None, ignore=[], **kwargs):
         import matplotlib.pyplot as plt
         axis = plt.gca()
 
+    extent = (
+        0,                      # left
+        neurogram.shape[0] / fs, # right
+        0,                      # bottom
+        neurogram.shape[1]       # top
+    )
+
     axis.imshow(
         neurogram.T,
         aspect='auto',
+        extent=extent,
         **kwargs
     )
+
+    axis.set_xlabel("Time [s]")
+    axis.set_ylabel("Channel number")
 
     return axis
 
