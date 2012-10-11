@@ -140,6 +140,62 @@ def _playdoh_map(func, iterable, cfg):
         yield i,ans,dt
 
 
+def _dispy_map(func, iterable, cfg):
+
+    import dispy
+
+
+    if cfg['machines']:
+        nodes = cfg['machines']
+    else:
+        nodes = ['*']
+
+
+    cluster = dispy.JobCluster(
+        func,
+        depends=[_apply_data, func],
+        nodes=nodes,
+    )
+
+
+
+    jobs = []
+    idx = []
+    for i,args in iterable:
+        if isinstance(args, tuple):
+            job = cluster.submit(*args)
+
+        elif isinstance(args, dict):
+            job = cluster.submit(**args)
+
+        else:
+            job = cluster.submit(args)
+
+        job.id = i
+        jobs.append(job)
+        idx.append(i)
+
+
+    for job in jobs:
+        ans = job()
+        if ans is None:
+            print(job.exception)
+            cluster.close()
+            exit()
+
+        i = job.id
+        dt = job.end_time - job.start_time
+
+        print("MAP: finished job:", i)
+
+        yield i,ans,dt
+
+
+
+
+
+
+
 
 def _publish_progress(status):
     dirname = 'work'
@@ -301,6 +357,8 @@ def map(func, iterable, backend='serial', cachedir='work/map_cache'):
         results = _multiprocessing_map(func, todos, cfg)
     elif cfg['backend'] == 'playdoh':
         results = _playdoh_map(func, todos, cfg)
+    elif cfg['backend'] == 'dispy':
+        results = _dispy_map(func, todos, cfg)
     else:
         raise RuntimeError, "Unknown map() backend: {}".format(cfg['backend'])
 
