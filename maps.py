@@ -151,6 +151,7 @@ def _dispy_map(func, iterable, cfg):
         nodes = ['*']
 
 
+    import numpy
     cluster = dispy.JobCluster(
         func,
         depends=[_apply_data, func],
