@@ -9,6 +9,8 @@ from numpy.testing import *
 import numpy as np
 from pprint import pprint
 
+import pandas as pd
+
 import marlib.thorns as th
 
 
@@ -25,10 +27,11 @@ def assert_trains_equal(a,b, almost=False):
 
 
     ### Assert if meta data is equal
-    assert a.dtype == b.dtype
-    meta = list(a.dtype.names)
-    meta.remove('spikes')
-    assert_array_equal(a[meta], b[meta])
+    assert np.all(a.columns == b.columns)
+
+    comp = (a.drop('spikes', axis=1) == b.drop('spikes', axis=1))
+    assert np.all(comp.values)
+
 
 
 
@@ -68,27 +71,19 @@ def test_from_arrays():
     ]
 
 
+    expected = {
+        'spikes': arrays,
+        'duration': np.repeat(10, len(arrays))
+    }
+    expected = pd.DataFrame(expected)
+
+
+
+
+
     result = th.spikes._arrays_to_trains(
         arrays,
         duration=10.0
-    )
-
-
-    expected = [(np.array(a),10) for a in arrays]
-    expected = np.array(
-        expected,
-        dtype=[
-            ('spikes', np.ndarray),
-            ('duration', float)
-        ]
-    )
-
-    e = np.array(
-        [(np.array(a),10) for a in arrays],
-        dtype=[
-            ('spikes', np.ndarray),
-            ('duration', float)
-        ]
     )
     assert_trains_equal(
         result,
@@ -112,19 +107,16 @@ def test_from_arrays():
 
 def test_make_empty_trains():
 
+    spikes = [[], []]
+
     trains = th.make_trains(
-        [[], []]
+        spikes
     )
 
-    expected = np.array(
-        [(np.array([]), 0.),
-         (np.array([]), 0.)],
-        dtype=[
-            ('spikes', np.ndarray),
-            ('duration', float)
-        ]
-    )
-
+    expected = pd.DataFrame({
+        'spikes': spikes,
+        'duration': np.repeat(0, len(spikes))
+    })
 
     assert_trains_equal(
         trains,
@@ -134,20 +126,17 @@ def test_make_empty_trains():
 
 
 
+
+
     trains = th.make_trains(
-        [[], []],
+        spikes,
         duration=10
     )
 
-    expected = np.array(
-        [(np.array([]), 10.),
-         (np.array([]), 10.)],
-        dtype=[
-            ('spikes', np.ndarray),
-            ('duration', float)
-        ]
-    )
-
+    expected = pd.DataFrame({
+        'spikes': spikes,
+        'duration': np.repeat(10, len(spikes))
+    })
 
     assert_trains_equal(
         trains,
@@ -229,6 +218,8 @@ def test_select_trains():
         idx=[1]
     )
 
+    print(selected)
+    print(expected)
 
     assert_trains_equal(
         selected,
@@ -290,8 +281,3 @@ def test_fold_trains():
         expected,
         almost=True
     )
-
-
-
-
-

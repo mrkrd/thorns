@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 from __future__ import division
+from __future__ import print_function
 
 __author__ = "Marek Rudnicki"
 
@@ -8,6 +9,8 @@ import random
 import numpy as np
 
 from collections import Iterable
+
+import pandas as pd
 
 from . import calc
 
@@ -18,7 +21,7 @@ def select_trains(spike_trains, **kwargs):
 
     mask = np.ones(len(spike_trains), dtype=bool)
     for key,val in kwargs.items():
-        mask = mask & (spike_trains[key] == val)
+        mask = mask & np.array(spike_trains[key] == val)
 
     selected = spike_trains[mask]
 
@@ -34,8 +37,6 @@ sel = select_trains
 
 
 def make_trains(data, **kwargs):
-    assert isinstance(data, Iterable)
-
     if 'fs' in kwargs:
         assert 'duration' not in kwargs
 
@@ -59,6 +60,9 @@ def make_trains(data, **kwargs):
     elif isinstance(data[0], Iterable):
         trains = _arrays_to_trains(data, **meta)
 
+    else:
+        raise RuntimeError("Spike train format not supported.")
+
 
     return trains
 
@@ -69,97 +73,23 @@ def make_trains(data, **kwargs):
 def _arrays_to_trains(arrays, **kwargs):
 
 
-    ### Meta data for each train
-    meta = {}
-    for k,v in kwargs.items():
-        if isinstance(v, Iterable):
-            assert len(v) == len(arrays)
-            meta[k] = v
-        else:
-            meta[k] = [v] * len(arrays)
-
-
-    ### Types of the metadata
-    types = [('spikes', np.ndarray)]
-    for key,val in meta.items():
-        field_name = key
-
-        if key == 'duration':
-            field_dtype = float
-        else:
-            field_dtype = type(val[0])
-
-        if field_dtype is str:
-            field_shape = max( [len(s) for s in val] )
-        else:
-            field_shape = 1
-
-        types.append(
-            (field_name, field_dtype, field_shape)
-        )
-
-
-
     ### Make sure we have duration
-    if 'duration' not in meta:
+    if 'duration' not in kwargs:
         max_spikes = [np.max(a) for a in arrays if len(a)>0]
         if max_spikes:
-            duration = max( max_spikes )
+            duration = np.max(max_spikes)
         else:
             duration = 0
-        meta['duration'] = [duration] * len(arrays)
-        types.append(('duration', float))
+        kwargs['duration'] = np.repeat(duration, len(arrays))
 
 
-    arrays = (np.array(a) for a in arrays)
-    trains = zip(arrays, *meta.values())
+    trains = {'spikes': arrays}
+    trains.update(kwargs)
 
+    trains = pd.DataFrame(trains)
 
-    trains = np.array(
-        trains,
-        dtype=types
-    )
 
     return trains
-
-
-
-# def _dicts_to_trains(dicts):
-#     """Convert list of dictionaries to np.rec.array
-
-#     >>> dicts = [{'a':1, 'b':2}, {'a':5, 'b':6}]
-#     >>> dicts_to_trains(dicts)  #doctest: +NORMALIZE_WHITESPACE
-#     rec.array([(1, 2), (5, 6)],
-#           dtype=[('a', '<i8'), ('b', '<i8')])
-
-#     """
-#     ### Derive types from the first dictionary
-#     types = {}
-#     for key,val in dicts[0].items():
-#         if isinstance(val, str):
-#             cnt = len(val)
-#         else:
-#             cnt = 1
-#         types[key] = [type(val), cnt]
-
-
-#     arr = []
-#     for d in dicts:
-#         assert set(d.keys()) == set(types.keys())
-
-#         rec = []
-#         for k,t in types.items():
-#             if isinstance(d[k], str) and (len(d[k]) > t[1]):
-#                 t[1] = len(d[k])
-
-#             rec.append(d[k])
-
-#         arr.append( tuple(rec) )
-
-
-#     dt = np.dtype({'names':types.keys(), 'formats':[tuple(each) for each in types.values()]})
-#     arr = np.array(arr, dtype=dt)
-#     return arr
 
 
 
@@ -231,38 +161,34 @@ def trains_to_array(spike_trains, fs):
 
 
 
-def accumulate_spike_trains(spike_trains, ignore=[]):
+def accumulate_spike_trains(spike_trains, ignore=None, keep=None):
 
     """Concatenate spike trains with the same meta data. Trains will
     be sorted by the metadata.
 
     """
 
-    keys = list(spike_trains.dtype.names)
+    keys = spike_trains.columns.tolist()
     keys.remove('spikes')
-    for key in ignore:
-        keys.remove(key)
 
-    meta = spike_trains[keys]
+    if ignore is not None:
+        assert keep is None
+        for k in ignore:
+            keys.remove(k)
 
-    unique_meta, indices = np.unique(meta, return_inverse=True)
+    if keep is not None:
+        assert ignore is None
+        keys = keep
 
-    trains = []
-    for idx in np.unique(indices):
-        selector = np.where( indices == idx )[0]
 
-        acc_spikes = np.concatenate(tuple( spike_trains['spikes'][selector] ))
-        acc_spikes.sort()
+    groups = spike_trains.groupby(keys, as_index=False)
 
-        trains.append( (acc_spikes,) + tuple(unique_meta[idx]) )
 
-    dt = [('spikes', np.ndarray)] + [(name,unique_meta.dtype[name])
-                                     for name in unique_meta.dtype.names]
+    acc = groups.agg({
+        'spikes': lambda x: tuple(np.concatenate(tuple(x.values)))
+    })
 
-    trains = np.array(trains, dtype=dt)
-
-    return trains
-
+    return acc
 
 
 accumulate_spikes = accumulate_spike_trains
@@ -440,6 +366,3 @@ fold_trains = fold_spike_trains
 #     return silence, tones_and_pads
 
 # split_and_fold = split_and_fold_trains
-
-
-
