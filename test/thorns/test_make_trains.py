@@ -16,6 +16,9 @@ import marlib.thorns as th
 
 def assert_trains_equal(a,b, almost=False):
 
+    a = a.reset_index(drop=True)
+    b = b.reset_index(drop=True)
+
     assert len(a) == len(b)
 
     ### Assert if spike trains are equal
@@ -217,9 +220,6 @@ def test_select_trains():
         cfs=[1],
         idx=[1]
     )
-
-    print(selected)
-    print(expected)
 
     assert_trains_equal(
         selected,

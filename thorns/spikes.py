@@ -80,10 +80,11 @@ def _arrays_to_trains(arrays, **kwargs):
             duration = np.max(max_spikes)
         else:
             duration = 0
-        kwargs['duration'] = np.repeat(duration, len(arrays))
+        kwargs['duration'] = np.repeat(float(duration), len(arrays))
 
 
-    trains = {'spikes': arrays}
+
+    trains = {'spikes': [np.array(a) for a in arrays]}
     trains.update(kwargs)
 
     trains = pd.DataFrame(trains)
@@ -183,10 +184,15 @@ def accumulate_spike_trains(spike_trains, ignore=None, keep=None):
 
     groups = spike_trains.groupby(keys, as_index=False)
 
+    acc = []
+    for name,group in groups:
+        spikes = np.concatenate(tuple(group['spikes']))
+        acc.append(name + (spikes,))
 
-    acc = groups.agg({
-        'spikes': lambda x: tuple(np.concatenate(tuple(x.values)))
-    })
+    columns = spike_trains.columns.drop('spikes').tolist()
+    columns.append('spikes')
+
+    acc = pd.DataFrame(acc, columns=columns)
 
     return acc
 
@@ -221,34 +227,28 @@ def trim_spike_trains(spike_trains, start, stop):
     assert np.all(tmin < tmaxs)
 
 
-    trimmed_trains = []
-    for key in spike_trains.dtype.names:
-        if key == 'spikes':
-            trimmed_spikes = []
-            for spikes,tmax in zip(spike_trains['spikes'], tmaxs):
+    trimmed = []
+    for train,tmax in zip(spike_trains['spikes'], tmaxs):
+        spikes = train[(train >= tmin) & (train <= tmax)]
+        spikes -= tmin
 
-                spikes = spikes[ (spikes >= tmin) & (spikes <= tmax)]
-                spikes -= tmin
-
-                trimmed_spikes.append(spikes)
+        trimmed.append(spikes)
 
 
-            trimmed_trains.append(
-                trimmed_spikes
-            )
+
+    durations = spike_trains['duration']
+    print("XXXX")
+    print(durations)
+    print(tmaxs)
+    durations[ durations>tmaxs ] = tmaxs[ durations>tmaxs ]
+    durations -= tmin
 
 
-        elif key == 'duration':
-            durations = np.array(spike_trains['duration'])
 
-            durations[ durations>tmaxs ] = tmaxs[ durations>tmaxs ]
-            durations -= tmin
-
-            trimmed_trains.append(durations)
+    out = spike_trains.drop(['spikes', 'duration'])
+    print(out)
 
 
-        else:
-            trimmed_trains.append(spike_trains[key])
 
     trimmed_trains = np.array(
         zip(*trimmed_trains),
