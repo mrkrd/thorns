@@ -41,17 +41,10 @@ def make_trains(data, **kwargs):
         assert 'duration' not in kwargs
 
 
-    meta = {}
-    for k,v in kwargs.items():
-        if k == 'fs':
-            continue
+    meta = dict(kwargs)
 
-        if isinstance(v, Iterable) and not isinstance(v, basestring):
-            assert len(v) == len(data)
-            meta[k] = v
-        else:
-            meta[k] = [v] * len(data)
-
+    if 'fs' in meta:
+        del meta['fs']
 
 
     if isinstance(data, np.ndarray) and (data.ndim == 2) and ('fs' in kwargs):
@@ -70,25 +63,29 @@ def make_trains(data, **kwargs):
 
 
 
-def _arrays_to_trains(arrays, **kwargs):
+def _arrays_to_trains(arrays, **meta):
 
 
     ### Make sure we have duration
-    if 'duration' not in kwargs:
+    if 'duration' not in meta:
         max_spikes = [np.max(a) for a in arrays if len(a)>0]
         if max_spikes:
             duration = np.max(max_spikes)
         else:
             duration = 0
-        kwargs['duration'] = np.repeat(float(duration), len(arrays))
+        meta['duration'] = float(duration)
 
+    else:
+        if np.isscalar(meta['duration']):
+            meta['duration'] = float(meta['duration'])
+        else:
+            meta['duration'] = np.array(meta['duration']).astype(float)
 
 
     trains = {'spikes': [np.array(a) for a in arrays]}
-    trains.update(kwargs)
+    trains.update(meta)
 
     trains = pd.DataFrame(trains)
-
 
     return trains
 
@@ -96,7 +93,7 @@ def _arrays_to_trains(arrays, **kwargs):
 
 
 
-def _array_to_trains(array, fs, **kwargs):
+def _array_to_trains(array, fs, **meta):
     """ Convert time functions to a list of spike trains.
 
     fs: samping frequency in Hz
@@ -116,13 +113,13 @@ def _array_to_trains(array, fs, **kwargs):
         trains.append( spikes )
 
 
-    assert 'duration' not in kwargs
+    assert 'duration' not in meta
 
-    kwargs['duration'] = len(array) / fs
+    meta['duration'] = len(array)/fs
 
     spike_trains = _arrays_to_trains(
         trains,
-        **kwargs
+        **meta
     )
 
     return spike_trains
@@ -209,7 +206,6 @@ def trim_spike_trains(spike_trains, start, stop):
     `stop'.
 
     """
-
     if start is not None and stop is not None:
         assert start < stop
 
@@ -237,25 +233,19 @@ def trim_spike_trains(spike_trains, start, stop):
 
 
     durations = spike_trains['duration']
-    print("XXXX")
-    print(durations)
-    print(tmaxs)
     durations[ durations>tmaxs ] = tmaxs[ durations>tmaxs ]
     durations -= tmin
 
 
 
-    out = spike_trains.drop(['spikes', 'duration'])
-    print(out)
+
+    out = pd.DataFrame(spike_trains)
+    out['spikes'] = trimmed
+    out['duration'] = durations
 
 
 
-    trimmed_trains = np.array(
-        zip(*trimmed_trains),
-        dtype=spike_trains.dtype
-    )
-
-    return trimmed_trains
+    return out
 
 
 
@@ -287,44 +277,34 @@ def fold_spike_trains(spike_trains, period):
     # [array([], dtype=float64), array([ 0.]), array([], dtype=float64), array([], dtype=float64)]
 
     """
-    data = {key:[] for key in spike_trains.dtype.names}
+    # data = {key:[] for key in spike_trains.dtype.names}
 
-    for train in spike_trains:
-        period_num = int( np.ceil(train['duration'] / period) )
-        last_period = np.fmod(train['duration'], period)
+    rows = []
+    for i,row in spike_trains.iterrows():
+        period_num = int( np.ceil(row['duration'] / period) )
+        last_period = np.fmod(row['duration'], period)
 
-        spikes = train['spikes']
+        spikes = row['spikes']
         for idx in range(period_num):
             lo = idx * period
             hi = (idx+1) * period
             sec = spikes[(spikes>=lo) & (spikes<hi)]
             sec = np.fmod(sec, period)
-            data['spikes'].append(sec)
 
-            data['duration'].append(period)
+            r = row.copy()
+            r['spikes'] = sec
+            r['duration'] = period
+
+            rows.append(r)
 
         if last_period > 0:
-            data['duration'][-1] = last_period
+            rows[-1]['duration'] = last_period
 
 
-        for key in spike_trains.dtype.names:
-            if key in ('spikes', 'duration'):
-                continue
-
-            data[key].extend(
-                [train[key]] * period_num
-            )
-
-
-    arrays = (data[key] for key in spike_trains.dtype.names)
-
-    folded_trains = np.array(
-        zip(*arrays),
-        dtype=spike_trains.dtype
-    )
-
+    folded_trains = pd.DataFrame(rows)
 
     return folded_trains
+
 
 fold = fold_spike_trains
 fold_trains = fold_spike_trains
