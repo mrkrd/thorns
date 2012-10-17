@@ -174,6 +174,7 @@ def accumulate_spike_trains(spike_trains, ignore=None, keep=None):
         for k in ignore:
             keys.remove(k)
 
+
     if keep is not None:
         assert ignore is None
         keys = keep
@@ -183,10 +184,12 @@ def accumulate_spike_trains(spike_trains, ignore=None, keep=None):
 
     acc = []
     for name,group in groups:
+        if not isinstance(name, tuple):
+            name = (name,)
         spikes = np.concatenate(tuple(group['spikes']))
         acc.append(name + (spikes,))
 
-    columns = spike_trains.columns.drop('spikes').tolist()
+    columns = list(keys)
     columns.append('spikes')
 
     acc = pd.DataFrame(acc, columns=columns)

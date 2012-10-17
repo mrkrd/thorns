@@ -12,15 +12,10 @@ from . import calc
 golden = 1.6180339887
 
 
-def plot_neurogram(spike_trains, fs, axis=None, ignore=[], **kwargs):
-
-    accumulated = spikes.accumulate_spikes(
-        spike_trains,
-        ignore=ignore
-    )
+def plot_neurogram(spike_trains, fs, axis=None, **kwargs):
 
     neurogram = spikes.trains_to_array(
-        accumulated,
+        spike_trains,
         fs
     )
 
