@@ -6,5 +6,9 @@ __author__ = "Marek Rudnicki"
 import thorns
 import waves
 
-from dumpdb import dumpdb, loaddb
+from dumpdb import (
+    dumpdb,
+    loaddb
+)
 from maps import map
+from plot import plot
