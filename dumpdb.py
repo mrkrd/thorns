@@ -27,7 +27,7 @@ def _dump_records(pars, data, dbdir):
         'timestamp': timestamp
     }
 
-    keys_str = string.join(pars.keys() + data.keys(), '-')
+    keys_str = string.join(pars.keys() + data.keys(), '_')
     time_str = timestamp.strftime("%Y%m%d-%H%M%S.%f")
     fname = os.path.join(
         dbdir,
