@@ -94,7 +94,7 @@ def test_kwargs():
 
     mr.dumpdb(
         x1,
-        yy=y1,
+        y1,
         bla='anf',
         dbdir=dbdir
     )

@@ -9,37 +9,26 @@ import os
 from glob import glob
 import cPickle as pickle
 import string
-import time
+import datetime
 
 import numpy as np
 import pandas as pd
 
 
 
-def dumpdb(xx, yy=None, dbdir=None, **kwargs):
 
-    if dbdir is None:
-        dbdir = os.path.join('work', 'dumpdb')
+def _dump_records(pars, data, dbdir):
 
+    timestamp = datetime.datetime.now()
 
-    if not os.path.exists(dbdir):
-        os.makedirs(dbdir)
+    records = {
+        'pars': pars,
+        'data': data,
+        'timestamp': timestamp
+    }
 
-
-    data = pd.DataFrame(xx)
-    xxkeys = list(data.keys())
-
-    if kwargs:
-        pars = [kwargs for d in xx]
-        data = data.join( pd.DataFrame(pars) )
-        xxkeys.extend( kwargs.keys() )
-
-    if yy is not None:
-        data = data.join( pd.DataFrame(yy) )
-
-
-    keys_str = string.join(data.keys(), '-')
-    time_str = "{!r}".format(time.time())
+    keys_str = string.join(pars.keys() + data.keys(), '-')
+    time_str = timestamp.strftime("%Y%m%d-%H%M%S.%f")
     fname = os.path.join(
         dbdir,
         time_str + "__" + keys_str + ".pkl"
@@ -48,10 +37,45 @@ def dumpdb(xx, yy=None, dbdir=None, **kwargs):
 
     print("DUMPDB: dumping", fname)
     with open(tmp_fname, 'wb') as f:
-        pickle.dump((data, xxkeys), f, -1)
+        pickle.dump(records, f, -1)
 
     assert not os.path.exists(fname)
     os.rename(tmp_fname, fname)
+
+
+
+
+def dumpdb(pars, data, dbdir=None, **kwargs):
+
+
+
+    if isinstance(pars, dict):
+        pars = [pars]
+
+    if isinstance(data, dict):
+        data = [data]
+
+
+
+    if dbdir is None:
+        dbdir = os.path.join('work', 'dumpdb')
+
+    if not os.path.exists(dbdir):
+        os.makedirs(dbdir)
+
+
+    assert len(pars) == len(data)
+
+    for p,d in zip(pars,data):
+        p.update(kwargs)
+
+        _dump_records(p, d, dbdir)
+
+
+
+
+
+
 
 
 
@@ -63,26 +87,29 @@ def loaddb(dbdir=None):
 
     pathname = os.path.join(dbdir, '*.pkl')
 
-    xxkeys = set()
-    data = []
+    pars_keys = set()
+    db = []
+    index = []
     for fname in sorted(glob(pathname)):
         print("LOADDB: loading", fname)
 
         with open(fname, 'rb') as f:
-            d, xk = pickle.load(f)
+            records = pickle.load(f)
 
-        xxkeys.update(xk)
-        data.append(d)
+        pars_keys.update(records['pars'].keys())
+        row = records['pars']
+        row.update(records['data'])
 
-    data = pd.concat(
-        data,
-        ignore_index=True
-    )
+        db.append(row)
+        index.append(records['timestamp'])
 
-    data.drop_duplicates(
-        cols=list(xxkeys),
+
+    db = pd.DataFrame(db, index=index)
+
+    db.drop_duplicates(
+        cols=list(pars_keys),
         take_last=True,
         inplace=True
     )
 
-    return data
+    return db
