@@ -167,7 +167,6 @@ def accumulate_spike_trains(spike_trains, ignore=None, keep=None):
     """
 
     keys = spike_trains.columns.tolist()
-    keys.remove('spikes')
 
     if ignore is not None:
         assert keep is None
@@ -178,6 +177,9 @@ def accumulate_spike_trains(spike_trains, ignore=None, keep=None):
     if keep is not None:
         assert ignore is None
         keys = keep
+
+    if 'spikes' in keys:
+        keys.remove('spikes')
 
 
     groups = spike_trains.groupby(keys, as_index=False)
