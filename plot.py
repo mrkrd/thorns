@@ -8,7 +8,6 @@ __author__ = "Marek Rudnicki"
 import argparse
 
 import numpy as np
-import matplotlib.pyplot as plt
 
 
 
@@ -23,6 +22,8 @@ _parser.add_argument(
 
 
 def plot(data, kind=None):
+    import matplotlib.pyplot as plt
+
 
     if kind is None:
 
