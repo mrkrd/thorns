@@ -206,7 +206,7 @@ def _print_summary(status):
 
 
 
-def _get_options(backend='serial'):
+def _get_options(backend, cache):
 
     cfg = {}
 
@@ -230,37 +230,42 @@ def _get_options(backend='serial'):
         dest='cache',
         action='store_const',
         const='yes',
-        default='yes'
+        # default='yes'
     )
     cache_args.add_argument(
         '--no-map-cache',
         dest='cache',
         action='store_const',
         const='no',
-        default='yes'
+        # default='yes'
     )
     cache_args.add_argument(
         '--refresh-map-cache',
         dest='cache',
         action='store_const',
         const='refresh',
-        default='yes'
+        # default='yes'
     )
 
 
     ns = parser.parse_known_args()[0]
     print(ns)
 
+
     if ns.backend is None:
         cfg['backend'] = backend
     else:
         cfg['backend'] = ns.backend[0]
 
+
     if ns.machines is not None:
         cfg['machines'] = ns.machines
 
-    cfg['cache'] = ns.cache
 
+    if ns.cache is None:
+        cfg['cache'] = cache
+    else:
+        cfg['cache'] = ns.cache
 
     return cfg
 
@@ -269,9 +274,12 @@ def _get_options(backend='serial'):
 
 
 
-def map(func, iterable, backend='serial', cachedir='work/map_cache'):
+def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'):
 
-    cfg = _get_options(backend)
+    cfg = _get_options(
+        backend=backend,
+        cache=cache
+    )
 
     status = {
         'all':0,
