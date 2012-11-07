@@ -3,6 +3,10 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 
+import logging
+logging.basicConfig(level=logging.INFO)
+
+
 import thorns
 import waves
 

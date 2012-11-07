@@ -15,6 +15,7 @@ import time
 import datetime
 import numpy as np
 import sys
+import logging
 
 
 class _FuncWrap(object):
@@ -39,17 +40,17 @@ def _apply_data(func, data):
 
     start = time.time()
     if isinstance(data, tuple):
-        result = func(*data)
+        ans = func(*data)
 
     elif isinstance(data, dict):
-        result = func(**data)
+        ans = func(**data)
 
     else:
-        result = func(data)
+        ans = func(data)
 
     dt = time.time() - start
 
-    return result, dt
+    return ans,dt
 
 
 
@@ -67,7 +68,7 @@ def _calc_pkl_name(obj, cachedir):
 
 
 def _load_cache(fname):
-    print("MAP: loading", fname)
+    logging.info("Loading cache from {}".format(fname))
     with open(fname, 'rb') as f:
         data = pickle.load(f)
     return data
@@ -78,11 +79,11 @@ def _dump_cache(obj, fname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-    print("MAP: dumping", fname)
+    logging.info("Dumping cache to {}".format(fname))
 
     tmp_fname = fname + ".tmp"
-    f = open(tmp_fname, 'wb')
-    pickle.dump(obj, f, -1)
+    with open(tmp_fname, 'wb') as f:
+        pickle.dump(obj, f, -1)
     os.rename(tmp_fname, fname)
 
 
@@ -92,9 +93,10 @@ def _serial_map(func, iterable, cfg):
 
     wrap = _FuncWrap(func)
 
-    for i,args in iterable:
-        result,dt = wrap(args)
-        yield i,result,dt
+    for args in iterable:
+        result = wrap(args)
+        yield result
+
 
 
 
@@ -108,15 +110,13 @@ def _multiprocessing_map(func, iterable, cfg):
 
 
     results = []
-    idx = []
-    for i,args in iterable:
+    for args in iterable:
         results.append( pool.apply_async(wrap, (args,)) )
-        idx.append( i )
 
 
-    for i,result in izip(idx,results):
-        ans,dt = result.get()
-        yield i,ans,dt
+    for result in results:
+        yield result.get()
+
 
 
 
@@ -126,18 +126,16 @@ def _playdoh_map(func, iterable, cfg):
 
     wrap = _func_wrap(func)
 
-    idx,args = zip(*iterable)
-
     jobrun = playdoh.map_async(
         wrap,
-        args,
+        iterable,
         machines=cfg['machines']
     )
     results = jobrun.get_results()
 
-    for i,result in zip(idx,results):
-        ans,dt = result
-        yield i,ans,dt
+    for result in results:
+        yield result
+
 
 
 
@@ -161,7 +159,7 @@ def _publish_progress(status):
         "P" * status['processed'] +
         "." * (status['all'] - status['loaded'] - status['processed'])
     )
-    msg = "{} + {} / {}\n\n{}\n".format(
+    msg = "{0} + {1} / {2}\n\n{3}\n".format(
         str(status['loaded']),
         str(status['processed']),
         str(status['all']),
@@ -169,9 +167,9 @@ def _publish_progress(status):
     )
 
 
-    f = open(fname, 'w')
-    f.write(msg)
-    f.close()
+    with open(fname, 'w') as f:
+        f.write(msg)
+
 
 
 
@@ -213,9 +211,8 @@ def _get_options(backend, cache):
     parser = argparse.ArgumentParser()
 
     parser.add_argument(
-        '--map-backend',
-        dest='backend',
-        nargs=1
+        '--backend',
+        dest='backend'
     )
     parser.add_argument(
         '--machines',
@@ -224,38 +221,20 @@ def _get_options(backend, cache):
         default=[]
     )
 
-    cache_args = parser.add_mutually_exclusive_group()
-    cache_args.add_argument(
-        '--map-cache',
-        dest='cache',
-        action='store_const',
-        const='yes',
-        # default='yes'
-    )
-    cache_args.add_argument(
-        '--no-map-cache',
-        dest='cache',
-        action='store_const',
-        const='no',
-        # default='yes'
-    )
-    cache_args.add_argument(
-        '--refresh-map-cache',
-        dest='cache',
-        action='store_const',
-        const='refresh',
-        # default='yes'
+    parser.add_argument(
+        '--cache',
+        dest='cache'
     )
 
 
     ns = parser.parse_known_args()[0]
-    print(ns)
+    logging.debug(ns)
 
 
     if ns.backend is None:
         cfg['backend'] = backend
     else:
-        cfg['backend'] = ns.backend[0]
+        cfg['backend'] = ns.backend
 
 
     if ns.machines is not None:
@@ -289,22 +268,22 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
         'start_time':time.time()
     }
 
+
+    cache_files = []
+    hows = []
     todos = []
-    done = []
-    for i,args in enumerate(iterable):
+    for args in iterable:
         fname = _calc_pkl_name(args, cachedir)
+        cache_files.append(fname)
+
+        status['all'] += 1
 
         if (cfg['cache'] == 'yes') and os.path.exists(fname):
-            done.append( (i, _load_cache(fname)) )
-            status['all'] += 1
-            status['loaded'] += 1
-
+            hows.append('load')
         else:
-            todos.append( (i, args) )
-            status['all'] += 1
+            hows.append('process')
+            todos.append(args)
 
-
-    _publish_progress(status)
 
 
     if cfg['backend'] == 'serial':
@@ -317,27 +296,28 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
         raise RuntimeError, "Unknown map() backend: {}".format(cfg['backend'])
 
 
-    for todo,result in izip(todos,results):
-        i,args = todo
-        j,r,dt = result
-        assert i == j
 
-        done.append( (i,r) )
+    for how,fname in zip(hows,cache_files):
 
-        if cfg['cache'] in ('yes', 'refresh'):
-            fname = _calc_pkl_name(args, cachedir)
-            _dump_cache(result[1], fname)
+        if how == 'load':
+            result = _load_cache(fname)
+            status['loaded'] += 1
+
+        elif how == 'process':
+            result = next(results)
+            status['processed'] += 1
+
+            if cfg['cache'] in ('yes', 'refresh'):
+                _dump_cache(result, fname)
+
+        else:
+            raise RuntimeError("Should never reach this point.")
 
 
-        status['processed'] += 1
+        ans,dt = result
         status['times'].append(dt)
-
         _publish_progress(status)
 
-
-    done.sort()
-    done = [d for i,d in done]
+        yield ans
 
     _print_summary(status)
-
-    return done

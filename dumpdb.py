@@ -10,11 +10,10 @@ from glob import glob
 import cPickle as pickle
 import string
 import datetime
+import logging
 
 import numpy as np
 import pandas as pd
-
-
 
 
 def _dump_records(pars, data, dbdir):
@@ -64,7 +63,7 @@ def dumpdb(pars, data, dbdir=None, **kwargs):
 
     assert len(pars) == len(data)
 
-    print("DUMPDB: dumping pars and data in {} files".format(len(pars)))
+    logging.info("DUMPDB: dumping pars and data in {} files".format(len(pars)))
 
     for p,d in zip(pars,data):
         p.update(kwargs)
@@ -91,7 +90,8 @@ def loaddb(dbdir=None):
     db = []
     index = []
     for fname in sorted(glob(pathname)):
-        print("LOADDB: loading", fname)
+        logging.info("LOADDB: loading {}".format(fname))
+
 
         with open(fname, 'rb') as f:
             records = pickle.load(f)

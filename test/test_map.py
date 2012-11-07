@@ -44,11 +44,11 @@ def test_serial_map():
 
     assert_array_equal(
         data**2,
-        results1
+        list(results1)
     )
     assert_array_equal(
         data**2,
-        results2
+        list(results2)
     )
 
 
@@ -76,11 +76,11 @@ def test_multiprocessing_map():
 
     assert_array_equal(
         data**2,
-        results1
+        list(results1)
     )
     assert_array_equal(
         data**2,
-        results2
+        list(results2)
     )
 
 
@@ -109,9 +109,14 @@ def test_playdoh_map():
 
     assert_array_equal(
         data**2,
-        results1
+        list(results1)
     )
     assert_array_equal(
         data**2,
-        results2
+        list(results2)
     )
+
+
+
+if __name__ == '__main__':
+    test_serial_map()
