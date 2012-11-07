@@ -35,7 +35,6 @@ def _dump_records(pars, data, dbdir):
     )
     tmp_fname = fname + ".tmp"
 
-    print("DUMPDB: dumping", fname)
     with open(tmp_fname, 'wb') as f:
         pickle.dump(records, f, -1)
 
@@ -46,7 +45,6 @@ def _dump_records(pars, data, dbdir):
 
 
 def dumpdb(pars, data, dbdir=None, **kwargs):
-
 
 
     if isinstance(pars, dict):
@@ -65,6 +63,8 @@ def dumpdb(pars, data, dbdir=None, **kwargs):
 
 
     assert len(pars) == len(data)
+
+    print("DUMPDB: dumping pars and data in {} files".format(len(pars)))
 
     for p,d in zip(pars,data):
         p.update(kwargs)
