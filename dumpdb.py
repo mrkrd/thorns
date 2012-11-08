@@ -16,6 +16,8 @@ import numpy as np
 import pandas as pd
 
 
+logger = logging.getLogger(__name__)
+
 def _dump_records(pars, data, dbdir):
 
     timestamp = datetime.datetime.now()
@@ -63,7 +65,7 @@ def dumpdb(pars, data, dbdir=None, **kwargs):
 
     assert len(pars) == len(data)
 
-    logging.info("DUMPDB: dumping pars and data in {} files".format(len(pars)))
+    logger.info("Dumping pars and data in {} files".format(len(pars)))
 
     for p,d in zip(pars,data):
         p.update(kwargs)
@@ -90,7 +92,7 @@ def loaddb(dbdir=None):
     db = []
     index = []
     for fname in sorted(glob(pathname)):
-        logging.info("LOADDB: loading {}".format(fname))
+        logger.info("Loading {}".format(fname))
 
 
         with open(fname, 'rb') as f:

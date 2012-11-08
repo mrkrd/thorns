@@ -9,13 +9,15 @@ __author__ = "Marek Rudnicki"
 import cPickle as pickle
 import hashlib
 import os
-from itertools import izip
-import argparse
 import time
 import datetime
 import numpy as np
 import sys
 import logging
+
+import marlib as mr
+
+logger = logging.getLogger(__name__)
 
 
 class _FuncWrap(object):
@@ -68,7 +70,7 @@ def _calc_pkl_name(obj, cachedir):
 
 
 def _load_cache(fname):
-    logging.info("Loading cache from {}".format(fname))
+    logger.info("Loading cache from {}".format(fname))
     with open(fname, 'rb') as f:
         data = pickle.load(f)
     return data
@@ -79,7 +81,7 @@ def _dump_cache(obj, fname):
     if not os.path.exists(dirname):
         os.makedirs(dirname)
 
-    logging.info("Dumping cache to {}".format(fname))
+    logger.info("Dumping cache to {}".format(fname))
 
     tmp_fname = fname + ".tmp"
     with open(tmp_fname, 'wb') as f:
@@ -208,43 +210,20 @@ def _get_options(backend, cache):
 
     cfg = {}
 
-    parser = argparse.ArgumentParser()
-
-    parser.add_argument(
-        '--backend',
-        dest='backend'
-    )
-    parser.add_argument(
-        '--machines',
-        dest='machines',
-        nargs='+',
-        default=[]
-    )
-
-    parser.add_argument(
-        '--cache',
-        dest='cache'
-    )
-
-
-    ns = parser.parse_known_args()[0]
-    logging.debug(ns)
-
-
-    if ns.backend is None:
+    if mr.ns.backend is None:
         cfg['backend'] = backend
     else:
-        cfg['backend'] = ns.backend
+        cfg['backend'] = mr.ns.backend
 
 
-    if ns.machines is not None:
-        cfg['machines'] = ns.machines
+    if mr.ns.machines is not None:
+        cfg['machines'] = mr.ns.machines
 
 
-    if ns.cache is None:
+    if mr.ns.cache is None:
         cfg['cache'] = cache
     else:
-        cfg['cache'] = ns.cache
+        cfg['cache'] = mr.ns.cache
 
     return cfg
 
