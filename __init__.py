@@ -5,6 +5,7 @@ __author__ = "Marek Rudnicki"
 
 import argparse
 import logging
+import os
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -27,7 +28,9 @@ parser.add_argument(
 )
 parser.add_argument(
     '--plot',
-    dest='plot'
+    dest='plot',
+    nargs='?',
+    const='png'
 )
 
 
@@ -57,3 +60,8 @@ from dumpdb import (
 )
 from maps import map
 from plot import plot
+
+
+def mkdir(dirname):
+    if not os.path.exists(dirname):
+        os.makedirs(dirname)
