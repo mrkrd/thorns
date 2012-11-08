@@ -8,8 +8,10 @@ __author__ = "Marek Rudnicki"
 import marlib as mr
 
 def main():
+
     db = mr.loaddb()
 
+    print()
     print(db.to_string())
 
 

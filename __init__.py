@@ -31,7 +31,7 @@ parser.add_argument(
 )
 
 
-args = parser.parse_args()
+args = parser.parse_known_args()[0]
 
 
 
