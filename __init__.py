@@ -25,21 +25,26 @@ parser.add_argument(
     '--cache',
     dest='cache'
 )
+parser.add_argument(
+    '--plot',
+    dest='plot'
+)
 
-ns = parser.parse_args()
+
+args = parser.parse_args()
 
 
 
-if ns.loglevel is None:
+if args.loglevel is None:
     logging.basicConfig(level=logging.INFO)
 else:
-    numeric_level = getattr(logging, ns.loglevel.upper(), None)
+    numeric_level = getattr(logging, args.loglevel.upper(), None)
     if not isinstance(numeric_level, int):
         raise ValueError('Invalid log level: %s' % loglevel)
     logging.basicConfig(level=numeric_level)
 
 
-logging.debug(ns)
+logging.debug(args)
 
 
 

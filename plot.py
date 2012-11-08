@@ -11,14 +11,6 @@ import numpy as np
 
 
 
-_parser = argparse.ArgumentParser()
-
-_parser.add_argument(
-    '--plot',
-    dest='plot',
-    nargs=1
-)
-
 
 
 def plot(data, kind=None):

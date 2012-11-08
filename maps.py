@@ -210,20 +210,20 @@ def _get_options(backend, cache):
 
     cfg = {}
 
-    if mr.ns.backend is None:
+    if mr.args.backend is None:
         cfg['backend'] = backend
     else:
-        cfg['backend'] = mr.ns.backend
+        cfg['backend'] = mr.args.backend
 
 
-    if mr.ns.machines is not None:
-        cfg['machines'] = mr.ns.machines
+    if mr.args.machines is not None:
+        cfg['machines'] = mr.args.machines
 
 
-    if mr.ns.cache is None:
+    if mr.args.cache is None:
         cfg['cache'] = cache
     else:
-        cfg['cache'] = mr.ns.cache
+        cfg['cache'] = mr.args.cache
 
     return cfg
 
