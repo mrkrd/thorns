@@ -11,6 +11,7 @@ import cPickle as pickle
 import string
 import datetime
 import logging
+from itertools import izip_longest
 
 import numpy as np
 import pandas as pd
@@ -63,11 +64,9 @@ def dumpdb(pars, data, dbdir=None, **kwargs):
         os.makedirs(dbdir)
 
 
-    assert len(pars) == len(data)
+    logger.info("Dumping pars and data.")
 
-    logger.info("Dumping pars and data in {} files".format(len(pars)))
-
-    for p,d in zip(pars,data):
+    for p,d in izip_longest(pars,data):
         p.update(kwargs)
 
         _dump_records(p, d, dbdir)

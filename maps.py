@@ -278,6 +278,7 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
 
     for how,fname in zip(hows,cache_files):
 
+        _publish_progress(status)
         if how == 'load':
             result = _load_cache(fname)
             status['loaded'] += 1
@@ -295,8 +296,8 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
 
         ans,dt = result
         status['times'].append(dt)
-        _publish_progress(status)
 
         yield ans
 
+    _publish_progress(status)
     _print_summary(status)
