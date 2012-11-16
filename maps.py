@@ -14,6 +14,7 @@ import datetime
 import numpy as np
 import sys
 import logging
+import inspect
 
 import marlib as mr
 
@@ -140,7 +141,28 @@ def _playdoh_map(func, iterable, cfg):
 
 
 
+def _ipython_map(func, iterable, cfg):
 
+    from IPython.parallel import Client
+
+    fname = inspect.getfile(func)
+    print(fname)
+
+    rc = Client()
+    logger.info("IPython engine IDs: {}".format(rc.ids))
+
+    rc[:].run(fname)
+
+    wrap = _FuncWrap(func)
+    pool = rc.load_balanced_view()
+
+    results = []
+    for args in iterable:
+        results.append( pool.apply_async(wrap, args) )
+
+
+    for result in results:
+        yield result.get()
 
 
 
@@ -177,23 +199,27 @@ def _publish_progress(status):
 
 def _print_summary(status):
 
+    ### Header
     print()
     print("Summary:")
     print()
 
-    if status['times']:
-        hist,edges = np.histogram(
-            status['times'],
-            bins=10,
-        )
 
-        for h,e in zip(hist,edges):
-            dt = datetime.timedelta(seconds=e)
-            height = h / hist.max() * 20
-            print(dt, '|', '#'*int(height))
+    ### Histogram
+    hist,edges = np.histogram(
+        status['times'],
+        bins=10,
+    )
 
-        print()
+    for h,e in zip(hist,edges):
+        dt = datetime.timedelta(seconds=e)
+        lenght = h / hist.max() * 20
+        row = "{dt} | {s:<20} | {h}".format(dt=dt, s='#'*int(lenght), h=h)
+        print(row)
 
+
+    ### Counts
+    print()
     print("Mapping time: {}".format(
         datetime.timedelta(seconds=(time.time() - status['start_time']))
     ))
@@ -271,8 +297,10 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
         results = _multiprocessing_map(func, todos, cfg)
     elif cfg['backend'] == 'playdoh':
         results = _playdoh_map(func, todos, cfg)
+    elif cfg['backend'] == 'ipython':
+        results = _ipython_map(func, todos, cfg)
     else:
-        raise RuntimeError, "Unknown map() backend: {}".format(cfg['backend'])
+        raise RuntimeError("Unknown map() backend: {}".format(cfg['backend']))
 
 
 
