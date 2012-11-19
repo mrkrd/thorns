@@ -146,7 +146,6 @@ def _ipython_map(func, iterable, cfg):
     from IPython.parallel import Client
 
     fname = inspect.getfile(func)
-    print(fname)
 
     rc = Client()
     logger.info("IPython engine IDs: {}".format(rc.ids))
