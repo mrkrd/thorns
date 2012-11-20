@@ -153,11 +153,11 @@ def _ipython_map(func, iterable, cfg):
 
 
     print(fname)
-    status = rc[:].run(fname, block=True)
+    status = rc[:].run(fname) #, block=True)
     status.wait()
 
-    res = rc[:].apply(dir)
-    print(res.get())
+    # res = rc[:].apply(dir)
+    # print(res.get())
 
     wrap = _FuncWrap(func)
     pool = rc.load_balanced_view()
