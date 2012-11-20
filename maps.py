@@ -150,7 +150,11 @@ def _ipython_map(func, iterable, cfg):
     rc = Client()
     logger.info("IPython engine IDs: {}".format(rc.ids))
 
-    rc[:].run(fname, block=True)
+
+    print(fname)
+    status = rc[:].run(fname) #, block=True)
+    status.wait()
+
 
     wrap = _FuncWrap(func)
     pool = rc.load_balanced_view()
