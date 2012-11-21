@@ -154,9 +154,8 @@ def test_ipython_map():
     )
 
 
-@unittest.skip("nose does not like fork")
 @with_setup(setup_dir, teardown_dir)
-def test_serial_fork_map():
+def test_serial_proc_map():
 
 
     data = np.arange(10)
@@ -165,23 +164,19 @@ def test_serial_fork_map():
     results1 = mr.map(
         square,
         dicts,
-        backend='serial_fork',
+        backend='serial_proc',
         cachedir=cachedir
     )
+    results1 = list(results1)
 
     results2 = mr.map(
         square,
         dicts,
-        backend='serial_fork',
+        backend='serial_proc',
         cachedir=cachedir
     )
+    results2 = list(results2)
 
-
-    try:
-        results1 = list(results1)
-        results2 = list(results2)
-    except SystemExit:
-        pass
 
 
     assert_array_equal(
@@ -196,5 +191,4 @@ def test_serial_fork_map():
 
 
 if __name__ == '__main__':
-    test_serial_fork_map()
     test_ipython_map()

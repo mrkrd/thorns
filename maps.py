@@ -15,6 +15,11 @@ import numpy as np
 import sys
 import logging
 import inspect
+import socket
+import subprocess
+import multiprocessing
+import shutil
+import tempfile
 
 import marlib as mr
 
@@ -102,30 +107,47 @@ def _serial_map(func, iterable, cfg):
 
 
 
-def _serial_fork_map(func, iterable, cfg):
+def _serial_proc_map(func, iterable, cfg):
 
-    import multiprocessing
-
-    wrap = _FuncWrap(func)
 
     for args in iterable:
-        parent_conn, child_conn = multiprocessing.Pipe()
+        dirname = tempfile.mkdtemp()
+        fname = os.path.join(
+            dirname,
+            'mr_maps_socket'
+        )
+        p = subprocess.Popen(
+            ['python', '-m', 'marlib.run_func', fname]
+        )
 
-        pid = os.fork()
+        module_name = inspect.getfile(func)
+        func_name = func.func_name
+        data = (module_name, func_name, args)
 
-        if pid:
-            ### in parent
-            child_conn.close()
-            result = parent_conn.recv()
-            parent_conn.close()
+        ### make socket
+        s = socket.socket(socket.AF_UNIX)
+        s.bind(fname)
+        s.listen(1)
+        conn, addr = s.accept()
 
-        else:
-            ### in child
-            parent_conn.close()
-            result = wrap(args)
-            child_conn.send(result)
-            child_conn.close()
-            exit()
+
+        ### send function and data to the child
+        f = conn.makefile('wb')
+        pickle.dump(data, f, -1)
+        f.close()
+
+
+        ### receive results from the child
+        f = conn.makefile('rb')
+        result = pickle.load(f)
+        f.close()
+
+
+        ### cleanup
+        conn.close()
+        s.close()
+        shutil.rmtree(dirname)
+
 
         yield result
 
@@ -133,8 +155,6 @@ def _serial_fork_map(func, iterable, cfg):
 
 
 def _multiprocessing_map(func, iterable, cfg):
-
-    import multiprocessing
 
     wrap = _FuncWrap(func)
 
@@ -334,8 +354,8 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
         results = _playdoh_map(func, todos, cfg)
     elif cfg['backend'] == 'ipython':
         results = _ipython_map(func, todos, cfg)
-    elif cfg['backend'] == 'serial_fork':
-        results = _serial_fork_map(func, todos, cfg)
+    elif cfg['backend'] == 'serial_proc':
+        results = _serial_proc_map(func, todos, cfg)
     else:
         raise RuntimeError("Unknown map() backend: {}".format(cfg['backend']))
 
