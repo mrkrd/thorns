@@ -185,8 +185,7 @@ def _publish_progress(status):
         os.makedirs(dirname)
 
     bar = (
-        "L" * status['loaded'] +
-        "P" * status['processed'] +
+        ''.join(status['bar']) +
         "." * (status['all'] - status['loaded'] - status['processed'])
     )
     msg = "{0} + {1} / {2}\n\n{3}\n".format(
@@ -275,6 +274,7 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
         'all':0,
         'loaded':0,
         'processed':0,
+        'bar': [],
         'times':[],
         'start_time':time.time()
     }
@@ -316,10 +316,12 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
         if how == 'load':
             result = _load_cache(fname)
             status['loaded'] += 1
+            status['bar'].append('L')
 
         elif how == 'process':
             result = next(results)
             status['processed'] += 1
+            status['bar'].append('P')
 
             if cfg['cache'] in ('yes', 'refresh'):
                 _dump_cache(result, fname)
