@@ -13,7 +13,7 @@ import numpy as np
 from numpy.testing import (
     assert_array_equal
 )
-
+from nose.tools import with_setup
 import marlib as mr
 
 
@@ -21,10 +21,19 @@ def square(x):
     return x**2
 
 
+def setup_dir():
+    global cachedir
+    cachedir = tempfile.mkdtemp()
+
+def teardown_dir():
+    global cachedir
+    shutil.rmtree(cachedir, ignore_errors=True)
+
+
+
+@with_setup(setup_dir, teardown_dir)
 def test_serial_map():
 
-    cachedir = tempfile.mkdtemp()
-
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
@@ -41,7 +50,6 @@ def test_serial_map():
         cachedir=cachedir
     )
 
-    shutil.rmtree(cachedir)
 
     assert_array_equal(
         data**2,
@@ -53,9 +61,9 @@ def test_serial_map():
     )
 
 
+@with_setup(setup_dir, teardown_dir)
 def test_multiprocessing_map():
 
-    cachedir = tempfile.mkdtemp()
 
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
@@ -73,7 +81,6 @@ def test_multiprocessing_map():
         cachedir=cachedir
     )
 
-    shutil.rmtree(cachedir)
 
     assert_array_equal(
         data**2,
@@ -86,9 +93,8 @@ def test_multiprocessing_map():
 
 
 
+@with_setup(setup_dir, teardown_dir)
 def test_playdoh_map():
-
-    cachedir = tempfile.mkdtemp()
 
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
@@ -106,7 +112,6 @@ def test_playdoh_map():
         cachedir=cachedir
     )
 
-    shutil.rmtree(cachedir)
 
     assert_array_equal(
         data**2,
@@ -119,9 +124,8 @@ def test_playdoh_map():
 
 
 @unittest.skip("not working with nosetest")
+@with_setup(setup_dir, teardown_dir)
 def test_ipython_map():
-
-    cachedir = tempfile.mkdtemp()
 
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
@@ -139,7 +143,6 @@ def test_ipython_map():
         cachedir=cachedir
     )
 
-    shutil.rmtree(cachedir)
 
     assert_array_equal(
         data**2,
@@ -151,8 +154,47 @@ def test_ipython_map():
     )
 
 
+@unittest.skip("nose does not like fork")
+@with_setup(setup_dir, teardown_dir)
+def test_serial_fork_map():
+
+
+    data = np.arange(10)
+    dicts = [{'x':i} for i in data]
+
+    results1 = mr.map(
+        square,
+        dicts,
+        backend='serial_fork',
+        cachedir=cachedir
+    )
+
+    results2 = mr.map(
+        square,
+        dicts,
+        backend='serial_fork',
+        cachedir=cachedir
+    )
+
+
+    try:
+        results1 = list(results1)
+        results2 = list(results2)
+    except SystemExit:
+        pass
+
+
+    assert_array_equal(
+        data**2,
+        results1
+    )
+    assert_array_equal(
+        data**2,
+        results2
+    )
 
 
 
 if __name__ == '__main__':
+    test_serial_fork_map()
     test_ipython_map()

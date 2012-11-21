@@ -102,6 +102,35 @@ def _serial_map(func, iterable, cfg):
 
 
 
+def _serial_fork_map(func, iterable, cfg):
+
+    import multiprocessing
+
+    wrap = _FuncWrap(func)
+
+    for args in iterable:
+        parent_conn, child_conn = multiprocessing.Pipe()
+
+        pid = os.fork()
+
+        if pid:
+            ### in parent
+            child_conn.close()
+            result = parent_conn.recv()
+            parent_conn.close()
+
+        else:
+            ### in child
+            parent_conn.close()
+            result = wrap(args)
+            child_conn.send(result)
+            child_conn.close()
+            exit()
+
+        yield result
+
+
+
 
 def _multiprocessing_map(func, iterable, cfg):
 
@@ -185,7 +214,7 @@ def _publish_progress(status):
         os.makedirs(dirname)
 
     bar = (
-        ''.join(status['bar']) +
+        "".join(status['bar']) +
         "." * (status['all'] - status['loaded'] - status['processed'])
     )
     msg = "{0} + {1} / {2}\n\n{3}\n".format(
@@ -305,6 +334,8 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
         results = _playdoh_map(func, todos, cfg)
     elif cfg['backend'] == 'ipython':
         results = _ipython_map(func, todos, cfg)
+    elif cfg['backend'] == 'serial_fork':
+        results = _serial_fork_map(func, todos, cfg)
     else:
         raise RuntimeError("Unknown map() backend: {}".format(cfg['backend']))
 
