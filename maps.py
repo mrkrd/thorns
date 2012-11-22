@@ -20,6 +20,7 @@ import subprocess
 import multiprocessing
 import shutil
 import tempfile
+import string
 
 import marlib as mr
 
@@ -222,66 +223,75 @@ def _ipython_map(func, iterable, cfg):
 
 
 
-def _publish_progress(status):
-    dirname = 'work'
-    sufix = os.path.splitext(
+def _publish_status(status, where='stdout'):
+
+
+    name = os.path.splitext(
         os.path.basename(sys.argv[0])
     )[0]
-    fname = os.path.join(dirname, 'status_' + sufix)
 
-
-    if not os.path.exists(dirname):
-        os.makedirs(dirname)
-
+    ### Bar
     bar = (
         "".join(status['bar']) +
         "." * (status['all'] - status['loaded'] - status['processed'])
     )
-    msg = "{0} + {1} / {2}\n\n{3}\n".format(
-        str(status['loaded']),
-        str(status['processed']),
-        str(status['all']),
-        bar
-    )
-
-
-    with open(fname, 'w') as f:
-        f.write(msg)
-
-
-
-
-def _print_summary(status):
-
-    ### Header
-    print()
-    print("Summary:")
-    print()
-
 
     ### Histogram
+    histogram = ""
     hist,edges = np.histogram(
         status['times'],
         bins=10,
     )
-
     for h,e in zip(hist,edges):
         dt = datetime.timedelta(seconds=e)
-        lenght = h / hist.max() * 20
-        row = "{dt} | {s:<20} | {h}".format(dt=dt, s='#'*int(lenght), h=h)
-        print(row)
+        if hist.max() == 0:
+            lenght = 0
+        else:
+            lenght = h / hist.max() * 20
+        row = "{dt}  {h} |{s:<20}\n".format(dt=dt, s='|'*int(lenght), h=h)
+        histogram += row
 
 
-    ### Counts
-    print()
-    print("Mapping time: {}".format(
-        datetime.timedelta(seconds=(time.time() - status['start_time']))
-    ))
-    print()
-    print("All: {}".format(status['all']))
-    print("Loaded: {}".format(status['loaded']))
-    print("Processed: {}".format(status['processed']))
-    print()
+    msg = """
+{header}
+
+{bar}
+
+Loaded (O): {loaded}
+Processed (#): {processed}
+All: {all}
+
+
+{histogram}
+Mapping time: {time}
+
+""".format(
+    header=string.center(" Status: "+name+" ", 75, "="),
+    all=status['all'],
+    loaded=status['loaded'],
+    processed=status['processed'],
+    bar=bar,
+    histogram=histogram,
+    time=datetime.timedelta(seconds=(time.time() - status['start_time']))
+)
+
+
+
+    if where == 'file':
+        dirname = status['dir']
+        fname = os.path.join(dirname, 'status_' + name)
+
+        if not os.path.exists(dirname):
+            os.makedirs(dirname)
+
+        with open(fname, 'w') as f:
+            f.write(msg)
+
+
+    elif where == 'stdout':
+        print(msg)
+
+
 
 
 
@@ -312,7 +322,7 @@ def _get_options(backend, cache):
 
 
 
-def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'):
+def map(func, iterable, backend='serial', cache='yes', workdir='work'):
 
     cfg = _get_options(
         backend=backend,
@@ -325,9 +335,11 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
         'processed':0,
         'bar': [],
         'times':[],
-        'start_time':time.time()
+        'start_time':time.time(),
+        'dir': workdir
     }
 
+    cachedir = os.path.join(workdir, 'map_cache')
 
     cache_files = []
     hows = []
@@ -363,16 +375,16 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
 
     for how,fname in zip(hows,cache_files):
 
-        _publish_progress(status)
+        _publish_status(status, 'file')
         if how == 'load':
             result = _load_cache(fname)
             status['loaded'] += 1
-            status['bar'].append('L')
+            status['bar'].append('O')
 
         elif how == 'process':
             result = next(results)
             status['processed'] += 1
-            status['bar'].append('P')
+            status['bar'].append('#')
 
             if cfg['cache'] in ('yes', 'refresh'):
                 _dump_cache(result, fname)
@@ -386,5 +398,5 @@ def map(func, iterable, backend='serial', cache='yes', cachedir='work/map_cache'
 
         yield ans
 
-    _publish_progress(status)
-    _print_summary(status)
+    _publish_status(status, 'file')
+    _publish_status(status, 'stdout')

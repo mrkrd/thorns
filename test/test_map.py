@@ -22,12 +22,12 @@ def square(x):
 
 
 def setup_dir():
-    global cachedir
-    cachedir = tempfile.mkdtemp()
+    global workdir
+    workdir = tempfile.mkdtemp()
 
 def teardown_dir():
-    global cachedir
-    shutil.rmtree(cachedir, ignore_errors=True)
+    global workdir
+    shutil.rmtree(workdir, ignore_errors=True)
 
 
 
@@ -41,13 +41,13 @@ def test_serial_map():
         square,
         dicts,
         backend='serial',
-        cachedir=cachedir
+        workdir=workdir
     )
     results2 = mr.map(
         square,
         dicts,
         backend='serial',
-        cachedir=cachedir
+        workdir=workdir
     )
 
 
@@ -72,13 +72,13 @@ def test_multiprocessing_map():
         square,
         dicts,
         backend='multiprocessing',
-        cachedir=cachedir
+        workdir=workdir
     )
     results2 = mr.map(
         square,
         dicts,
         backend='multiprocessing',
-        cachedir=cachedir
+        workdir=workdir
     )
 
 
@@ -103,13 +103,13 @@ def test_playdoh_map():
         square,
         dicts,
         backend='playdoh',
-        cachedir=cachedir
+        workdir=workdir
     )
     results2 = mr.map(
         square,
         dicts,
         backend='playdoh',
-        cachedir=cachedir
+        workdir=workdir
     )
 
 
@@ -134,13 +134,13 @@ def test_ipython_map():
         square,
         dicts,
         backend='ipython',
-        cachedir=cachedir
+        workdir=workdir
     )
     results2 = mr.map(
         square,
         dicts,
         backend='ipython',
-        cachedir=cachedir
+        workdir=workdir
     )
 
 
@@ -165,7 +165,7 @@ def test_serial_proc_map():
         square,
         dicts,
         backend='serial_proc',
-        cachedir=cachedir
+        workdir=workdir
     )
     results1 = list(results1)
 
@@ -173,7 +173,7 @@ def test_serial_proc_map():
         square,
         dicts,
         backend='serial_proc',
-        cachedir=cachedir
+        workdir=workdir
     )
     results2 = list(results2)
 
