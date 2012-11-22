@@ -114,7 +114,7 @@ def _serial_proc_map(func, iterable, cfg):
         dirname = tempfile.mkdtemp()
         fname = os.path.join(
             dirname,
-            'mr_maps_socket'
+            'marlib_maps_socket'
         )
         p = subprocess.Popen(
             ['python', '-m', 'marlib.run_func', fname]
@@ -124,14 +124,14 @@ def _serial_proc_map(func, iterable, cfg):
         func_name = func.func_name
         data = (module_name, func_name, args)
 
-        ### make socket
+        ### make a socket
         s = socket.socket(socket.AF_UNIX)
         s.bind(fname)
         s.listen(1)
         conn, addr = s.accept()
 
 
-        ### send function and data to the child
+        ### send the function and data to the child
         f = conn.makefile('wb')
         pickle.dump(data, f, -1)
         f.close()
