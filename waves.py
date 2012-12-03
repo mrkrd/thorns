@@ -5,7 +5,7 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import numpy as np
-
+import scipy.signal as dsp
 
 
 def root_mean_square(s):
@@ -24,6 +24,20 @@ def set_dbspl(signal, dbspl):
 
     return scalled
 
+
+def resample(signal, fs, new_fs):
+    new_signal = dsp.resample(signal, len(signal)*new_fs/fs)
+    return new_signal
+
+
+
+def cut_add(a,b):
+    assert a.ndim == b.ndim == 1
+
+    length = min([len(a), len(b)])
+    s = a[0:length] + b[0:length]
+
+    return s
 
 
 

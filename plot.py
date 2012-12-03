@@ -14,7 +14,7 @@ import marlib as mr
 
 
 
-def plot(data, kind=None):
+def plot(data, fs=None, kind=None):
 
     backend = mr.args.plot
 
@@ -32,13 +32,17 @@ def plot(data, kind=None):
             kind = 'imshow'
 
 
+    if fs is None:
+        fs = 1
+
 
 
     import matplotlib.pyplot as plt
     fig, ax = plt.subplots(1,1)
 
     if kind in ('vector', 'plot'):
-        ax.plot(data)
+        time = np.arange(len(data)) / fs
+        ax.plot(time, data)
 
     elif kind in ('imshow', 'matrix'):
         ax.imshow(data, aspect='auto')

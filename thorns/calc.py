@@ -8,8 +8,8 @@ import numpy as np
 
 
 def get_duration(spike_trains):
-    assert np.all(spike_trains['duration'] == spike_trains['duration'][0])
-    duration = spike_trains['duration'][0]
+    duration = spike_trains['duration'].values[0]
+    assert np.all(spike_trains['duration'] == duration)
 
     return duration
 

@@ -78,11 +78,11 @@ def test_calc_sac():
 
 
 def test_calc_psth():
+
     trains = th.make_trains(
         [[0.5, 1.5, 2.5],
          [0.5, 2.5]]
     )
-
 
     psth, bin_edges = th.calc_psth(
         trains,
@@ -246,4 +246,3 @@ def test_calc_si():
         freq=10
     )
     assert_equal(si, 1)
-
