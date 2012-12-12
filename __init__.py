@@ -30,7 +30,7 @@ parser.add_argument(
     '--plot',
     dest='plot',
     nargs='?',
-    const='png'
+    const='show'
 )
 
 

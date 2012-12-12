@@ -15,6 +15,22 @@ rms = root_mean_square
 
 
 
+def filter(signal, fs, band):
+
+    lo, hi = band
+
+    freqs = np.linspace(0, fs/2, len(signal)/2+1)
+
+
+    signal_fft = np.fft.rfft(signal)
+    signal_fft[ (freqs < lo) | (freqs > hi) ] = 0
+
+    filtered = np.fft.irfft(signal_fft)
+
+    return filtered
+
+
+
 
 def set_dbspl(signal, dbspl):
     p0 = 20e-6

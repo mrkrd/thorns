@@ -107,10 +107,38 @@ def loaddb(dbdir=None):
 
     db = pd.DataFrame(db, index=index)
 
+    # Has to wrap arrays to be able to compare them
+    _wrap_arrays(db)
     db.drop_duplicates(
         cols=list(pars_keys),
         take_last=True,
         inplace=True
     )
+    _unwrap_arrays(db)
 
     return db
+
+
+
+
+class ArrayCompareWrapper(object):
+    def __init__(self, arr):
+        self.arr = arr
+    def __eq__(self, other):
+        return np.all(self.arr == other.arr)
+
+
+def _wrap_arrays(db):
+    for col in db.columns:
+        for idx in db.index:
+            val = db[col][idx]
+            if isinstance(val, np.ndarray):
+                db[col][idx] = ArrayCompareWrapper(val)
+
+
+def _unwrap_arrays(db):
+    for col in db.columns:
+        for idx in db.index:
+            val = db[col][idx]
+            if isinstance(val, ArrayCompareWrapper):
+                db[col][idx] = val.arr
