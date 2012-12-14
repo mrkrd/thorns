@@ -253,8 +253,6 @@ def _publish_status(status, where='stdout'):
 
 
     msg = """
-{header}
-
 {bar}
 
 Loaded (O): {loaded}
@@ -266,7 +264,6 @@ All: {all}
 Mapping time: {time}
 
 """.format(
-    header=string.center(" Status: "+name+" ", 75, "="),
     all=status['all'],
     loaded=status['loaded'],
     processed=status['processed'],
