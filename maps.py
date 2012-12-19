@@ -357,7 +357,7 @@ def map(func, iterable, backend='serial', cache='yes', workdir='work'):
 
     if cfg['backend'] == 'serial':
         results = _serial_map(func, todos, cfg)
-    elif cfg['backend'] == 'multiprocessing':
+    elif cfg['backend'] in ('multiprocessing', 'm'):
         results = _multiprocessing_map(func, todos, cfg)
     elif cfg['backend'] == 'playdoh':
         results = _playdoh_map(func, todos, cfg)
