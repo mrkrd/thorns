@@ -47,7 +47,7 @@ def calc_psth(spike_trains, bin_size, normalize=True):
 
 
 
-def calc_isih(spike_trains, bin_size=1e-3, normalize=True):
+def calc_isih(spike_trains, bin_size, normalize=True):
     """Calculate inter-spike interval histogram."""
 
     isis = np.concatenate(
@@ -278,6 +278,26 @@ calc_sac = calc_shuffled_autocorrelogram
 
 
 
+def calc_period_histogram(
+        spike_trains,
+        freq,
+        nbins=64,               # int(spike_fs / freq)
+        normalize=True):
+
+
+    all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
+    folded = np.fmod(all_spikes, 1/freq)
+    normalized = folded * freq
+
+    hist, bin_edges = np.histogram(
+        normalized,
+        bins=nbins,
+        range=(0, 1),
+        normed=normalize
+    )
+
+
+    return hist, bin_edges
 
 
 

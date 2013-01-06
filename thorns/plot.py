@@ -6,8 +6,8 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 
-from . import spikes
-from . import calc
+from marlib.thorns import spikes
+from marlib.thorns import calc
 
 golden = 1.6180339887
 
@@ -126,54 +126,45 @@ def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
 #     return plot
 
 
-# def period_histogram(spike_trains,
-#                      stimulus_freq,
-#                      nbins=64,
-#                      spike_fs=None,
-#                      center=False,
-#                      plot=None,
-#                      label=None,
-#                      **style):
-#     """Plots period histogram."""
-
-#     trains = spike_trains['spikes']
-
-#     # Align bins to sampling frequency, if given
-#     if spike_fs is not None:
-#         nbins = int(spike_fs / stimulus_freq)
-
-#     all_spikes = np.concatenate(tuple(trains))
-#     folded = np.fmod(all_spikes, 1/stimulus_freq)
-#     normalized = folded * stimulus_freq
-
-#     print "Make sure that np.histogram get the right number of bins"
-
-#     hist, edges = np.histogram(
-#         normalized,
-#         bins=nbins,
-#         range=(0, 1),
-#         normed=True
-#     )
-
-#     ### TODO: find the direction instead of max value
-#     if center:
-#         center_idx = hist.argmax()
-#         hist = np.roll(hist, nbins//2 - center_idx)
-
-#     c = biggles.Histogram(hist, x0=0, binsize=1/len(hist))
-
-#     c.style(**style)
-#     if label is not None:
-#         c.label = label
+def plot_period_histogram(
+        spike_trains,
+        freq,
+        nbins=64,
+        normalize=True,
+        axis=None,
+        fmt='k-',
+        **kwargs):
+    """Plots period histogram."""
 
 
-#     if plot is None:
-#         plot = biggles.FramedPlot()
-#     plot.xlabel = "Normalized Phase"
-#     plot.ylabel = "Probability Density Function"
-#     plot.add(c)
+    hist, bin_edges = calc.calc_period_histogram(
+        spike_trains,
+        freq=freq,
+        nbins=nbins,
+        normalize=normalize
+    )
 
-#     return plot
+
+
+    if axis is None:
+        import matplotlib.pyplot as plt
+        axis = plt.gca()
+
+
+    axis.plot(
+        bin_edges[:-1],
+        hist,
+        fmt,
+        drawstyle='steps-post',
+        **kwargs
+    )
+
+
+    axis.set_xlabel("Normalized Phase")
+    axis.set_ylabel("Probability Density Function")
+
+    return axis
+
 
 
 def plot_sac(

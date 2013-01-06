@@ -45,7 +45,9 @@ from calc import (
     calc_si,
 
     count_spikes,
-    count
+    count,
+
+    calc_period_histogram
 )
 
 from plot import (
@@ -53,5 +55,6 @@ from plot import (
     plot_psth,
     plot_neurogram,
     plot_sac,
+    plot_period_histogram,
     show
 )
