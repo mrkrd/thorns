@@ -5,6 +5,7 @@ from __future__ import division
 __author__ = "Marek Rudnicki"
 
 import numpy as np
+import pandas as pd
 
 
 def get_duration(spike_trains):
@@ -100,6 +101,9 @@ def calc_entrainment(spike_trains, freq, bin_size=1e-3):
 def calc_synchronization_index(spike_trains, freq):
     """Calculate synchronization index aka vector strength."""
 
+    if isinstance(spike_trains, pd.Series):
+        spike_trains = pd.DataFrame(spike_trains).T
+
     all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
 
     if len(all_spikes) == 0:
@@ -157,6 +161,9 @@ calc_si = calc_synchronization_index
 
 def calc_firing_rate(spike_trains):
     """Calculates average firing rate."""
+
+    if isinstance(spike_trains, pd.Series):
+        spike_trains = pd.DataFrame(spike_trains).T
 
     duration = np.sum( spike_trains['duration'] )
 
