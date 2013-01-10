@@ -58,7 +58,10 @@ from dumpdb import (
     dumpdb,
     loaddb
 )
-from maps import map
+from maps import (
+    map,
+    apply
+)
 from plot import plot
 
 

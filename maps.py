@@ -64,8 +64,10 @@ def _apply_data(func, data):
 
 
 
-def _calc_pkl_name(obj, cachedir):
-    pkl = pickle.dumps(obj, -1)
+def _calc_pkl_name(obj, func, cachedir):
+    src = inspect.getsource(func)
+
+    pkl = pickle.dumps((obj, src), -1)
     h = hashlib.sha1(pkl).hexdigest()
 
     pkl_name = os.path.join(
@@ -317,6 +319,14 @@ def _get_options(backend, cache):
 
 
 
+def apply(func, workdir='work', **kwargs):
+
+    results = map(func, [kwargs], workdir=workdir)
+    result = list(results)[0]
+
+    return result
+
+
 
 
 def map(func, iterable, backend='serial', cache='yes', workdir='work'):
@@ -342,7 +352,7 @@ def map(func, iterable, backend='serial', cache='yes', workdir='work'):
     hows = []
     todos = []
     for args in iterable:
-        fname = _calc_pkl_name(args, cachedir)
+        fname = _calc_pkl_name(args, func, cachedir)
         cache_files.append(fname)
 
         status['all'] += 1
