@@ -250,7 +250,7 @@ def _publish_status(status, where='stdout'):
             lenght = 0
         else:
             lenght = h / hist.max() * 20
-        row = "{dt}  {h} |{s:<20}\n".format(dt=dt, s='|'*int(lenght), h=h)
+        row = " {dt}  {h:>4} |{s:<20}\n".format(dt=dt, s='|'*int(lenght), h=h)
         histogram += row
 
 
@@ -259,11 +259,10 @@ def _publish_status(status, where='stdout'):
 
 Loaded (O): {loaded}
 Processed (#): {processed}
-All: {all}
-
 
 {histogram}
-Mapping time: {time}
+--------------------
+Time: {time}
 
 """.format(
     all=status['all'],
