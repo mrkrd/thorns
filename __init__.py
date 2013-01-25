@@ -39,16 +39,15 @@ args = parser.parse_known_args()[0]
 
 
 if args.loglevel is None:
-    logging.basicConfig(level=logging.INFO)
+    loglevel = logging.INFO
 else:
-    numeric_level = getattr(logging, args.loglevel.upper(), None)
-    if not isinstance(numeric_level, int):
+    loglevel = getattr(logging, args.loglevel.upper(), None)
+    if not isinstance(loglevel, int):
         raise ValueError('Invalid log level: %s' % loglevel)
-    logging.basicConfig(level=numeric_level)
 
+logging.getLogger().setLevel(loglevel)
 
 logging.debug(args)
-
 
 
 import thorns
