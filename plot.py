@@ -14,7 +14,7 @@ import marlib as mr
 
 
 
-def plot(data, fs=None, kind=None):
+def plot(y=None, x=None, fs=None, kind=None):
 
     backend = mr.args.plot
 
@@ -22,18 +22,23 @@ def plot(data, fs=None, kind=None):
         return
 
 
-
-    if kind is None:
-        if isinstance(data, np.ndarray) and data.ndim == 1:
-            kind = 'vector'
-        elif isinstance(data, list):
-            kind = 'vector'
-        elif isinstance(data, np.ndarray) and data.ndim == 2:
-            kind = 'imshow'
-
-
     if fs is None:
         fs = 1
+
+    if x is None:
+        x = np.arange(len(y)) / fs
+
+
+
+
+    if kind is None:
+        if isinstance(y, np.ndarray) and y.ndim == 1:
+            kind = 'vector'
+        elif isinstance(y, list):
+            kind = 'vector'
+        elif isinstance(y, np.ndarray) and y.ndim == 2:
+            kind = 'imshow'
+
 
 
 
@@ -41,11 +46,10 @@ def plot(data, fs=None, kind=None):
     fig, ax = plt.subplots(1,1)
 
     if kind in ('vector', 'plot'):
-        time = np.arange(len(data)) / fs
-        ax.plot(time, data)
+        ax.plot(x, y)
 
     elif kind in ('imshow', 'matrix'):
-        ax.imshow(data, aspect='auto')
+        ax.imshow(y, aspect='auto')
 
     else:
         raise RuntimeError("Plot kind {} not implemented".format(kind))
