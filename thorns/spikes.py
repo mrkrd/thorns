@@ -7,12 +7,11 @@ __author__ = "Marek Rudnicki"
 
 import random
 import numpy as np
+import pandas as pd
 
 from collections import Iterable
 
-import pandas as pd
-
-from . import calc
+from marlib.thorns.calc import get_duration
 
 
 
@@ -134,7 +133,7 @@ def _array_to_trains(array, fs, **meta):
 def trains_to_array(spike_trains, fs):
     """Convert spike trains to signals."""
 
-    duration = calc.get_duration(spike_trains)
+    duration = get_duration(spike_trains)
 
     nbins = np.ceil(duration * fs)
     tmax = nbins / fs

@@ -6,6 +6,7 @@ __author__ = "Marek Rudnicki"
 import argparse
 import logging
 import os
+import sys
 
 parser = argparse.ArgumentParser()
 parser.add_argument(
@@ -14,28 +15,41 @@ parser.add_argument(
 )
 parser.add_argument(
     '--backend',
-    dest='backend'
 )
 parser.add_argument(
     '--machines',
-    dest='machines',
     nargs='+',
     default=[]
 )
 parser.add_argument(
-    '--cache',
-    dest='cache'
+    '--cache'
 )
 parser.add_argument(
     '--plot',
-    dest='plot',
     nargs='?',
     const='show'
 )
+parser.add_argument(
+    '--pdb',
+    action='store_true'
+)
+parser.add_argument(
+    '--files',
+    nargs='+'
+)
+
 
 
 args = parser.parse_known_args()[0]
 
+
+
+if args.pdb:
+    import pdb, sys, traceback
+    def info(type, value, tb):
+        traceback.print_exception(type, value, tb)
+        pdb.pm()
+    sys.excepthook = info
 
 
 if args.loglevel is None:
