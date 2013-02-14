@@ -15,7 +15,7 @@ rms = root_mean_square
 
 
 
-def filter(signal, fs, band):
+def fft_filter(signal, fs, band):
 
     lo, hi = band
 

@@ -34,8 +34,8 @@ parser.add_argument(
     action='store_true'
 )
 parser.add_argument(
-    '--files',
-    nargs='+'
+    'files',
+    nargs='*'
 )
 
 
