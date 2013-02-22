@@ -12,6 +12,9 @@ import os
 import marlib as mr
 
 
+def show():
+    import matplotlib.pyplot as plt
+    plt.show()
 
 
 def plot(y=None, x=None, fs=None, kind=None):

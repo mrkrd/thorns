@@ -75,7 +75,10 @@ from maps import (
     map,
     apply
 )
-from plot import plot
+from plot import (
+    plot,
+    show
+)
 
 
 def mkdir(dirname):
