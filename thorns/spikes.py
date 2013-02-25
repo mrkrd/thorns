@@ -165,17 +165,19 @@ def accumulate_spike_trains(spike_trains, ignore=None, keep=None):
 
     """
 
+    assert None in (ignore, keep)
+
     keys = spike_trains.columns.tolist()
 
     if ignore is not None:
-        assert keep is None
         for k in ignore:
             keys.remove(k)
 
-
     if keep is not None:
-        assert ignore is None
         keys = keep
+
+    if 'duration' not in keys:
+        keys.append('duration')
 
     if 'spikes' in keys:
         keys.remove('spikes')
