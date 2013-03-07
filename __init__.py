@@ -64,8 +64,6 @@ logging.getLogger().setLevel(loglevel)
 logging.debug(args)
 
 
-import thorns
-import waves
 
 from dumpdb import (
     dumpdb,
