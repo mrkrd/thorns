@@ -5,7 +5,6 @@ from __future__ import print_function
 
 __author__ = "Marek Rudnicki"
 
-
 import cPickle as pickle
 import hashlib
 import os
