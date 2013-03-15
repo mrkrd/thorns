@@ -362,7 +362,6 @@ def map(func, iterable, backend='serial', cache='yes', workdir='work'):
             todos.append(args)
 
 
-
     if cfg['backend'] == 'serial':
         results = _serial_map(func, todos, cfg)
     elif cfg['backend'] in ('multiprocessing', 'm'):
