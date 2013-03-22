@@ -56,5 +56,11 @@ from plot import (
     plot_neurogram,
     plot_sac,
     plot_period_histogram,
-    show
 )
+
+from mar import show
+
+def gcf():
+    import matplotlib.pyplot as plt
+    fig = plt.gcf()
+    return fig

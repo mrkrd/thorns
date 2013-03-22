@@ -8,6 +8,7 @@ import logging
 import os
 import sys
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument(
     '--log',
@@ -65,17 +66,23 @@ logging.debug(args)
 
 
 
-from dumpdb import (
+from mar.dumpdb import (
     dumpdb,
-    loaddb
+    loaddb,
 )
-from maps import (
+
+from mar.maps import (
     map,
-    apply
+    apply,
 )
-from plot import (
+
+from mar.plot import (
     plot,
-    show
+    show,
+)
+
+from mar.waves import (
+    resample,
 )
 
 

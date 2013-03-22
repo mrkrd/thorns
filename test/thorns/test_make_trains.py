@@ -11,7 +11,7 @@ from pprint import pprint
 
 import pandas as pd
 
-import marlib.thorns as th
+import mar.thorns as th
 
 
 def assert_trains_equal(a,b, almost=False):

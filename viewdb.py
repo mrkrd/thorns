@@ -5,11 +5,11 @@ from __future__ import print_function
 
 __author__ = "Marek Rudnicki"
 
-import marlib as mr
+import mar
 
 def main():
 
-    db = mr.loaddb()
+    db = mar.loaddb()
 
     print()
     print(db.to_string())

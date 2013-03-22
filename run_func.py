@@ -11,7 +11,7 @@ import cPickle as pickle
 import sys
 import imp
 
-from marlib.maps import _FuncWrap
+from mar.maps import _FuncWrap
 
 def main():
     socket_fname = sys.argv[1]

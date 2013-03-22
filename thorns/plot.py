@@ -6,8 +6,8 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 
-from marlib.thorns import spikes
-from marlib.thorns import calc
+from mar.thorns import spikes
+from mar.thorns import calc
 
 golden = 1.6180339887
 
@@ -205,9 +205,6 @@ def plot_sac(
     return axis
 
 
-def show():
-    import matplotlib.pyplot as plt
-    plt.show()
 
 
 
