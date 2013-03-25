@@ -12,7 +12,7 @@ from numpy.testing import (
     assert_almost_equal
 )
 
-import mar.thorns as th
+import marlab.thorns as th
 
 
 

@@ -14,7 +14,7 @@ from numpy.testing import (
     assert_array_equal
 )
 from nose.tools import with_setup
-import mar
+import marlab as mr
 
 
 def square(x):
@@ -37,13 +37,13 @@ def test_serial_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mar.map(
+    results1 = mr.map(
         square,
         dicts,
         backend='serial',
         workdir=workdir
     )
-    results2 = mar.map(
+    results2 = mr.map(
         square,
         dicts,
         backend='serial',
@@ -68,13 +68,13 @@ def test_multiprocessing_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mar.map(
+    results1 = mr.map(
         square,
         dicts,
         backend='multiprocessing',
         workdir=workdir
     )
-    results2 = mar.map(
+    results2 = mr.map(
         square,
         dicts,
         backend='multiprocessing',
@@ -99,13 +99,13 @@ def test_playdoh_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mar.map(
+    results1 = mr.map(
         square,
         dicts,
         backend='playdoh',
         workdir=workdir
     )
-    results2 = mar.map(
+    results2 = mr.map(
         square,
         dicts,
         backend='playdoh',
@@ -130,13 +130,13 @@ def test_ipython_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mar.map(
+    results1 = mr.map(
         square,
         dicts,
         backend='ipython',
         workdir=workdir
     )
-    results2 = mar.map(
+    results2 = mr.map(
         square,
         dicts,
         backend='ipython',
@@ -161,7 +161,7 @@ def test_serial_proc_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mar.map(
+    results1 = mr.map(
         square,
         dicts,
         backend='serial_proc',
@@ -169,7 +169,7 @@ def test_serial_proc_map():
     )
     results1 = list(results1)
 
-    results2 = mar.map(
+    results2 = mr.map(
         square,
         dicts,
         backend='serial_proc',

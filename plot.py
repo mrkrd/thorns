@@ -9,7 +9,7 @@ import numpy as np
 import datetime
 import os
 
-import mar
+import marlab as mr
 
 
 def show():
@@ -19,7 +19,7 @@ def show():
 
 def plot(y=None, x=None, fs=None, kind=None):
 
-    backend = mar.args.plot
+    backend = mr.args.plot
 
     if backend is None:
         return
@@ -66,11 +66,11 @@ def plot(y=None, x=None, fs=None, kind=None):
     fname = os.path.join(dirname, time_str + "__" + kind + "." + backend)
 
     if backend == 'png':
-        mar.mkdir(dirname)
+        mr.mkdir(dirname)
         fig.savefig(fname)
 
     elif backend == 'pdf':
-        mar.mkdir(dirname)
+        mr.mkdir(dirname)
         fig.savefig(fname)
 
     elif backend == 'show':

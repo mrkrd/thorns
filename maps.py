@@ -21,7 +21,7 @@ import shutil
 import tempfile
 import string
 
-import mar
+import marlab as mr
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ def _serial_proc_map(func, iterable, cfg):
             'mar_maps_socket'
         )
         p = subprocess.Popen(
-            ['python', '-m', 'mar.run_func', fname]
+            ['python', '-m', 'mr.run_func', fname]
         )
 
         module_name = inspect.getfile(func)
@@ -297,20 +297,20 @@ def _get_options(backend, cache):
 
     cfg = {}
 
-    if mar.args.backend is None:
+    if mr.args.backend is None:
         cfg['backend'] = backend
     else:
-        cfg['backend'] = mar.args.backend
+        cfg['backend'] = mr.args.backend
 
 
-    if mar.args.machines is not None:
-        cfg['machines'] = mar.args.machines
+    if mr.args.machines is not None:
+        cfg['machines'] = mr.args.machines
 
 
-    if mar.args.cache is None:
+    if mr.args.cache is None:
         cfg['cache'] = cache
     else:
-        cfg['cache'] = mar.args.cache
+        cfg['cache'] = mr.args.cache
 
     return cfg
 

@@ -58,7 +58,7 @@ from plot import (
     plot_period_histogram,
 )
 
-from mar import show
+from marlab import show
 
 def gcf():
     import matplotlib.pyplot as plt

@@ -6,8 +6,8 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 
-from mar.thorns import spikes
-from mar.thorns import calc
+from marlab.thorns import spikes
+from marlab.thorns import calc
 
 golden = 1.6180339887
 
