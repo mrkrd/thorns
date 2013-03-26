@@ -8,10 +8,26 @@ import numpy as np
 import scipy.signal as dsp
 
 
-def root_mean_square(s):
-    return np.sqrt( np.sum(s**2) / s.size )
 
-rms = root_mean_square
+def calc_signal_to_noise_ratio_db(signal, noise):
+    assert signal.shape == noise.shape
+
+    snr_db = 20 * np.log10(
+        calc_rms(signal) / calc_rms(noise)
+    )
+
+    return snr_db
+
+
+calc_snr_db = calc_signal_to_noise_ratio_db
+snr = calc_signal_to_noise_ratio_db
+
+
+def calc_root_mean_square(signal):
+    return np.sqrt( np.sum(signal**2) / signal.size )
+
+calc_rms = calc_root_mean_square
+rms = calc_root_mean_square
 
 
 
@@ -47,13 +63,14 @@ def resample(signal, fs, new_fs):
 
 
 
-def cut_add(a,b):
+def trim(a,b):
     assert a.ndim == b.ndim == 1
 
     length = min([len(a), len(b)])
-    s = a[0:length] + b[0:length]
+    aa = a[0:length]
+    bb = b[0:length]
 
-    return s
+    return aa, bb
 
 
 
