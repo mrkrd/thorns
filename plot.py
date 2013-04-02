@@ -9,7 +9,7 @@ import numpy as np
 import datetime
 import os
 
-import marlab as mr
+import elmar as mr
 
 
 def show():

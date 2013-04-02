@@ -5,7 +5,7 @@ from __future__ import print_function
 
 __author__ = "Marek Rudnicki"
 
-import marlab as mr
+import elmar as mr
 
 def main():
 

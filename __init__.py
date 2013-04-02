@@ -66,22 +66,22 @@ logging.debug(args)
 
 
 
-from marlab.dumpdb import (
+from elmar.dumpdb import (
     dumpdb,
     loaddb,
 )
 
-from marlab.maps import (
+from elmar.maps import (
     map,
     apply,
 )
 
-from marlab.plot import (
+from elmar.plot import (
     plot,
     show,
 )
 
-from marlab.waves import (
+from elmar.waves import (
     resample,
 )
 

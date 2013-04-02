@@ -21,7 +21,7 @@ import shutil
 import tempfile
 import string
 
-import marlab as mr
+import elmar as mr
 
 logger = logging.getLogger(__name__)
 
