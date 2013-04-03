@@ -63,7 +63,7 @@ def _apply_data(func, data):
 
 
 
-def _calc_pkl_name(obj, func, cachedir):
+def _pkl_name(obj, func, cachedir):
     src = inspect.getsource(func)
 
     pkl = pickle.dumps((obj, src), -1)
@@ -109,7 +109,7 @@ def _serial_map(func, iterable, cfg):
 
 
 
-def _serial_proc_map(func, iterable, cfg):
+def _isolated_serial_map(func, iterable, cfg):
 
 
     for args in iterable:
@@ -119,7 +119,7 @@ def _serial_proc_map(func, iterable, cfg):
             'mar_maps_socket'
         )
         p = subprocess.Popen(
-            ['python', '-m', 'mr.run_func', fname]
+            ['python', '-m', 'elmar.run_func', fname]
         )
 
         module_name = inspect.getfile(func)
@@ -317,6 +317,8 @@ def _get_options(backend, cache):
 
 
 
+
+
 def apply(func, workdir='work', **kwargs):
 
     results = map(func, [kwargs], workdir=workdir)
@@ -350,7 +352,7 @@ def map(func, iterable, backend='serial', cache='yes', workdir='work'):
     hows = []
     todos = []
     for args in iterable:
-        fname = _calc_pkl_name(args, func, cachedir)
+        fname = _pkl_name(args, func, cachedir)
         cache_files.append(fname)
 
         status['all'] += 1
@@ -370,8 +372,8 @@ def map(func, iterable, backend='serial', cache='yes', workdir='work'):
         results = _playdoh_map(func, todos, cfg)
     elif cfg['backend'] == 'ipython':
         results = _ipython_map(func, todos, cfg)
-    elif cfg['backend'] == 'serial_proc':
-        results = _serial_proc_map(func, todos, cfg)
+    elif cfg['backend'] == 'serial_isolated':
+        results = _isolated_serial_map(func, todos, cfg)
     else:
         raise RuntimeError("Unknown map() backend: {}".format(cfg['backend']))
 

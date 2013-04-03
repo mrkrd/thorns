@@ -16,7 +16,7 @@ import elmar.thorns as th
 
 
 
-def test_calc_firing_rate():
+def test_firing_rate():
 
     trains = th.make_trains(
         [[0.1, 0.4],
@@ -24,7 +24,7 @@ def test_calc_firing_rate():
         duration=1
     )
 
-    rate = th.calc_firing_rate(
+    rate = th.firing_rate(
         trains
     )
 
@@ -32,7 +32,7 @@ def test_calc_firing_rate():
 
 
 
-def test_calc_ci():
+def test_ci():
 
     trains = th.make_trains(
         [[1,3],
@@ -40,7 +40,7 @@ def test_calc_ci():
     )
 
 
-    ci = th.calc_ci(
+    ci = th.ci(
         trains,
         normalize=False
     )
@@ -50,14 +50,14 @@ def test_calc_ci():
 
 
 
-def test_calc_sac():
+def test_sac():
 
     trains = th.make_trains(
         [[1,3],
          [1,2,3]]
     )
 
-    sac, bin_edges = th.calc_sac(
+    sac, bin_edges = th.sac(
         trains,
         coincidence_window=1,
         analysis_window=3,
@@ -77,14 +77,14 @@ def test_calc_sac():
 
 
 
-def test_calc_psth():
+def test_psth():
 
     trains = th.make_trains(
         [[0.5, 1.5, 2.5],
          [0.5, 2.5]]
     )
 
-    psth, bin_edges = th.calc_psth(
+    psth, bin_edges = th.psth(
         trains,
         bin_size=1,
         normalize=False
@@ -102,11 +102,11 @@ def test_calc_psth():
 
 
 
-def test_calc_psth_with_empty_trains():
+def test_psth_with_empty_trains():
     trains = th.make_trains(
         [[], []]
     )
-    psth, bin_edges = th.calc_psth(
+    psth, bin_edges = th.psth(
         trains,
         bin_size=1,
         normalize=False
@@ -122,7 +122,7 @@ def test_calc_psth_with_empty_trains():
         [[], []],
         duration=2
     )
-    psth, bin_edges = th.calc_psth(
+    psth, bin_edges = th.psth(
         trains,
         bin_size=1,
         normalize=False
@@ -147,7 +147,7 @@ def test_firint_rate():
     )
 
 
-    rate = th.calc_rate(trains)
+    rate = th.rate(trains)
 
 
     assert_equal(rate, 1.)
@@ -168,13 +168,13 @@ def test_count_spikes():
 
 
 
-def test_calc_isih():
+def test_isih():
 
     trains = th.make_trains(
         [[1,2,3], [2,5,8]]
     )
 
-    isih, bin_edges = th.calc_isih(
+    isih, bin_edges = th.isih(
         trains,
         bin_size=1,
         normalize=False
@@ -191,13 +191,13 @@ def test_calc_isih():
 
 
 
-def test_calc_entrainment():
+def test_entrainment():
 
     trains = th.make_trains(
         [[1, 2, 3], [0, 2, 4]]
     )
 
-    ent = th.calc_entrainment(
+    ent = th.entrainment(
         trains,
         freq=1,
         bin_size=0.1
@@ -213,7 +213,7 @@ def test_calc_entrainment():
         [[1], []]
     )
 
-    ent = th.calc_entrainment(
+    ent = th.entrainment(
         trains,
         freq=1,
         bin_size=0.1
@@ -223,13 +223,13 @@ def test_calc_entrainment():
 
 
 
-def test_calc_si():
+def test_si():
 
     trains = th.make_trains(
         [np.linspace(0, 1, 1000)]
     )
 
-    si = th.calc_si(
+    si = th.si(
         trains,
         freq=10
     )
@@ -241,7 +241,7 @@ def test_calc_si():
     trains = th.make_trains(
         [np.zeros(100)]
     )
-    si = th.calc_si(
+    si = th.si(
         trains,
         freq=10
     )

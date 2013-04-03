@@ -26,28 +26,28 @@ from spikes import (
 from calc import (
     get_duration,
 
-    calc_shuffled_autocorrelogram,
-    calc_sac,
+    shuffled_autocorrelogram,
+    sac,
 
-    calc_correlation_index,
-    calc_ci,
+    correlation_index,
+    ci,
 
-    calc_firing_rate,
-    calc_rate,
+    firing_rate,
+    rate,
 
-    calc_psth,
+    psth,
 
-    calc_isih,
+    isih,
 
-    calc_entrainment,
+    entrainment,
 
-    calc_synchronization_index,
-    calc_si,
+    synchronization_index,
+    si,
 
     count_spikes,
     count,
 
-    calc_period_histogram
+    period_histogram
 )
 
 from plot import (

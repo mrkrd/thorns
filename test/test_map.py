@@ -155,7 +155,7 @@ def test_ipython_map():
 
 
 @with_setup(setup_dir, teardown_dir)
-def test_serial_proc_map():
+def test_isolated_serial_map():
 
 
     data = np.arange(10)
@@ -164,7 +164,7 @@ def test_serial_proc_map():
     results1 = mr.map(
         square,
         dicts,
-        backend='serial_proc',
+        backend='serial_isolated',
         workdir=workdir
     )
     results1 = list(results1)
@@ -172,7 +172,7 @@ def test_serial_proc_map():
     results2 = mr.map(
         square,
         dicts,
-        backend='serial_proc',
+        backend='serial_isolated',
         workdir=workdir
     )
     results2 = list(results2)

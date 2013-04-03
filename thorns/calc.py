@@ -17,7 +17,7 @@ def get_duration(spike_trains):
 
 
 
-def calc_psth(spike_trains, bin_size, normalize=True):
+def psth(spike_trains, bin_size, normalize=True):
 
     duration = get_duration(spike_trains)
     trial_num = len(spike_trains)
@@ -48,7 +48,7 @@ def calc_psth(spike_trains, bin_size, normalize=True):
 
 
 
-def calc_isih(spike_trains, bin_size, normalize=True):
+def isih(spike_trains, bin_size, normalize=True):
     """Calculate inter-spike interval histogram."""
 
     isis = np.concatenate(
@@ -72,10 +72,10 @@ def calc_isih(spike_trains, bin_size, normalize=True):
 
 
 
-def calc_entrainment(spike_trains, freq, bin_size=1e-3):
+def entrainment(spike_trains, freq, bin_size=1e-3):
     """Calculate entrainment."""
 
-    hist, bin_edges = calc_isih(
+    hist, bin_edges = isih(
         spike_trains,
         bin_size=bin_size
     )
@@ -98,7 +98,7 @@ def calc_entrainment(spike_trains, freq, bin_size=1e-3):
 
 
 
-def calc_synchronization_index(spike_trains, freq):
+def synchronization_index(spike_trains, freq):
     """Calculate synchronization index aka vector strength."""
 
     if isinstance(spike_trains, pd.Series):
@@ -130,7 +130,7 @@ def calc_synchronization_index(spike_trains, freq):
     return r
 
 
-calc_si = calc_synchronization_index
+si = synchronization_index
 
 
 
@@ -159,7 +159,7 @@ calc_si = calc_synchronization_index
 #     print shuffle_spikes(spikes)
 
 
-def calc_firing_rate(spike_trains):
+def firing_rate(spike_trains):
     """Calculates average firing rate."""
 
     if isinstance(spike_trains, pd.Series):
@@ -175,7 +175,7 @@ def calc_firing_rate(spike_trains):
     return rate
 
 
-calc_rate = calc_firing_rate
+rate = firing_rate
 
 
 
@@ -187,7 +187,7 @@ count = count_spikes
 
 
 
-def calc_correlation_index(
+def correlation_index(
         spike_trains,
         coincidence_window=50e-6,
         normalize=True):
@@ -215,7 +215,7 @@ def calc_correlation_index(
 
     if normalize:
         trial_num = len(spike_trains)
-        firing_rate = calc_firing_rate(spike_trains)
+        firing_rate = firing_rate(spike_trains)
         duration = get_duration(spike_trains)
 
         norm = trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * duration
@@ -229,10 +229,10 @@ def calc_correlation_index(
     return ci
 
 
-calc_ci = calc_correlation_index
+ci = correlation_index
 
 
-def calc_shuffled_autocorrelogram(
+def shuffled_autocorrelogram(
         spike_trains,
         coincidence_window=50e-6,
         analysis_window=5e-3,
@@ -267,7 +267,7 @@ def calc_shuffled_autocorrelogram(
     )
 
     if normalize:
-        firing_rate = calc_firing_rate(spike_trains)
+        firing_rate = firing_rate(spike_trains)
         norm = trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * duration
         sac_half = hist / norm
     else:
@@ -280,12 +280,12 @@ def calc_shuffled_autocorrelogram(
     return sac, bin_edges
 
 
-calc_sac = calc_shuffled_autocorrelogram
+sac = shuffled_autocorrelogram
 
 
 
 
-def calc_period_histogram(
+def period_histogram(
         spike_trains,
         freq,
         nbins=64,               # int(spike_fs / freq)

@@ -81,7 +81,7 @@ def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
     """Plots PSTH of spike_trains."""
 
 
-    psth, bin_edges = calc.calc_psth(
+    psth, bin_edges = calc.psth(
         spike_trains,
         bin_size
     )
@@ -137,7 +137,7 @@ def plot_period_histogram(
     """Plots period histogram."""
 
 
-    hist, bin_edges = calc.calc_period_histogram(
+    hist, bin_edges = calc.period_histogram(
         spike_trains,
         freq=freq,
         nbins=nbins,
@@ -177,7 +177,7 @@ def plot_sac(
         **kwargs):
     """Plot shuffled autocorrelogram (SAC) (Joris 2006)"""
 
-    sac, bin_edges = calc.calc_sac(
+    sac, bin_edges = calc.sac(
         spike_trains,
         coincidence_window=coincidence_window,
         analysis_window=analysis_window,

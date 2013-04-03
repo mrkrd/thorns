@@ -9,25 +9,24 @@ import scipy.signal as dsp
 
 
 
-def calc_signal_to_noise_ratio_db(signal, noise):
+def signal_to_noise_ratio_db(signal, noise):
     assert signal.shape == noise.shape
 
     snr_db = 20 * np.log10(
-        calc_rms(signal) / calc_rms(noise)
+        rms(signal) / rms(noise)
     )
 
     return snr_db
 
 
-calc_snr_db = calc_signal_to_noise_ratio_db
-snr = calc_signal_to_noise_ratio_db
+snr_db = signal_to_noise_ratio_db
+snr = signal_to_noise_ratio_db
 
 
-def calc_root_mean_square(signal):
+def root_mean_square(signal):
     return np.sqrt( np.sum(signal**2) / signal.size )
 
-calc_rms = calc_root_mean_square
-rms = calc_root_mean_square
+rms = root_mean_square
 
 
 
@@ -75,7 +74,7 @@ def trim(a,b):
 
 
 
-def make_ramped_tone(
+def ramped_tone(
         fs,
         freq,
         duration=50e-3,
@@ -108,7 +107,7 @@ def make_ramped_tone(
 
 
 
-def make_white_noise(
+def white_noise(
         fs,
         duration,
         band,
@@ -158,7 +157,7 @@ def make_white_noise(
 
 
 
-def make_electrical_pulse(
+def electrical_pulse(
         fs,
         amplitudes,
         durations,
