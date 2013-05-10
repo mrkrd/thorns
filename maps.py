@@ -197,14 +197,24 @@ def _ipython_map(func, iterable, cfg):
     from IPython.parallel import Client
 
     fname = inspect.getfile(func)
-    # fname = os.path.abspath(fname)
+    with open(fname) as f:
+        code = f.read()
+
+
 
     rc = Client()
     logger.info("IPython engine IDs: {}".format(rc.ids))
 
 
     # print(fname)
-    status = rc[:].run(fname) #, block=True)
+    status = rc[:].execute(
+'''
+_tmp_dict = dict()
+exec """{code}""" in _tmp_dict
+globals().update(_tmp_dict)
+del _tmp_dict
+'''.format(code=code)
+    )
     status.wait()
 
     # res = rc[:].apply(dir)
@@ -253,23 +263,36 @@ def _publish_status(status, where='stdout'):
         histogram += row
 
 
+    seconds = time.time() - status['start_time']
+    remaining = status['all'] - status['loaded'] - status['processed']
+    if status['processed']:
+        eta = datetime.timedelta(seconds=(
+            remaining * seconds / (status['processed'])
+        ))
+    else:
+        eta = 'Unknown'
+
     msg = """
 {bar}
 
-Loaded (O): {loaded}
+Loaded    (O): {loaded}
 Processed (#): {processed}
+Remaining (.): {remaining}
 
 {histogram}
 --------------------
 Time: {time}
+ETA:  {eta}
 
 """.format(
     all=status['all'],
     loaded=status['loaded'],
     processed=status['processed'],
+    remaining=remaining,
     bar=bar,
     histogram=histogram,
-    time=datetime.timedelta(seconds=(time.time() - status['start_time']))
+    time=datetime.timedelta(seconds=seconds),
+    eta=eta,
 )
 
 
