@@ -54,7 +54,8 @@ def plot(y=None, x=None, fs=None, kind=None):
         ax.plot(x, y)
 
     elif kind in ('imshow', 'matrix'):
-        ax.imshow(y, aspect='auto')
+        img = ax.imshow(y, aspect='auto')
+        plt.colorbar(img)
 
     else:
         raise RuntimeError("Plot kind {} not implemented".format(kind))

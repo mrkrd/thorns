@@ -185,3 +185,16 @@ def electrical_pulse(
     signal = np.concatenate( signals )
 
     return signal
+
+
+
+def t(signal, fs):
+    """
+    Return time vector for the signal.
+
+    signal: signal
+    fs: sampling frequency in Hz
+
+    """
+    tmax = (len(signal)-1) / fs
+    return np.linspace(0, tmax, len(signal))
