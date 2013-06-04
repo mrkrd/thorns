@@ -21,7 +21,7 @@ import shutil
 import tempfile
 import string
 
-import elmar as mr
+import mrlib as mr
 
 logger = logging.getLogger(__name__)
 
@@ -119,7 +119,7 @@ def _isolated_serial_map(func, iterable, cfg):
             'mar_maps_socket'
         )
         p = subprocess.Popen(
-            ['python', '-m', 'elmar.run_func', fname]
+            ['python', '-m', 'mrlib.run_func', fname]
         )
 
         module_name = inspect.getfile(func)

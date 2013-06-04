@@ -12,7 +12,7 @@ from numpy.testing import (
     assert_almost_equal
 )
 
-import elmar.thorns as th
+import mrlib.thorns as th
 
 
 

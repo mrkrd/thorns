@@ -11,7 +11,7 @@ from pprint import pprint
 
 import pandas as pd
 
-import elmar.thorns as th
+import mrlib.thorns as th
 
 
 def assert_trains_equal(a,b, almost=False):

@@ -12,7 +12,7 @@ from numpy.testing import (
     assert_array_equal
 )
 
-import elmar as mr
+import mrlib as mr
 
 
 

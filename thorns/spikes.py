@@ -11,7 +11,7 @@ import pandas as pd
 
 from collections import Iterable
 
-from elmar.thorns.calc import get_duration
+from mrlib.thorns.calc import get_duration
 
 
 

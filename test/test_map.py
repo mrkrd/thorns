@@ -14,7 +14,7 @@ from numpy.testing import (
     assert_array_equal
 )
 from nose.tools import with_setup
-import elmar as mr
+import mrlib as mr
 
 
 def square(x):
