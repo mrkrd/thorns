@@ -91,6 +91,8 @@ def ramped_tone(
     dbspl: dB SPL
 
     """
+    assert ramp < duration/2
+
     t = np.arange(0, duration, 1/fs)
     s = np.sin(2 * np.pi * t * freq)
     if dbspl != None:
