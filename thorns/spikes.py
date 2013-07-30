@@ -208,17 +208,9 @@ accumulate = accumulate_spike_trains
 
 
 def trim_spike_trains(spike_trains, start, stop):
-    """Return spike trains with that are between `start' and
-    `stop'.
+    """Remove all spikes outside of the (start, stop) range."""
 
-    """
-    if start is not None and stop is not None:
-        assert start < stop
-
-    if start is None:
-        tmin = 0
-    else:
-        tmin = start
+    tmin = start
 
     if stop is None:
         tmaxs = spike_trains['duration']
@@ -237,18 +229,14 @@ def trim_spike_trains(spike_trains, start, stop):
         trimmed.append(spikes)
 
 
-
-    durations = spike_trains['duration']
+    durations = np.array(spike_trains['duration'])
     durations[ durations>tmaxs ] = tmaxs[ durations>tmaxs ]
     durations -= tmin
 
 
-
-
-    out = pd.DataFrame(spike_trains)
+    out = spike_trains.copy()
     out['spikes'] = trimmed
     out['duration'] = durations
-
 
 
     return out
