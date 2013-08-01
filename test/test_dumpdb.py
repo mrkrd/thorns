@@ -40,23 +40,20 @@ def test_dump_and_load():
 
 
 
-    store = tempfile.NamedTemporaryFile()
+    # store = tempfile.NamedTemporaryFile()
+    # os.unlink(store.name)
 
 
     mr.dumpdb(
-        x1,y1,
-        dbdir=dbdir
+        x1,y1
     )
     mr.dumpdb(
-        x2,y2,
-        dbdir=dbdir
+        x2,y2
     )
 
 
 
-    db = mr.loaddb(
-        dbdir=dbdir
-    )
+    db = mr.loaddb()
 
 
     assert len(db) == 2
@@ -72,7 +69,8 @@ def test_dump_and_load():
     )
 
 
-    shutil.rmtree(dbdir)
+    shutil.rmtree('work')
+
 
 
 def test_kwargs():
@@ -89,20 +87,15 @@ def test_kwargs():
 
 
 
-    dbdir = tempfile.mkdtemp()
-
 
     mr.dumpdb(
         x1,
         y1,
         bla='anf',
-        dbdir=dbdir
     )
 
 
-    db = mr.loaddb(
-        dbdir=dbdir
-    )
+    db = mr.loaddb()
 
 
     assert len(db) == 2
@@ -122,4 +115,4 @@ def test_kwargs():
         ['anf', 'anf']
     )
 
-    shutil.rmtree(dbdir)
+    shutil.rmtree('work')
