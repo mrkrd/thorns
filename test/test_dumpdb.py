@@ -40,7 +40,7 @@ def test_dump_and_load():
 
 
 
-    dbdir = tempfile.mkdtemp()
+    store = tempfile.NamedTemporaryFile()
 
 
     mr.dumpdb(

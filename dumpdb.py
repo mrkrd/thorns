@@ -6,12 +6,10 @@ from __future__ import print_function
 __author__ = "Marek Rudnicki"
 
 import os
-from glob import glob
-import cPickle as pickle
-import string
 import datetime
 import logging
 from itertools import izip_longest
+import shelve
 
 import numpy as np
 import pandas as pd
@@ -19,90 +17,78 @@ import pandas as pd
 
 logger = logging.getLogger(__name__)
 
-def _dump_records(pars, data, dbdir):
-
-    timestamp = datetime.datetime.now()
-
-    records = {
-        'pars': pars,
-        'data': data,
-        'timestamp': timestamp
-    }
-
-    keys_str = string.join(pars.keys() + data.keys(), '_')
-    time_str = timestamp.strftime("%Y%m%d-%H%M%S.%f")
-    fname = os.path.join(
-        dbdir,
-        time_str + "__" + keys_str + ".pkl"
-    )
-    tmp_fname = fname + ".tmp"
-
-    with open(tmp_fname, 'wb') as f:
-        pickle.dump(records, f, -1)
-
-    assert not os.path.exists(fname)
-    os.rename(tmp_fname, fname)
 
 
 
+def dumpdb(xs=None, ys=None, name='dump', **kwargs):
 
-def dumpdb(pars, data, dbdir=None, **kwargs):
+    ## the case only data is given
+    if ys is None:
+        ys = xs
+        xs = None
 
+    if xs is None:
+        xs = []
+    elif isinstance(xs, dict):
+        xs = [xs]
 
-    if isinstance(pars, dict):
-        pars = [pars]
+    if ys is None:
+        ys = []
+    elif (ys is None) or isinstance(ys, dict):
+        ys = [ys]
 
-    if isinstance(data, dict):
-        data = [data]
+    dbdir = 'work'
 
-
-
-    if dbdir is None:
-        dbdir = os.path.join('work', 'dumpdb')
+    fname = os.path.join(dbdir, name)
 
     if not os.path.exists(dbdir):
         os.makedirs(dbdir)
 
-
-    logger.info("Dumping pars and data.")
-
-    for p,d in izip_longest(pars,data):
-        p.update(kwargs)
-
-        _dump_records(p, d, dbdir)
+    logger.info("Dumping pars (xs) and data (ys) into {}.".format(fname))
 
 
+    past = datetime.datetime.now()
+    store = shelve.open(fname, protocol=-1)
+    for x,y in izip_longest(xs, ys, fillvalue={}):
+        now = datetime.datetime.now()
+        assert past < now, "Keys are conflicting"
+
+        x.update(kwargs)
+        record = {
+            'x': x,
+            'y': y,
+        }
+
+        key = now.strftime("%Y%m%d-%H%M%S.%f")
+        store[key] = record
+
+        past = now
 
 
 
 
 
 
+def loaddb(name='dump'):
 
-def loaddb(dbdir=None):
+    dbdir = 'work'
 
-    if dbdir is None:
-        dbdir = os.path.join('work', 'dumpdb')
+    fname = os.path.join(dbdir, name)
 
+    logger.info("Loading dumpdb from {}".format(fname))
 
-    pathname = os.path.join(dbdir, '*.pkl')
+    store = shelve.open(fname, protocol=-1)
 
-    pars_keys = set()
+    xkeys = set()
     db = []
     index = []
-    for fname in sorted(glob(pathname)):
-        logger.info("Loading {}".format(fname))
-
-
-        with open(fname, 'rb') as f:
-            records = pickle.load(f)
-
-        pars_keys.update(records['pars'].keys())
-        row = records['pars']
-        row.update(records['data'])
+    for key,record in sorted(store.iteritems()):
+        xkeys.update(record['x'].keys())
+        row = record['x']
+        row.update(record['y'])
 
         db.append(row)
-        index.append(records['timestamp'])
+        index.append(key)
 
 
     db = pd.DataFrame(db, index=index)
@@ -110,7 +96,7 @@ def loaddb(dbdir=None):
     # Has to wrap arrays to be able to compare them
     _wrap_arrays(db)
     db.drop_duplicates(
-        cols=list(pars_keys),
+        cols=list(xkeys),
         take_last=True,
         inplace=True
     )
