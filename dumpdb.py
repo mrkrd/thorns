@@ -50,6 +50,9 @@ def dumpdb(xs=None, ys=None, name='dump', **kwargs):
     past = datetime.datetime.now()
     store = shelve.open(fname, protocol=-1)
     for x,y in izip_longest(xs, ys, fillvalue={}):
+        # print('xxxx', x)
+        print('yyyy', type(y))
+        print()
         now = datetime.datetime.now()
         assert past < now, "Keys are conflicting"
 
