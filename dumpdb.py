@@ -39,7 +39,7 @@ def dumpdb(xs=None, ys=None, name='dump', **kwargs):
 
     dbdir = 'work'
 
-    fname = os.path.join(dbdir, name)
+    fname = os.path.join(dbdir, name+'.db')
 
     if not os.path.exists(dbdir):
         os.makedirs(dbdir)
@@ -76,7 +76,7 @@ def loaddb(name='dump'):
 
     dbdir = 'work'
 
-    fname = os.path.join(dbdir, name)
+    fname = os.path.join(dbdir, name+'.db')
 
     logger.info("Loading dumpdb from {}".format(fname))
 
