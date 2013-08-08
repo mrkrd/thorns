@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 
-def dumpdb(xs=None, ys=None, name='dump', **kwargs):
+def dumpdb(xs=None, ys=None, name='dump', workdir='work', **kwargs):
 
     ## the case only data is given
     if ys is None:
@@ -37,12 +37,11 @@ def dumpdb(xs=None, ys=None, name='dump', **kwargs):
     elif (ys is None) or isinstance(ys, dict):
         ys = [ys]
 
-    dbdir = 'work'
 
-    fname = os.path.join(dbdir, name+'.db')
+    fname = os.path.join(workdir, name+'.db')
 
-    if not os.path.exists(dbdir):
-        os.makedirs(dbdir)
+    if not os.path.exists(workdir):
+        os.makedirs(workdir)
 
     logger.info("Dumping pars (xs) and data (ys) into {}.".format(fname))
 
@@ -50,9 +49,6 @@ def dumpdb(xs=None, ys=None, name='dump', **kwargs):
     past = datetime.datetime.now()
     store = shelve.open(fname, protocol=-1)
     for x,y in izip_longest(xs, ys, fillvalue={}):
-        # print('xxxx', x)
-        print('yyyy', type(y))
-        print()
         now = datetime.datetime.now()
         assert past < now, "Keys are conflicting"
 
@@ -72,11 +68,9 @@ def dumpdb(xs=None, ys=None, name='dump', **kwargs):
 
 
 
-def loaddb(name='dump'):
+def loaddb(name='dump', workdir='work'):
 
-    dbdir = 'work'
-
-    fname = os.path.join(dbdir, name+'.db')
+    fname = os.path.join(workdir, name+'.db')
 
     logger.info("Loading dumpdb from {}".format(fname))
 

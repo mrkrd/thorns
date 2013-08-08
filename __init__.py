@@ -14,26 +14,38 @@ parser.add_argument(
     '--log',
     dest='loglevel'
 )
+
 parser.add_argument(
     '--backend',
 )
+
 parser.add_argument(
     '--machines',
     nargs='+',
-    default=[]
+    default=None
 )
+
 parser.add_argument(
     '--cache'
 )
+
 parser.add_argument(
     '--plot',
     nargs='?',
     const='show'
 )
+
 parser.add_argument(
     '--pdb',
     action='store_true'
 )
+
+parser.add_argument(
+    '--dependencies',
+    nargs='+',
+    default=None
+)
+
 parser.add_argument(
     'files',
     nargs='*'

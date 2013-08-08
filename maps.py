@@ -183,7 +183,8 @@ def _playdoh_map(func, iterable, cfg):
     jobrun = playdoh.map_async(
         wrap,
         iterable,
-        machines=cfg['machines']
+        machines=cfg['machines'],
+        codedependencies=cfg['dependencies'],
     )
     results = jobrun.get_results()
 
@@ -203,10 +204,15 @@ def _ipython_map(func, iterable, cfg):
 
 
     rc = Client()
+    rc[:].clear()
+
     logger.info("IPython engine IDs: {}".format(rc.ids))
 
 
     # print(fname)
+
+    ## The trick with `exec in {}' is done because we want to avoid
+    ## executing `__main__'
     status = rc[:].execute(
 '''
 _tmp_dict = dict()
@@ -328,12 +334,22 @@ def _get_options(backend, cache):
 
     if mr.args.machines is not None:
         cfg['machines'] = mr.args.machines
+    else:
+        cfg['machines'] = []
+
+
+    if mr.args.dependencies is not None:
+        cfg['dependencies'] = mr.args.dependencies
+    else:
+        cfg['dependencies'] = []
 
 
     if mr.args.cache is None:
         cfg['cache'] = cache
     else:
         cfg['cache'] = mr.args.cache
+
+
 
     return cfg
 
@@ -420,7 +436,6 @@ def map(func, iterable, backend='serial', cache='yes', workdir='work'):
 
         else:
             raise RuntimeError("Should never reach this point.")
-
 
         ans,dt = result
         status['times'].append(dt)
