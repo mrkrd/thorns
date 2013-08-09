@@ -20,6 +20,7 @@ import multiprocessing
 import shutil
 import tempfile
 import string
+import imp
 
 import mrlib as mr
 
@@ -197,31 +198,73 @@ def _ipython_map(func, iterable, cfg):
 
     from IPython.parallel import Client
 
+    rc = Client()
+    rc[:].clear()
+
+
+
+    ### Make modules for all dependencies on the engines
+    for dep in cfg['dependencies']:
+        mod_name = os.path.splitext(
+            os.path.basename(dep)
+        )[0]
+
+
+        with open(dep) as f:
+            code = f.read()
+        code = code.replace("\'", "\\\'")
+        code = code.replace("\"", "\\\"")
+
+
+        rc[:].execute(
+"""
+import imp
+import sys
+
+_mod = imp.new_module({mod_name})
+sys.modules[{mod_name}] = _mod
+
+exec '''{code}''' in _mod.__dict__
+
+del _mod
+""".format(code=code, mod_name=mod_name),
+            block=True
+        )
+
+
+
+
+
+
+
+    ### Make sure all definitions surrounding the func are present on
+    ### the engines (evaluate the code from the file of the func)
     fname = inspect.getfile(func)
     with open(fname) as f:
         code = f.read()
 
 
-
-    rc = Client()
-    rc[:].clear()
-
     logger.info("IPython engine IDs: {}".format(rc.ids))
 
 
-    # print(fname)
+    ## Need to escape all ' and " in order to embed the code into
+    ## execute string
+    code = code.replace("\'", "\\\'")
+    code = code.replace("\"", "\\\"")
+
 
     ## The trick with `exec in {}' is done because we want to avoid
     ## executing `__main__'
-    status = rc[:].execute(
-'''
+    rc[:].execute(
+"""
 _tmp_dict = dict()
-exec """{code}""" in _tmp_dict
+exec '''{code}''' in _tmp_dict
 globals().update(_tmp_dict)
 del _tmp_dict
-'''.format(code=code)
+""".format(code=code),
+        block=True
     )
-    status.wait()
+    # status.wait()
 
     # res = rc[:].apply(dir)
     # print(res.get())
