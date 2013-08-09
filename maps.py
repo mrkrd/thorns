@@ -212,27 +212,31 @@ def _ipython_map(func, iterable, cfg):
 
         with open(dep) as f:
             code = f.read()
+
+        # TODO: fix the but with "\n" in the source code.  Trying to
+        # escape the backslash, but does not work here.  Working test
+        # file in projects/python_tests/escaping
+        code = code.replace("\\", "\\\\")
         code = code.replace("\'", "\\\'")
         code = code.replace("\"", "\\\"")
 
-
-        rc[:].execute(
-"""
+        c = """
 import imp
 import sys
 
-_mod = imp.new_module({mod_name})
-sys.modules[{mod_name}] = _mod
+_mod = imp.new_module('{mod_name}')
+sys.modules['{mod_name}'] = _mod
 
 exec '''{code}''' in _mod.__dict__
 
 del _mod
-""".format(code=code, mod_name=mod_name),
+""".format(code=code, mod_name=mod_name)
+
+
+        rc[:].execute(
+            c,
             block=True
         )
-
-
-
 
 
 
