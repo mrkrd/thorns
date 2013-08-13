@@ -24,7 +24,7 @@ snr = signal_to_noise_ratio_db
 
 
 def root_mean_square(signal):
-    return np.sqrt( np.sum(signal**2) / signal.size )
+    return np.sqrt( np.mean(signal**2) )
 
 rms = root_mean_square
 
