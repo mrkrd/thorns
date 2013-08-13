@@ -220,7 +220,8 @@ def _ipython_map(func, iterable, cfg):
         code = code.replace("\'", "\\\'")
         code = code.replace("\"", "\\\"")
 
-        c = """
+        rc[:].execute(
+"""
 import imp
 import sys
 
@@ -230,11 +231,7 @@ sys.modules['{mod_name}'] = _mod
 exec '''{code}''' in _mod.__dict__
 
 del _mod
-""".format(code=code, mod_name=mod_name)
-
-
-        rc[:].execute(
-            c,
+""".format(code=code, mod_name=mod_name),
             block=True
         )
 
