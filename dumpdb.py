@@ -21,8 +21,14 @@ logger = logging.getLogger(__name__)
 
 
 def dumpdb(xs=None, ys=None, name='dump', workdir='work', **kwargs):
+    """Dump data in order to recall the most up-to-date records later
 
-    ## the case only data is given
+    xs: parameters (list of dicts)
+    ys: data that depends on the parameters (list of dicts)
+
+    """
+
+    ## if only data is given
     if ys is None:
         ys = xs
         xs = None
@@ -69,6 +75,7 @@ def dumpdb(xs=None, ys=None, name='dump', workdir='work', **kwargs):
 
 
 def loaddb(name='dump', workdir='work'):
+    """Recall dumped parameters/data discarding duplicated records"""
 
     fname = os.path.join(workdir, name+'.db')
 
