@@ -9,6 +9,36 @@ import scipy.signal as dsp
 
 
 
+def align(a, fs_a, b, fs_b):
+    """Align two signals (a,b) so that they have the same sampling
+    frequency (resample to lower fs) and length (trim longer signal).
+
+    """
+    assert a.ndim == 1
+    assert b.ndim == 1
+
+    if fs_a == fs_b:
+        fs = fs_a
+    elif fs_a > fs_b:
+        fs = fs_b
+        a = resample(a, fs_a, fs)
+    elif fs_a < fs_b:
+        fs = fs_a,
+        b = resample(b, fs_b, fs)
+
+
+    if len(a) > len(b):
+        a = a[0:len(b)]
+    elif len(a) < len(b):
+        b = b[0:len(a)]
+
+    return a, b, fs
+
+
+
+
+
+
 def signal_to_noise_ratio_db(signal, noise):
     assert signal.shape == noise.shape
 
