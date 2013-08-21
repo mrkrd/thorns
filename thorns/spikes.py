@@ -49,6 +49,11 @@ def make_trains(data, **kwargs):
     if isinstance(data, np.ndarray) and (data.ndim == 2) and ('fs' in kwargs):
         trains = _array_to_trains(data, kwargs['fs'], **meta)
 
+    elif isinstance(data, dict): # brian like spiketimes (dict of arrays)
+        # TODO: test this case
+        arrays = [a for a in data.itervalues()]
+        trains = _arrays_to_trains(arrays, **meta)
+
     elif isinstance(data[0], Iterable):
         trains = _arrays_to_trains(data, **meta)
 
