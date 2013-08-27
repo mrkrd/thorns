@@ -366,14 +366,16 @@ ETA:  {eta}
 
 
 
-def _get_options(backend, cache):
+def _get_options(backend, cache, dependencies):
 
     cfg = {}
 
-    if mr.args.backend is None:
+    if mr.args.backend is not None:
+        cfg['backend'] = mr.args.backend
+    elif backend is not None:
         cfg['backend'] = backend
     else:
-        cfg['backend'] = mr.args.backend
+        cfg['backend'] = 'serial'
 
 
     if mr.args.machines is not None:
@@ -384,14 +386,18 @@ def _get_options(backend, cache):
 
     if mr.args.dependencies is not None:
         cfg['dependencies'] = mr.args.dependencies
+    elif dependencies is not None:
+        cfg['dependencies'] = dependencies
     else:
         cfg['dependencies'] = []
 
 
-    if mr.args.cache is None:
+    if mr.args.cache is not None:
+        cfg['cache'] = mr.args.cache
+    elif cache is not None:
         cfg['cache'] = cache
     else:
-        cfg['cache'] = mr.args.cache
+        cfg['cache'] = 'yes'
 
 
 
@@ -412,11 +418,19 @@ def apply(func, workdir='work', **kwargs):
 
 
 
-def map(func, iterable, backend='serial', cache='yes', workdir='work'):
+def map(
+        func,
+        iterable,
+        backend='serial',
+        cache='yes',
+        workdir='work',
+        dependencies=None
+):
 
     cfg = _get_options(
         backend=backend,
-        cache=cache
+        cache=cache,
+        dependencies=dependencies
     )
 
     status = {
@@ -461,7 +475,7 @@ def map(func, iterable, backend='serial', cache='yes', workdir='work'):
         raise RuntimeError("Unknown map() backend: {}".format(cfg['backend']))
 
 
-
+    answers = []
     for how,fname in zip(hows,cache_files):
 
         _publish_status(status, 'file')
@@ -484,7 +498,9 @@ def map(func, iterable, backend='serial', cache='yes', workdir='work'):
         ans,dt = result
         status['times'].append(dt)
 
-        yield ans
+        answers.append(ans)
 
     _publish_status(status, 'file')
     _publish_status(status, 'stdout')
+
+    return(answers)

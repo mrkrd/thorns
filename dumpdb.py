@@ -27,7 +27,6 @@ def dumpdb(xs=None, ys=None, name='dump', workdir='work', **kwargs):
     ys: data that depends on the parameters (list of dicts)
 
     """
-
     ## if only data is given
     if ys is None:
         ys = xs
