@@ -4,16 +4,11 @@ __author__ = "Marek Rudnicki"
 
 
 import argparse
-import logging
 import os
 import sys
 
 
 parser = argparse.ArgumentParser()
-parser.add_argument(
-    '--log',
-    dest='loglevel'
-)
 
 parser.add_argument(
     '--backend',
@@ -63,18 +58,6 @@ if args.pdb:
         traceback.print_exception(type, value, tb)
         pdb.pm()
     sys.excepthook = info
-
-
-if args.loglevel is None:
-    loglevel = logging.INFO
-else:
-    loglevel = getattr(logging, args.loglevel.upper(), None)
-    if not isinstance(loglevel, int):
-        raise ValueError('Invalid log level: %s' % loglevel)
-
-logging.getLogger().setLevel(loglevel)
-
-logging.debug(args)
 
 
 
