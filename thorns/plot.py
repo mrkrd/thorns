@@ -24,9 +24,9 @@ def plot_neurogram(spike_trains, fs, axis=None, **kwargs):
         axis = plt.gca()
 
     extent = (
-        0,                      # left
+        0,                       # left
         neurogram.shape[0] / fs, # right
-        0,                      # bottom
+        0,                       # bottom
         neurogram.shape[1]       # top
     )
 
