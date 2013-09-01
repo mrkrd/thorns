@@ -106,7 +106,7 @@ def synchronization_index(spike_trains, freq):
 
     all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
 
-    if len(all_spikes) == 0:
+    if len(all_spikes) < 10:
         return np.nan
 
 
@@ -131,7 +131,8 @@ def synchronization_index(spike_trains, freq):
 
 
 si = synchronization_index
-
+vector_strength = synchronization_index
+vs = synchronization_index
 
 
 # def shuffle_spikes(spike_trains):
