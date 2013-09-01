@@ -6,6 +6,7 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 import pandas as pd
+import warnings
 
 
 def get_duration(spike_trains):
@@ -107,6 +108,7 @@ def synchronization_index(spike_trains, freq):
     all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
 
     if len(all_spikes) < 10:
+        warnings.warn("Too few spikes to reliably calculate SI: {}".format(len(all_spikes)))
         return np.nan
 
 
