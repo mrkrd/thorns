@@ -89,7 +89,7 @@ def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
 
     if axis is None:
         import matplotlib.pyplot as plt
-        plot = plt.gca()
+        axis = plt.gca()
 
 
     axis.plot(
