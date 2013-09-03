@@ -107,7 +107,7 @@ def synchronization_index(spike_trains, freq):
 
     all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
 
-    if len(all_spikes) < 10:
+    if len(all_spikes) < 20:
         warnings.warn("Too few spikes to reliably calculate SI: {}".format(len(all_spikes)))
         return np.nan
 
