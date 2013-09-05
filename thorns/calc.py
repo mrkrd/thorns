@@ -49,7 +49,7 @@ def psth(spike_trains, bin_size, normalize=True):
 
 
 
-def isih(spike_trains, bin_size, normalize=True):
+def isih(spike_trains, bin_size, **kwargs):
     """Calculate inter-spike interval histogram."""
 
     isis = np.concatenate(
@@ -65,7 +65,7 @@ def isih(spike_trains, bin_size, normalize=True):
         isis,
         bins=nbins,
         range=(0, nbins*bin_size),
-        normed=normalize
+        **kwargs
     )
 
     return hist, bin_edges
@@ -293,7 +293,8 @@ def period_histogram(
         spike_trains,
         freq,
         nbins=64,               # int(spike_fs / freq)
-        normalize=True):
+        **kwargs
+):
 
 
     all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
@@ -304,7 +305,7 @@ def period_histogram(
         normalized,
         bins=nbins,
         range=(0, 1),
-        normed=normalize
+        **kwargs
     )
 
 
