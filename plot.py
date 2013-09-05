@@ -21,11 +21,11 @@ def show():
 
 def plot(y=None, x=None, fs=None, kind=None):
 
-    backend = mr.args.plot
 
-    if backend is None:
+    if 'MR_PLOT' not in os.environ:
         return
-
+    else:
+        backend = os.environ['MR_PLOT']
 
     if fs is None:
         fs = 1
