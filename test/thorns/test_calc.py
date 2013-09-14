@@ -177,7 +177,6 @@ def test_isih():
     isih, bin_edges = th.isih(
         trains,
         bin_size=1,
-        normalize=False
     )
 
     assert_array_equal(

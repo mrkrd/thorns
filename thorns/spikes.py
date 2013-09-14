@@ -8,6 +8,7 @@ __author__ = "Marek Rudnicki"
 import random
 import numpy as np
 import pandas as pd
+import sys
 
 from collections import Iterable
 
@@ -54,6 +55,12 @@ def make_trains(data, **kwargs):
         arrays = [a for a in data.itervalues()]
         trains = _arrays_to_trains(arrays, **meta)
 
+    elif ('brian' in sys.modules) and isinstance(data, sys.modules['brian'].SpikeMonitor):
+        meta.setdefault('duration', float(data.clock.t))
+
+        spikes = [spks for spks in data.spiketimes.itervalues()]
+        trains = _arrays_to_trains(spikes, **meta)
+
     elif isinstance(data[0], Iterable):
         trains = _arrays_to_trains(data, **meta)
 
@@ -68,6 +75,7 @@ def make_trains(data, **kwargs):
 
 
 def _arrays_to_trains(arrays, **meta):
+    """Convert a list of arrays with spike times to `spike trains'"""
 
 
     ### Make sure we have duration
@@ -98,7 +106,7 @@ def _arrays_to_trains(arrays, **meta):
 
 
 def _array_to_trains(array, fs, **meta):
-    """ Convert time functions to a list of spike trains.
+    """Convert time functions to a list of spike trains.
 
     fs: samping frequency in Hz
     a: input array
@@ -127,9 +135,6 @@ def _array_to_trains(array, fs, **meta):
     )
 
     return spike_trains
-
-
-
 
 
 

@@ -21,6 +21,7 @@ import shutil
 import tempfile
 import string
 import imp
+import functools
 
 import mrlib as mr
 
@@ -36,7 +37,9 @@ class _FuncWrap(object):
         return result
 
 
+
 def _func_wrap(func):
+    @functools.wraps(func)
     def wrap(data):
         result = _apply_data(func, data)
         return result
