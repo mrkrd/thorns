@@ -472,7 +472,7 @@ def map(
         results = _multiprocessing_map(func, todos, cfg)
     elif cfg['backend'] == 'playdoh':
         results = _playdoh_map(func, todos, cfg)
-    elif cfg['backend'] == 'ipython':
+    elif cfg['backend'] in ('ipython', 'ipcluster'):
         results = _ipython_map(func, todos, cfg)
     elif cfg['backend'] == 'serial_isolated':
         results = _isolated_serial_map(func, todos, cfg)
