@@ -19,6 +19,20 @@ logger = logging.getLogger(__name__)
 
 
 
+def get_store(workdir='work'):
+
+    fname = os.path.join(workdir, 'store.db')
+
+    if not os.path.exists(workdir):
+        os.makedirs(workdir)
+
+    store = shelve.open(fname, protocol=-1)
+
+    return store
+
+
+mkstore = get_store
+
 
 def dumpdb(xs=None, ys=None, name='dump', workdir='work', **kwargs):
     """Dump data in order to recall the most up-to-date records later

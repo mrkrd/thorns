@@ -19,6 +19,8 @@ if 'MR_PDB' in os.environ:
 from mrlib.dumpdb import (
     dumpdb,
     loaddb,
+    get_store,
+    mkstore
 )
 
 from mrlib.maps import (

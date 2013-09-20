@@ -51,15 +51,7 @@ def _func_wrap(func):
 def _apply_data(func, data):
 
     start = time.time()
-    if isinstance(data, tuple):
-        ans = func(*data)
-
-    elif isinstance(data, dict):
-        ans = func(**data)
-
-    else:
-        ans = func(data)
-
+    ans = func(**data)
     dt = time.time() - start
 
     return ans,dt
@@ -429,7 +421,8 @@ def map(
         backend='serial',
         cache='yes',
         workdir='work',
-        dependencies=None
+        dependencies=None,
+        kwargs=None
 ):
 
     cfg = _get_options(
@@ -454,6 +447,10 @@ def map(
     hows = []
     todos = []
     for args in iterable:
+        args = dict(args)
+        if kwargs is not None:
+            args.update(kwargs)
+
         fname = _pkl_name(args, func, cachedir)
         cache_files.append(fname)
 
