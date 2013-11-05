@@ -34,7 +34,7 @@ def get_store(workdir='work'):
 mkstore = get_store
 
 
-def dumpdb(xs=None, ys=None, name='dump', workdir='work', **kwargs):
+def dumpdb(xs=None, ys=None, name='dump', workdir='work', kwargs=None):
     """Dump data in order to recall the most up-to-date records later
 
     xs: parameters (list of dicts)
@@ -71,7 +71,8 @@ def dumpdb(xs=None, ys=None, name='dump', workdir='work', **kwargs):
         now = datetime.datetime.now()
         assert past < now, "Keys are conflicting"
 
-        x.update(kwargs)
+        if kwargs is not None:
+            x.update(kwargs)
         record = {
             'x': x,
             'y': y,
