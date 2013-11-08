@@ -22,10 +22,10 @@ def show():
 def plot(y=None, x=None, fs=None, kind=None):
 
 
-    if 'MR_PLOT' not in os.environ:
+    if 'MRplot' not in os.environ:
         return
     else:
-        backend = os.environ['MR_PLOT']
+        backend = os.environ['MRplot']
 
     if fs is None:
         fs = 1

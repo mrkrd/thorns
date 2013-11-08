@@ -365,32 +365,32 @@ def _get_options(backend, cache, dependencies):
 
     cfg = {}
 
-    if 'MR_MAP' in os.environ:
-        cfg['backend'] = os.environ['MR_MAP']
+    if 'MRmap' in os.environ:
+        cfg['backend'] = os.environ['MRmap']
     elif backend is not None:
         cfg['backend'] = backend
     else:
         cfg['backend'] = 'serial'
 
 
-    if 'MR_MACHINES' in os.environ:
+    if 'MRmachines' in os.environ:
         # TODO: must be parsed
-        cfg['machines'] = os.environ['MR_MACHINES']
+        cfg['machines'] = os.environ['MRmachines']
     else:
         cfg['machines'] = []
 
 
-    if 'MR_DEPENDENCIES' in os.environ:
+    if 'MRdependencies' in os.environ:
         # TODO: must be parsed
-        cfg['dependencies'] = os.environ['MR_DEPENDENCIES']
+        cfg['dependencies'] = os.environ['MRdependencies']
     elif dependencies is not None:
         cfg['dependencies'] = dependencies
     else:
         cfg['dependencies'] = []
 
 
-    if 'MR_CACHE' in os.environ:
-        cfg['cache'] = os.environ['MR_CACHE']
+    if 'MRcache' in os.environ:
+        cfg['cache'] = os.environ['MRcache']
     elif cache is not None:
         cfg['cache'] = cache
     else:

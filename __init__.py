@@ -7,7 +7,7 @@ import os
 import sys
 
 
-if 'MR_PDB' in os.environ:
+if 'MRpdb' in os.environ:
     import pdb, sys, traceback
     def info(type, value, tb):
         traceback.print_exception(type, value, tb)
