@@ -194,8 +194,8 @@ def electrical_pulse(
         amplitudes,
         durations,
         gap=0,
-        pad=0):
-
+        pad=0
+):
 
     assert len(amplitudes) == len(durations)
 
@@ -217,6 +217,44 @@ def electrical_pulse(
     signal = np.concatenate( signals )
 
     return signal
+
+
+
+def generate_electrical_amplitudes(
+        durations,
+        polarity,
+        ratio=None,
+):
+
+    if ratio is not None:
+        assert ratio > 0
+
+    ### Normalize polarity
+    if polarity in ('c', 'cathodic', -1):
+        polarity = -1
+    elif polarity in ('a', 'anodic', 1):
+        polarity = 1
+    else:
+        raise RuntimeError("Unknown polarity")
+
+
+    ### Monophasic pulse
+    if len(durations) == 1:
+        amplitude = polarity / durations[0]
+        amplitudes = (amplitude,)
+
+    ### Triphasic pulse
+    elif len(durations) == 3:
+        amplitudes = (
+            +1*polarity * (0.5 * ratio / durations[0]),
+            -1*polarity * (0.5 / durations[1]),
+            +1*polarity * (0.5 * (1-ratio) / durations[2])
+        )
+
+    else:
+        raise RuntimeError("Unknown pulse shape")
+
+    return amplitudes
 
 
 
