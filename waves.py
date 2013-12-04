@@ -204,7 +204,6 @@ def electrical_pulse(
 
     signals = []
     for amp,dur in zip(amplitudes, durations):
-
         signals.append( amp * np.ones(dur * fs) )
         signals.append( gap_signal )
 
@@ -226,8 +225,8 @@ def generate_electrical_amplitudes(
         ratio=None,
 ):
 
-    if ratio is not None:
-        assert ratio > 0
+    assert (ratio is None) or (ratio > 0)
+
 
     ### Normalize polarity
     if polarity in ('c', 'cathodic', -1):
@@ -242,6 +241,16 @@ def generate_electrical_amplitudes(
     if len(durations) == 1:
         amplitude = polarity / durations[0]
         amplitudes = (amplitude,)
+
+
+    ### Biphasic pulse
+    elif len(durations) == 2:
+        assert (ratio is None) or (ratio == 1)
+        amplitudes = (
+            +1*polarity * (0.5 / durations[0]),
+            -1*polarity * (0.5 / durations[1])
+        )
+
 
     ### Triphasic pulse
     elif len(durations) == 3:
