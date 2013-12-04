@@ -225,7 +225,7 @@ def generate_electrical_amplitudes(
         ratio=None,
 ):
 
-    assert (ratio is None) or (ratio > 0)
+    assert (ratio is None) or (ratio >= 0)
 
 
     ### Normalize polarity
