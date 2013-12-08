@@ -194,7 +194,8 @@ def electrical_pulse(
         amplitudes,
         durations,
         gap=0,
-        pad=0
+        pad=0,
+        charge=None
 ):
 
     assert len(amplitudes) == len(durations)
@@ -214,6 +215,12 @@ def electrical_pulse(
     signals.append( pad_signal )
 
     signal = np.concatenate( signals )
+
+
+    if charge is not None:
+        c = np.sum(np.abs(signal))/fs
+        signal /= c
+
 
     return signal
 

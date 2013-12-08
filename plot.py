@@ -19,7 +19,7 @@ def show():
     plt.show()
 
 
-def plot(y=None, x=None, fs=None, kind=None):
+def plot(y=None, x=None, fs=None, kind=None, fmt=''):
 
 
     if 'MRplot' not in os.environ:
@@ -51,7 +51,7 @@ def plot(y=None, x=None, fs=None, kind=None):
     fig, ax = plt.subplots(1,1)
 
     if kind in ('vector', 'plot'):
-        ax.plot(x, y)
+        ax.plot(x, y, fmt)
 
     elif kind in ('imshow', 'matrix'):
         img = ax.imshow(y, aspect='auto')
