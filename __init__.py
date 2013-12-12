@@ -15,6 +15,19 @@ if 'MRpdb' in os.environ:
     sys.excepthook = info
 
 
+if 'MRlog' in os.environ:
+    import logging
+
+    if os.environ['MRlog'] in ('d', 'debug'):
+        level = 'DEBUG'
+
+    else:
+        level = os.environ['MRlog'].upper()
+
+    logger = logging.getLogger()
+    logger.setLevel(level)
+
+
 
 from mrlib.dumpdb import (
     dumpdb,
