@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import division
-from __future__ import print_function
+from __future__ import division, absolute_import, print_function
 
 __author__ = "Marek Rudnicki"
 
@@ -22,8 +21,6 @@ import tempfile
 import string
 import imp
 import functools
-
-import mrlib as mr
 
 logger = logging.getLogger(__name__)
 
@@ -193,7 +190,7 @@ def _ipython_map(func, iterable, cfg):
 
     from IPython.parallel import Client
 
-    rc = Client()
+    rc = Client(sshserver=cfg['sshserver'])
     rc[:].clear()
 
 
@@ -396,6 +393,11 @@ def _get_options(backend, cache, dependencies):
     else:
         cfg['cache'] = 'yes'
 
+
+    if 'MRsshserver' in os.environ:
+        cfg['sshserver'] = os.environ['MRsshserver']
+    else:
+        cfg['sshserver'] = None
 
 
     return cfg
