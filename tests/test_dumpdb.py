@@ -91,7 +91,7 @@ def test_kwargs():
     mr.dumpdb(
         x1,
         y1,
-        bla='anf',
+        kwargs={'bla':'anf'}
     )
 
 
