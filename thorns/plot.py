@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-from __future__ import division
+from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
@@ -9,7 +9,7 @@ import numpy as np
 from mrlib.thorns import spikes
 from mrlib.thorns import calc
 
-golden = 1.6180339887
+GOLDEN = 1.6180339887
 
 
 def plot_neurogram(spike_trains, fs, axis=None, **kwargs):
@@ -45,7 +45,7 @@ def plot_neurogram(spike_trains, fs, axis=None, **kwargs):
 
 
 
-def plot_raster(spike_trains, axis=None, fmt='k.', **kwargs):
+def plot_raster(spike_trains, axis=None, style='k.', **kwargs):
     """Plot raster plot."""
 
     trains = spike_trains['spikes']
@@ -64,7 +64,7 @@ def plot_raster(spike_trains, axis=None, fmt='k.', **kwargs):
         import matplotlib.pyplot as plt
         axis = plt.gca()
 
-    axis.plot(s, n, fmt, **kwargs)
+    axis.plot(s, n, style, **kwargs)
     axis.set_xlabel("Time [s]")
     axis.set_xlim( (0, duration) )
     axis.set_ylabel("Trial Number")
@@ -132,8 +132,9 @@ def plot_period_histogram(
         nbins=64,
         normalize=True,
         axis=None,
-        fmt='k-',
-        **kwargs):
+        style='k-',
+        **kwargs
+):
     """Plots period histogram."""
 
 
@@ -154,7 +155,7 @@ def plot_period_histogram(
     axis.plot(
         bin_edges[:-1],
         hist,
-        fmt,
+        style,
         drawstyle='steps-post',
         **kwargs
     )
@@ -173,8 +174,9 @@ def plot_sac(
         analysis_window=5e-3,
         normalize=True,
         axis=None,
-        fmt='k-',
-        **kwargs):
+        style='k-',
+        **kwargs
+):
     """Plot shuffled autocorrelogram (SAC) (Joris 2006)"""
 
     sac, bin_edges = calc.sac(
@@ -193,7 +195,7 @@ def plot_sac(
     axis.plot(
         bin_edges[:-1],
         sac,
-        fmt,
+        style,
         drawstyle='steps-post',
         **kwargs
     )
@@ -203,13 +205,3 @@ def plot_sac(
     axis.set_ylabel("Normalized Number of Coincidences")
 
     return axis
-
-
-
-
-
-def main():
-    pass
-
-if __name__ == "__main__":
-    main()

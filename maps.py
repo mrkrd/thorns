@@ -205,7 +205,7 @@ def _ipython_map(func, iterable, cfg):
         with open(dep) as f:
             code = f.read()
 
-        # TODO: fix the but with "\n" in the source code.  Trying to
+        # TODO: fix the bug with "\n" in the source code.  Trying to
         # escape the backslash, but does not work here.  Working test
         # file in projects/python_tests/escaping
         code = code.replace("\\", "\\\\")
