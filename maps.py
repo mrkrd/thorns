@@ -190,7 +190,7 @@ def _ipython_map(func, iterable, cfg):
 
     from IPython.parallel import Client
 
-    rc = Client(sshserver=cfg['sshserver'])
+    rc = Client()
     rc[:].clear()
 
 
@@ -392,12 +392,6 @@ def _get_options(backend, cache, dependencies):
         cfg['cache'] = cache
     else:
         cfg['cache'] = 'yes'
-
-
-    if 'MRsshserver' in os.environ:
-        cfg['sshserver'] = os.environ['MRsshserver']
-    else:
-        cfg['sshserver'] = None
 
 
     return cfg
