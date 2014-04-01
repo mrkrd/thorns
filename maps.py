@@ -205,12 +205,13 @@ def _ipython_map(func, iterable, cfg):
         with open(dep) as f:
             code = f.read()
 
-        # TODO: fix the but with "\n" in the source code.  Trying to
+        # TODO: fix the bug with "\n" in the source code.  Trying to
         # escape the backslash, but does not work here.  Working test
-        # file in projects/python_tests/escaping
-        code = code.replace("\\", "\\\\")
-        code = code.replace("\'", "\\\'")
-        code = code.replace("\"", "\\\"")
+        # file in projects/python_demos/escaping
+        # code = code.replace("\\", "\\\\")
+        # code = code.replace("\'", "\\\'")
+        # code = code.replace("\"", "\\\"")
+        code = code.encode('string_escape')
 
         rc[:].execute(
 """
@@ -242,8 +243,10 @@ del _mod
 
     ## Need to escape all ' and " in order to embed the code into
     ## execute string
-    code = code.replace("\'", "\\\'")
-    code = code.replace("\"", "\\\"")
+    # code = code.replace("\'", "\\\'")
+    # code = code.replace("\"", "\\\"")
+
+    code = code.encode('string_escape')
 
 
     ## The trick with `exec in {}' is done because we want to avoid
@@ -420,7 +423,23 @@ def map(
         dependencies=None,
         kwargs=None
 ):
+    """Apply func to every item of iterable and return a list of the
+    results.  This map supports multiple backends, e.g. serial,
+    multiprocessing, ipcluster
 
+    Parameters
+    ----------
+    func : function
+        The function to be applied to the data
+    iterable : list of dicts
+        Each dict is applied to the func. The keys of the dicts should
+        correspond to the parameters of the func.
+    cache : bool or {'yes', 'no', 'refresh'}
+        If True, each result is loaded instead calculated again.
+
+    TODO: finish the docstring
+
+    """
     cfg = _get_options(
         backend=backend,
         cache=cache,
