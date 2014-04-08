@@ -37,8 +37,18 @@ mkstore = get_store
 def dumpdb(xs=None, ys=None, name='dump', workdir='work', kwargs=None):
     """Dump data in order to recall the most up-to-date records later
 
-    xs: parameters (list of dicts)
-    ys: data that depends on the parameters (list of dicts)
+    Parameters
+    ----------
+    xs : list of dicts
+        Parameters.
+    ys : list of dicts
+        Data that depends on the parameters.
+    name : str, optional
+        Base name of the pickle file.
+    workdir : str, optional
+        Directory for the data.
+    kwargs : dict, optional
+        If given, all `xy` (parameter) dicts will be updated using `kwargs`.
 
     """
     ## if only data is given
@@ -89,7 +99,24 @@ def dumpdb(xs=None, ys=None, name='dump', workdir='work', kwargs=None):
 
 
 def loaddb(name='dump', workdir='work'):
-    """Recall dumped parameters/data discarding duplicated records"""
+    """Recall dumped parameters/data discarding duplicated records
+
+    Parameters
+    ----------
+    name : str, optional
+        Base of the data filename.
+    workdir : str, optional
+        Directory where the data is stored.
+
+
+
+    Returns
+    -------
+    pd.DataFrame
+        All data without duplicates.
+
+
+    """
 
     fname = os.path.join(workdir, name+'.db')
 

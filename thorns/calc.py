@@ -1,6 +1,7 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from __future__ import division
+from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
@@ -299,29 +300,14 @@ def period_histogram(
 
     all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
     folded = np.fmod(all_spikes, 1/freq)
-    normalized = folded * freq
+    normalized = folded * freq * 2 * np.pi
 
     hist, bin_edges = np.histogram(
         normalized,
         bins=nbins,
-        range=(0, 1),
+        range=(0, 2*np.pi),
         **kwargs
     )
 
 
     return hist, bin_edges
-
-
-
-
-
-def main():
-    import doctest
-
-    print "Doctest start:"
-    doctest.testmod()
-    print "done."
-
-
-if __name__ == "__main__":
-    main()

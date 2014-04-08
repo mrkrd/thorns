@@ -1,7 +1,18 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from __future__ import division
-from __future__ import print_function
+"""Contains `spike_trains` creation and manipulation functions.
+
+`spike_trains` is a data format to contain physiological action
+potentials data and meta information.  It is based on `pd.DataFrame`,
+which MUST contain two columns *spikes* and *duration*.  The values in
+*spikes* are numpy arrays of spike timings in seconds.  The values in
+the *duration* column are the durations of the stimuli also in
+seconds.
+
+"""
+
+from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 

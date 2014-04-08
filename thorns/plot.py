@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
 from __future__ import division, print_function, absolute_import
 
@@ -130,39 +131,70 @@ def plot_period_histogram(
         spike_trains,
         freq,
         nbins=64,
-        normalize=True,
         axis=None,
-        style='k-',
+        style='',
+        density=False,
         **kwargs
 ):
-    """Plots period histogram."""
+    """Plot period histogram of the given spike trains.
 
+    Parameters
+    ----------
+    spike_trains : spike_trains
+        Spike trains for plotting.
+    freq : float
+        Stimulus frequency.
+    nbins : int
+        Number of bins for the histogram.
+    axis : plt.Axis, optional
+        Matplotlib Axis to plot on.
+    style : str, optional
+        Plotting style (See matplotlib plotting styles).
+    density : bool, optional
+        If False, the result will contain the number of samples in
+        each bin. If True, the result is the value of the probability
+        density function at the bin, normalized such that the integral
+        over the range is 1. (See `np.histogram()` for reference)
+
+
+    Returns
+    -------
+    plt.Axis
+        Matplotlib axis containing the plot.
+
+    """
 
     hist, bin_edges = calc.period_histogram(
         spike_trains,
         freq=freq,
         nbins=nbins,
-        normalize=normalize
+        density=density
     )
 
 
 
     if axis is None:
         import matplotlib.pyplot as plt
-        axis = plt.gca()
+        axis = plt.gca(polar=True)
 
 
-    axis.plot(
+    axis.fill(
         bin_edges[:-1],
         hist,
         style,
-        drawstyle='steps-post',
         **kwargs
     )
 
+    # axis.plot(
+    #     bin_edges[:-1],
+    #     hist,
+    #     style,
+    #     **kwargs
+    # )
 
-    axis.set_xlabel("Normalized Phase")
-    axis.set_ylabel("Probability Density Function")
+
+    axis.set_xlabel("Stimulus Phase")
+    # axis.set_ylabel("Probability Density Function")
 
     return axis
 
