@@ -13,16 +13,16 @@ from mrlib.thorns import calc
 GOLDEN = 1.6180339887
 
 
-def plot_neurogram(spike_trains, fs, axis=None, **kwargs):
+def plot_neurogram(spike_trains, fs, ax=None, **kwargs):
 
     neurogram = spikes.trains_to_array(
         spike_trains,
         fs
     )
 
-    if axis is None:
+    if ax is None:
         import matplotlib.pyplot as plt
-        axis = plt.gca()
+        ax = plt.gca()
 
     extent = (
         0,                       # left
@@ -31,22 +31,22 @@ def plot_neurogram(spike_trains, fs, axis=None, **kwargs):
         neurogram.shape[1]       # top
     )
 
-    axis.imshow(
+    ax.imshow(
         neurogram.T,
         aspect='auto',
         extent=extent,
         **kwargs
     )
 
-    axis.set_xlabel("Time [s]")
-    axis.set_ylabel("Channel number")
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Channel number")
 
-    return axis
-
-
+    return ax
 
 
-def plot_raster(spike_trains, axis=None, style='k.', **kwargs):
+
+
+def plot_raster(spike_trains, ax=None, style='k.', **kwargs):
     """Plot raster plot."""
 
     trains = spike_trains['spikes']
@@ -61,24 +61,24 @@ def plot_raster(spike_trains, axis=None, style='k.', **kwargs):
     s = np.concatenate(tuple(trains))
 
 
-    if axis is None:
+    if ax is None:
         import matplotlib.pyplot as plt
-        axis = plt.gca()
+        ax = plt.gca()
 
-    axis.plot(s, n, style, **kwargs)
-    axis.set_xlabel("Time [s]")
-    axis.set_xlim( (0, duration) )
-    axis.set_ylabel("Trial Number")
-    axis.set_ylim( (-0.5, len(trains)-0.5) )
-
-
-    return axis
+    ax.plot(s, n, style, **kwargs)
+    ax.set_xlabel("Time [s]")
+    ax.set_xlim( (0, duration) )
+    ax.set_ylabel("Trial Number")
+    ax.set_ylim( (-0.5, len(trains)-0.5) )
 
 
+    return ax
 
 
 
-def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
+
+
+def plot_psth(spike_trains, bin_size, ax=None, **kwargs):
     """Plots PSTH of spike_trains."""
 
 
@@ -88,12 +88,12 @@ def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
     )
 
 
-    if axis is None:
+    if ax is None:
         import matplotlib.pyplot as plt
-        axis = plt.gca()
+        ax = plt.gca()
 
 
-    axis.plot(
+    ax.plot(
         bin_edges[:-1],
         psth,
         drawstyle='steps-post',
@@ -101,11 +101,11 @@ def plot_psth(spike_trains, bin_size, axis=None, **kwargs):
     )
 
 
-    axis.set_xlabel("Time [s]")
-    axis.set_ylabel("Spikes per Second")
+    ax.set_xlabel("Time [s]")
+    ax.set_ylabel("Spikes per Second")
 
 
-    return axis
+    return ax
 
 
 # def isih(spike_trains, bin_size=1e-3, plot=None, **style):
@@ -131,7 +131,7 @@ def plot_period_histogram(
         spike_trains,
         freq,
         nbins=64,
-        axis=None,
+        ax=None,
         style='',
         density=False,
         **kwargs
@@ -146,8 +146,8 @@ def plot_period_histogram(
         Stimulus frequency.
     nbins : int
         Number of bins for the histogram.
-    axis : plt.Axis, optional
-        Matplotlib Axis to plot on.
+    ax : plt.Ax, optional
+        Matplotlib Ax to plot on.
     style : str, optional
         Plotting style (See matplotlib plotting styles).
     density : bool, optional
@@ -173,19 +173,19 @@ def plot_period_histogram(
 
 
 
-    if axis is None:
+    if ax is None:
         import matplotlib.pyplot as plt
-        axis = plt.gca(polar=True)
+        ax = plt.gca(polar=True)
 
 
-    axis.fill(
+    ax.fill(
         bin_edges[:-1],
         hist,
         style,
         **kwargs
     )
 
-    # axis.plot(
+    # ax.plot(
     #     bin_edges[:-1],
     #     hist,
     #     style,
@@ -193,10 +193,10 @@ def plot_period_histogram(
     # )
 
 
-    axis.set_xlabel("Stimulus Phase")
-    # axis.set_ylabel("Probability Density Function")
+    ax.set_xlabel("Stimulus Phase")
+    # ax.set_ylabel("Probability Density Function")
 
-    return axis
+    return ax
 
 
 
@@ -205,7 +205,7 @@ def plot_sac(
         coincidence_window=50e-6,
         analysis_window=5e-3,
         normalize=True,
-        axis=None,
+        ax=None,
         style='k-',
         **kwargs
 ):
@@ -219,12 +219,12 @@ def plot_sac(
     )
 
 
-    if axis is None:
+    if ax is None:
         import matplotlib.pyplot as plt
-        axis = plt.gca()
+        ax = plt.gca()
 
 
-    axis.plot(
+    ax.plot(
         bin_edges[:-1],
         sac,
         style,
@@ -233,7 +233,46 @@ def plot_sac(
     )
 
 
-    axis.set_xlabel("Delay [s]")
-    axis.set_ylabel("Normalized Number of Coincidences")
+    ax.set_xlabel("Delay [s]")
+    ax.set_ylabel("Normalized Number of Coincidences")
 
-    return axis
+    return ax
+
+
+
+def plot_signal(signal, fs=None, ax=None):
+    """Plot time signal.
+
+    Parameters
+    ----------
+    signal : array_like
+        Time signal.
+    fs : float, optional
+        Sampling freuency of the signal.
+
+
+    Returns
+    -------
+    plt.Axis
+       Matplotlib Axis with the plot.
+
+    """
+
+    if ax is None:
+        import matplotlib.pyplot as plt
+        ax = plt.gca()
+
+
+    if fs is None:
+        fs = 1
+
+
+    t = np.arange(len(signal)) / fs
+
+
+    ax.set_xlim((t[0],t[-1]))
+
+
+    ax.plot(t, signal)
+
+    return ax

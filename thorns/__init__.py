@@ -56,6 +56,7 @@ from plot import (
     plot_neurogram,
     plot_sac,
     plot_period_histogram,
+    plot_signal
 )
 
 from mrlib import show
