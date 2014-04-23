@@ -4,3 +4,6 @@
 *.mat
 *.orig
 work
+MRlib.egg-info
+build
+dist

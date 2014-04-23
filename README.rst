@@ -2,6 +2,14 @@ Tools.
 
 
 
+User Install
+============
+
+python setup.py install --user
+
+
+
+
 
 Submodules
 ==========
