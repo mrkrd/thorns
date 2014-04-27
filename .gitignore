@@ -3,7 +3,7 @@
 *.pyc
 *.mat
 *.orig
+*.egg-info
 work
-MRlib.egg-info
 build
 dist
