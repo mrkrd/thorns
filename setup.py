@@ -9,5 +9,6 @@ setup(
 
     author = "Marek Rudnicki",
     author_email = "marek.rudnicki@tum.de",
-    description = "Tools.",
+    description = "Tools",
+    license = "GPL",
 )
