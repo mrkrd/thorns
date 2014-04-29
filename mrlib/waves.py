@@ -107,18 +107,36 @@ def trim(a,b):
 def ramped_tone(
         fs,
         freq,
-        duration=50e-3,
-        ramp=2.5e-3,
+        duration,
         pad=0,
-        dbspl=None):
-    """ Generate ramped tone singal.
+        ramp=2.5e-3,
+        dbspl=None
+):
+    """Generate ramped tone singal.
 
-    fs: sampling frequency [Hz]
-    freq: frequency of the tone [Hz]
-    tone_durations: [s]
-    ramp: [s]
-    pad: [s]
-    dbspl: dB SPL
+    Parameters
+    ----------
+
+    fs : float
+        Sampling frequency in Hz.
+    freq : float
+        Frequency of the tone in Hz.
+    durations : float
+        Duration of the tone in seconds.
+    pad : float, optional
+        Duration of the pad in seconds (default is 0)
+    ramp : float, optional
+        Duration of the ramp in seconds (default is 2.5 ms)
+    dbspl : float, optional
+        Amplitude of the tone in dB SPL.  If None (default), no scaling.
+
+
+    Returns
+    -------
+
+    array_like
+        The output tone with optional padding.
+
 
     """
     assert ramp < duration/2
@@ -133,9 +151,9 @@ def ramped_tone(
     s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
 
     pad_signal = np.zeros(pad * fs)
-    s = np.concatenate( (s, pad_signal) )
+    sound = np.concatenate( (s, pad_signal) )
 
-    return s
+    return sound
 
 
 
