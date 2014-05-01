@@ -192,6 +192,8 @@ def plot_period_histogram(
     #     **kwargs
     # )
 
+    ax.set_xticks([0, np.pi, 2*np.pi])
+    ax.set_xticklabels([0, r"$\pi$", r"2$\pi$"])
 
     ax.set_xlabel("Stimulus Phase")
     # ax.set_ylabel("Probability Density Function")
