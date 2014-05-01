@@ -178,7 +178,7 @@ def plot_period_histogram(
         ax = plt.gca(polar=True)
 
 
-    ax.fill(
+    ax.plot(
         bin_edges[:-1],
         hist,
         style,
