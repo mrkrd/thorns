@@ -297,7 +297,6 @@ def period_histogram(
         **kwargs
 ):
 
-
     all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
     folded = np.fmod(all_spikes, 1/freq)
     normalized = folded * freq * 2 * np.pi
@@ -308,6 +307,5 @@ def period_histogram(
         range=(0, 2*np.pi),
         **kwargs
     )
-
 
     return hist, bin_edges
