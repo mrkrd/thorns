@@ -3,7 +3,7 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = "MRlib",
+    name = "mrlib",
     version = "0.1",
     packages = find_packages(),
 
