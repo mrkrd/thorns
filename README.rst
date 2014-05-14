@@ -2,8 +2,24 @@ Tools.
 
 
 
-User Install
+Installation
 ============
+
+Developer
+---------
+
+./build_inplace.sh
+python setup.py develop --user
+
+
+Administrator
+-------------
+
+python setup.py install
+
+
+User
+----
 
 python setup.py install --user
 
