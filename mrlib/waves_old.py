@@ -4,6 +4,10 @@ from __future__ import division
 
 __author__ = "Marek Rudnicki"
 
+
+raise NotImplementedError
+
+
 import numpy as np
 
 golden = 1.6180339887
@@ -83,28 +87,6 @@ def generate_ramped_tone(fs,
     return s
 
 
-def generate_amplitude_modulated_tone(fs,
-                                      fm,
-                                      fc,
-                                      modulation_depth=1,
-                                      tone_duration=100):
-    """ Generates amplitude modulated signals.
-
-    fs: sampling frequency (Hz)
-    fm: modulation frequency (Hz)
-    fc: carrier frequency (Hz)
-    modulation_depth: modulation depth
-    tone_duration: tone duration (ms)
-
-    """
-    m = modulation_depth
-    t = np.arange(0, tone_duration/1000, 1/fs)
-    s = (1 + m*np.sin(2*pi*fm*t)) * np.sin(2*pi*fc*t)
-
-    return s
-
-
-generate_am_tone = generate_amplitude_modulated_tone
 
 
 def now():

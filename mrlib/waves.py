@@ -1,11 +1,22 @@
 #!/usr/bin/env python
 
-from __future__ import division
+"""DSP related functions.
+
+"""
+
+
+from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
 import numpy as np
 import scipy.signal as dsp
+
+
+from mrlib.thorns import (
+    plot_signal,
+    show
+)
 
 
 
@@ -121,7 +132,7 @@ def ramped_tone(
         Sampling frequency in Hz.
     freq : float
         Frequency of the tone in Hz.
-    durations : float
+    duration : float
         Duration of the tone in seconds.
     pad : float, optional
         Duration of the pad in seconds (default is 0)
@@ -146,9 +157,11 @@ def ramped_tone(
     if dbspl != None:
         s = set_dbspl(s, dbspl)
 
-    ramp_signal = np.linspace(0, 1, np.ceil(ramp * fs))
-    s[0:len(ramp_signal)] = s[0:len(ramp_signal)] * ramp_signal
-    s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
+    if ramp != 0:
+        ramp_signal = np.linspace(0, 1, np.ceil(ramp * fs))
+        s[0:len(ramp_signal)] = s[0:len(ramp_signal)] * ramp_signal
+        s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
+
 
     pad_signal = np.zeros(pad * fs)
     sound = np.concatenate( (s, pad_signal) )
@@ -165,7 +178,7 @@ def white_noise(
         ramp=2.5e-3,
         pad=0,
         dbspl=None
-    ):
+):
 
     np.random.seed(seed)
 
@@ -302,3 +315,59 @@ def t(signal, fs):
     """
     tmax = (len(signal)-1) / fs
     return np.linspace(0, tmax, len(signal))
+
+
+
+def amplitude_modulated_tone(
+        fs,
+        fm,
+        fc,
+        m,
+        duration,
+        pad=0,
+        ramp=2.5e-3,
+        dbspl=None
+):
+    """Generate amplitude modulated tone.
+
+    fs : float
+        Sampling frequency in Hz.
+    fm : float
+        Modulation frequency in Hz.
+    fc : float
+        Carrier frequency in Hz.
+    m : float
+        Modulation depth <0-1>.
+    duration : float
+        Tone duration in seconds.
+    pad : float, optional
+        Duration of the pad in seconds (default is 0)
+    ramp : float, optional
+        Duration of the ramp in seconds (default is 2.5 ms)
+    dbspl : float, optional
+        Amplitude of the tone in dB SPL.  If None (default), no scaling.
+
+    """
+    assert ramp < duration/2
+    assert 0 <= m <= 1
+    assert fs/2 >= fc > fm
+
+    t = np.arange(0, duration, 1/fs)
+    s = (1 + m*np.sin(2*np.pi*fm*t)) * np.sin(2*np.pi*fc*t)
+
+    if dbspl != None:
+        s = set_dbspl(s, dbspl)
+
+    if ramp != 0:
+        ramp_signal = np.linspace(0, 1, np.ceil(ramp * fs))
+        s[0:len(ramp_signal)] = s[0:len(ramp_signal)] * ramp_signal
+        s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
+
+
+    pad_signal = np.zeros(pad * fs)
+    sound = np.concatenate( (s, pad_signal) )
+
+    return sound
+
+
+am_tone = amplitude_modulated_tone
