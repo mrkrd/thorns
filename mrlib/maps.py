@@ -287,55 +287,25 @@ def _publish_status(status, where='stdout'):
     )[0]
 
     ### Bar
+    bar_len = 50
+
     bar = (
-        "".join(status['bar']) +
-        "." * (status['all'] - status['loaded'] - status['processed'])
+        "O" * int(round(bar_len * status['loaded']/status['all'])) +
+        "#" * int(round(bar_len * status['processed']/status['all']))
     )
-
-    # ### Histogram
-    # histogram = ""
-    # hist,edges = np.histogram(
-    #     status['times'],
-    #     bins=10,
-    # )
-    # for h,e in zip(hist,edges):
-    #     dt = datetime.timedelta(seconds=e)
-    #     if hist.max() == 0:
-    #         lenght = 0
-    #     else:
-    #         lenght = h / hist.max() * 20
-    #     row = " {dt}  {h:>4} |{s:<20}\n".format(dt=dt, s='|'*int(lenght), h=h)
-    #     histogram += row
-
+    bar += "." * (bar_len - len(bar))
 
     seconds = time.time() - status['start_time']
-    remaining = status['all'] - status['loaded'] - status['processed']
-    if status['processed']:
-        eta = datetime.timedelta(seconds=(
-            remaining * seconds / (status['processed'])
-        ))
-    else:
-        eta = 'Unknown'
 
     msg = """
-{bar}
-
-Loaded    (O): {loaded}
-Processed (#): {processed}
-Remaining (.): {remaining}
-
---------------------
-Time: {time}
-ETA:  {eta}
-
+{loaded}/{processed}/{remaining} [{bar}] {time}
 """.format(
-    all=status['all'],
     loaded=status['loaded'],
     processed=status['processed'],
-    remaining=remaining,
+    remaining=(status['all']-status['loaded']-status['processed']),
     bar=bar,
     time=datetime.timedelta(seconds=seconds),
-    eta=eta,
+
 )
 
 
@@ -497,12 +467,10 @@ def map(
         if how == 'load':
             result = _load_cache(fname)
             status['loaded'] += 1
-            status['bar'].append('O')
 
         elif how == 'process':
             result = next(results)
             status['processed'] += 1
-            status['bar'].append('#')
 
             if cfg['cache'] in ('yes', 'refresh'):
                 _dump_cache(result, fname)
