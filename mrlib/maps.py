@@ -292,20 +292,20 @@ def _publish_status(status, where='stdout'):
         "." * (status['all'] - status['loaded'] - status['processed'])
     )
 
-    ### Histogram
-    histogram = ""
-    hist,edges = np.histogram(
-        status['times'],
-        bins=10,
-    )
-    for h,e in zip(hist,edges):
-        dt = datetime.timedelta(seconds=e)
-        if hist.max() == 0:
-            lenght = 0
-        else:
-            lenght = h / hist.max() * 20
-        row = " {dt}  {h:>4} |{s:<20}\n".format(dt=dt, s='|'*int(lenght), h=h)
-        histogram += row
+    # ### Histogram
+    # histogram = ""
+    # hist,edges = np.histogram(
+    #     status['times'],
+    #     bins=10,
+    # )
+    # for h,e in zip(hist,edges):
+    #     dt = datetime.timedelta(seconds=e)
+    #     if hist.max() == 0:
+    #         lenght = 0
+    #     else:
+    #         lenght = h / hist.max() * 20
+    #     row = " {dt}  {h:>4} |{s:<20}\n".format(dt=dt, s='|'*int(lenght), h=h)
+    #     histogram += row
 
 
     seconds = time.time() - status['start_time']
@@ -324,7 +324,6 @@ Loaded    (O): {loaded}
 Processed (#): {processed}
 Remaining (.): {remaining}
 
-{histogram}
 --------------------
 Time: {time}
 ETA:  {eta}
@@ -335,7 +334,6 @@ ETA:  {eta}
     processed=status['processed'],
     remaining=remaining,
     bar=bar,
-    histogram=histogram,
     time=datetime.timedelta(seconds=seconds),
     eta=eta,
 )
