@@ -297,16 +297,14 @@ def _publish_status(status, where='stdout'):
 
     seconds = time.time() - status['start_time']
 
-    msg = """
-{loaded}/{processed}/{remaining} [{bar}] {time}
-""".format(
-    loaded=status['loaded'],
-    processed=status['processed'],
-    remaining=(status['all']-status['loaded']-status['processed']),
-    bar=bar,
-    time=datetime.timedelta(seconds=seconds),
+    msg = "\n{loaded}/{processed}/{remaining} [{bar}] {time}\n".format(
+        loaded=status['loaded'],
+        processed=status['processed'],
+        remaining=(status['all']-status['loaded']-status['processed']),
+        bar=bar,
+        time=datetime.timedelta(seconds=seconds),
 
-)
+    )
 
 
 
@@ -392,8 +390,8 @@ def map(
         kwargs=None
 ):
     """Apply func to every item of iterable and return a list of the
-    results.  This map supports multiple backends, e.g. serial,
-    multiprocessing, ipcluster
+    results.  This map supports multiple backends, e.g. 'serial',
+    'multiprocessing', 'ipcluster'.
 
     Parameters
     ----------
@@ -402,7 +400,7 @@ def map(
     iterable : list of dicts
         Each dict is applied to the func. The keys of the dicts should
         correspond to the parameters of the func.
-    cache : bool or {'yes', 'no', 'refresh'}
+    cache : bool or {'yes', 'no', 'redo'}
         If True, each result is loaded instead calculated again.
 
     TODO: finish the docstring
@@ -472,7 +470,7 @@ def map(
             result = next(results)
             status['processed'] += 1
 
-            if cfg['cache'] in ('yes', 'refresh'):
+            if cfg['cache'] in ('yes', 'refresh', 'redo'):
                 _dump_cache(result, fname)
 
         else:
