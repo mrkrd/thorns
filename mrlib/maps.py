@@ -279,7 +279,7 @@ del _tmp_dict
 
 
 
-def _publish_status(status, where='stdout'):
+def _publish_status(status, where='stdout', func_name=""):
 
 
     name = os.path.splitext(
@@ -287,7 +287,7 @@ def _publish_status(status, where='stdout'):
     )[0]
 
     ### Bar
-    bar_len = 50
+    bar_len = 30
 
     bar = (
         "O" * int(round(bar_len * status['loaded']/status['all'])) +
@@ -297,13 +297,13 @@ def _publish_status(status, where='stdout'):
 
     seconds = time.time() - status['start_time']
 
-    msg = "\n{loaded}/{processed}/{remaining} [{bar}] {time}\n".format(
+    msg = "{func_name}: {loaded}/{processed}/{remaining} [{bar}] {time}".format(
         loaded=status['loaded'],
         processed=status['processed'],
         remaining=(status['all']-status['loaded']-status['processed']),
         bar=bar,
         time=datetime.timedelta(seconds=seconds),
-
+        func_name=func_name
     )
 
 
@@ -461,7 +461,7 @@ def map(
     answers = []
     for how,fname in zip(hows,cache_files):
 
-        _publish_status(status, 'file')
+        _publish_status(status, 'file', func_name=func.func_name)
         if how == 'load':
             result = _load_cache(fname)
             status['loaded'] += 1
@@ -481,7 +481,7 @@ def map(
 
         answers.append(ans)
 
-    _publish_status(status, 'file')
-    _publish_status(status, 'stdout')
+    _publish_status(status, 'file', func_name=func.func_name)
+    _publish_status(status, 'stdout', func_name=func.func_name)
 
     return(answers)
