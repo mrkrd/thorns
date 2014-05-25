@@ -287,7 +287,7 @@ def _publish_status(status, where='stdout', func_name=""):
     )[0]
 
     ### Bar
-    bar_len = 30
+    bar_len = 20
 
     bar = (
         "O" * int(round(bar_len * status['loaded']/status['all'])) +
@@ -297,7 +297,7 @@ def _publish_status(status, where='stdout', func_name=""):
 
     seconds = time.time() - status['start_time']
 
-    msg = "{func_name}: {loaded}/{processed}/{remaining} [{bar}] {time}".format(
+    msg = "{func_name:<22} [{bar}]  {loaded}/{processed}/{remaining}  {time}".format(
         loaded=status['loaded'],
         processed=status['processed'],
         remaining=(status['all']-status['loaded']-status['processed']),
