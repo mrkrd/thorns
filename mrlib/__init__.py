@@ -41,7 +41,7 @@ from mrlib.maps import (
     apply,
 )
 
-from mrlib.plot import (
+from mrlib.plotting import (
     plot,
     show,
 )
