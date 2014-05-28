@@ -85,8 +85,67 @@ def plot(y=None, x=None, fs=None, kind=None, style=''):
 
 
 
-def main():
-    pass
 
-if __name__ == "__main__":
-    main()
+def set_rc_style(style='default'):
+    """Set the style for plots by modifying mpl.rcParams (call before
+    plotting) and axes (call after plotting).
+
+    """
+
+    import matplotlib as mpl
+
+    mpl.rcdefaults()
+
+    if style == 'jaro':
+        style_dict = {
+            'figure.figsize': (3.27, 2.5),
+            'lines.linewidth': 1.5,
+            'lines.markersize': 3,
+            'axes.grid': False,
+            'axes.color_cycle': ["#348ABD", "#A60628", "#7A68A6", "#467821", "#D55E00", "#CC79A7", "#56B4E9", "#009E73", "#F0E442", "#0072B2"],
+            'font.family': 'sans',
+            'font.size': 9,
+            'legend.fancybox': True,
+            'legend.frameon': False,
+            'legend.fontsize': 'small',
+            'legend.numpoints': 2,
+        }
+
+        mpl.rcParams.update(style_dict)
+
+    elif style == 'default':
+        pass
+
+    else:
+        raise NotImplementedError("Style not implemented: {}".format(style))
+
+
+
+def set_fig_style(style='default', fig=None):
+
+    import matplotlib.pyplot as plt
+
+    if fig is None:
+        fig = plt.gcf()
+
+    if fig is not None:
+        axes = fig.axes
+
+    if style == 'jaro':
+
+        for ax in axes:
+            ax.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.get_xaxis().tick_bottom()
+            ax.get_yaxis().tick_left()
+
+
+        fig.set_figheight(2.5 * len(axes))
+        fig.tight_layout()
+
+
+    elif style == 'default':
+        pass
+
+    else:
+        raise NotImplementedError("Style not implemented: {}".format(style))
