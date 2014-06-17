@@ -31,7 +31,6 @@ def get_store(workdir='work'):
     return store
 
 
-mkstore = get_store
 
 
 def dumpdb(xs=None, ys=None, name='dump', workdir='work', kwargs=None):

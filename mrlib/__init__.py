@@ -33,7 +33,6 @@ from mrlib.dumpdb import (
     dumpdb,
     loaddb,
     get_store,
-    mkstore
 )
 
 from mrlib.maps import (
