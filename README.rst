@@ -1,40 +1,27 @@
-Tools.
+thorns
+======
 
+:Name: thorns
+:Description: Spike analysis software
+:Author: Marek Rudnicki
+:Email: marekrud@gmail.com
+:URL: https://github.com/mrkrd/thorns
+:License: GNU General Public License v3 or later (GPLv3+)
 
 
 Installation
-============
+------------
 
-Developer
----------
+Developer::
 
-./build_inplace.sh
-python setup.py develop --user
+  python setup.py develop --user
 
 
-Administrator
--------------
+Administrator::
 
-python setup.py install
-
-
-User
-----
-
-python setup.py install --user
+  python setup.py install
 
 
+User::
 
-
-
-Submodules
-==========
-
-dumpdb: quick dumping and loading records
-
-maps: map() equivalent with various backends (ipython cluster,
-multiprocessing) with caching
-
-waves: signal creation and manipulation
-
-thorns: spike trains creation, manipulation and statistics
+  python setup.py install --user
