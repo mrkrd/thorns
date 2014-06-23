@@ -1,10 +1,12 @@
 thorns
 ======
 
+*Description Spike analysis software*
+
+
 :Name: thorns
 :Author: Marek Rudnicki
 :Email: marekrud@gmail.com
-:Description: Spike analysis software
 :URL: https://github.com/mrkrd/thorns
 :License: GNU General Public License v3 or later (GPLv3+)
 
