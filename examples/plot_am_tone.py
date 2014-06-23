@@ -11,7 +11,7 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 
-import mrlib.waves as wv
+import thorns.waves as wv
 
 def main():
 

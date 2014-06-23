@@ -3,13 +3,13 @@
 from setuptools import setup, find_packages
 
 setup(
-    name = "mrlib",
+    name = "thorns",
     version = "0.1",
     author = "Marek Rudnicki",
     author_email = "marek.rudnicki@tum.de",
 
     packages = find_packages(),
 
-    description = "Tools",
+    description = "Spike analysis software",
     license = "GPL",
 )

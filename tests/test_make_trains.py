@@ -1,41 +1,16 @@
 #!/usr/bin/env python
 
-from __future__ import division
+from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
-from numpy.testing import *
+from numpy.testing import assert_equal
+from pandas.util.testing import assert_frame_equal
 
 import numpy as np
-from pprint import pprint
-
 import pandas as pd
 
-import mrlib.thorns as th
-
-
-def assert_trains_equal(a,b, almost=False):
-
-    a = a.reset_index(drop=True)
-    b = b.reset_index(drop=True)
-
-    assert len(a) == len(b)
-
-    ### Assert if spike trains are equal
-    for ta,tb in zip(a['spikes'], b['spikes']):
-        if almost:
-            assert_array_almost_equal(ta, tb)
-        else:
-            assert_array_equal(ta, tb)
-
-
-    ### Assert if meta data is equal
-    assert np.all(a.columns == b.columns)
-
-    comp = (a.drop('spikes', axis=1) == b.drop('spikes', axis=1))
-    assert np.all(comp.values)
-
-
+import thorns as th
 
 
 
@@ -57,7 +32,7 @@ def test_from_array():
     )
 
 
-    assert_trains_equal(
+    assert_frame_equal(
         expected,
         result
     )
@@ -76,7 +51,7 @@ def test_from_arrays():
 
     expected = {
         'spikes': arrays,
-        'duration': np.repeat(10, len(arrays))
+        'duration': np.repeat(10., len(arrays))
     }
     expected = pd.DataFrame(expected)
 
@@ -88,7 +63,8 @@ def test_from_arrays():
         arrays,
         duration=10.0
     )
-    assert_trains_equal(
+
+    assert_frame_equal(
         result,
         expected
     )
@@ -100,7 +76,7 @@ def test_from_arrays():
         arrays,
         duration=10.0
     )
-    assert_trains_equal(
+    assert_frame_equal(
         expected,
         result
     )
@@ -118,10 +94,10 @@ def test_make_empty_trains():
 
     expected = pd.DataFrame({
         'spikes': spikes,
-        'duration': np.repeat(0, len(spikes))
+        'duration': np.repeat(0., len(spikes))
     })
 
-    assert_trains_equal(
+    assert_frame_equal(
         trains,
         expected
     )
@@ -138,10 +114,10 @@ def test_make_empty_trains():
 
     expected = pd.DataFrame({
         'spikes': spikes,
-        'duration': np.repeat(10, len(spikes))
+        'duration': np.repeat(10., len(spikes))
     })
 
-    assert_trains_equal(
+    assert_frame_equal(
         trains,
         expected
     )
@@ -164,7 +140,7 @@ def test_trains_to_array():
     )
 
 
-    assert_array_equal(
+    assert_equal(
         result,
         [[0,0],
          [1,0],
@@ -192,7 +168,7 @@ def test_accumulate_spike_trains():
         cfs=[1,2,3]
     )
 
-    assert_trains_equal(accumulated, expected)
+    assert_frame_equal(accumulated, expected)
 
 
 
@@ -220,10 +196,11 @@ def test_select_trains():
         cfs=[1],
         idx=[1]
     )
+    expected.index = [3]
 
-    assert_trains_equal(
+    assert_frame_equal(
         selected,
-        expected
+        expected,
     )
 
 
@@ -249,7 +226,7 @@ def test_trim():
     )
 
 
-    assert_trains_equal(
+    assert_frame_equal(
         trimmed,
         expected
     )
@@ -275,9 +252,7 @@ def test_fold_trains():
             2, 2, 2, 2, 2, 2, 2]
     )
 
-
-    assert_trains_equal(
+    assert_frame_equal(
         folded,
         expected,
-        almost=True
     )

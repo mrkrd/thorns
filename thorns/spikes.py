@@ -23,7 +23,7 @@ import sys
 
 from collections import Iterable
 
-from mrlib.thorns.calc import get_duration
+from thorns.stats import get_duration
 
 
 
@@ -279,7 +279,7 @@ trim_trains = trim_spike_trains
 
 
 def fold_spike_trains(spike_trains, period):
-    """ Fold each of the spike trains.
+    """Fold the spike trains.
 
     >>> from thorns import arrays_to_trains
     >>> a = [np.array([1,2,3,4]), np.array([2,3,4,5])]
@@ -317,6 +317,7 @@ def fold_spike_trains(spike_trains, period):
 
 
     folded_trains = pd.DataFrame(rows)
+    folded_trains = folded_trains.reset_index(drop=True)
 
     return folded_trains
 

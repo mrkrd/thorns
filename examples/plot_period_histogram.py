@@ -12,7 +12,7 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 
-import mrlib.thorns as th
+import thorns as th
 
 
 

@@ -13,7 +13,7 @@ import numpy as np
 import scipy.signal as dsp
 
 
-from mrlib.thorns import (
+from thorns import (
     plot_signal,
     show
 )

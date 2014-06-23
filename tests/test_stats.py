@@ -1,18 +1,13 @@
 #!/usr/bin/env python
 
-from __future__ import division
+from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
 import numpy as np
-from numpy.testing import (
-    assert_array_equal,
-    assert_array_almost_equal,
-    assert_equal,
-    assert_almost_equal
-)
+from numpy.testing import assert_equal, assert_almost_equal
 
-import mrlib.thorns as th
+import thorns as th
 
 
 
@@ -45,7 +40,7 @@ def test_ci():
         normalize=False
     )
 
-    assert ci == 4
+    assert_equal(ci, 4)
 
 
 
@@ -65,11 +60,11 @@ def test_sac():
     )
 
 
-    assert_array_equal(
+    assert_equal(
         bin_edges,
         [-2., -1.,  0.,  1.,  2.,  3.]
     )
-    assert_array_equal(
+    assert_equal(
         sac,
         [2, 2, 4, 2, 2]
     )
@@ -91,11 +86,11 @@ def test_psth():
     )
 
 
-    assert_array_equal(
+    assert_equal(
         psth,
         [2, 1, 2]
     )
-    assert_array_equal(
+    assert_equal(
         bin_edges,
         [0, 1, 2, 3]
     )
@@ -128,11 +123,11 @@ def test_psth_with_empty_trains():
         normalize=False
     )
 
-    assert_array_equal(
+    assert_equal(
         psth,
         [0,0]
     )
-    assert_array_equal(
+    assert_equal(
         bin_edges,
         [0,1,2]
     )
@@ -179,11 +174,11 @@ def test_isih():
         bin_size=1,
     )
 
-    assert_array_equal(
+    assert_equal(
         isih,
         [ 0, 2, 2]
     )
-    assert_array_equal(
+    assert_equal(
         bin_edges,
         [ 0, 1, 2, 3]
     )

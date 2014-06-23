@@ -9,7 +9,7 @@ from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
-import mrlib as mr
+import thorns as th
 
 def main():
 
@@ -29,13 +29,13 @@ def main():
 
 
     ### Dump the data
-    mr.dumpdb(space, results)
+    th.dumpdb(space, results)
 
 
 
     ### Load the data, note that duplicated resuts are dropped (only
     ### the most recent data is returned)
-    db = mr.loaddb()
+    db = th.loaddb()
 
 
 

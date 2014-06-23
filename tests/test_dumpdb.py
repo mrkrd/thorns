@@ -1,18 +1,16 @@
 #!/usr/bin/env python
 
-from __future__ import division
+from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
-import tempfile
 import shutil
 
 import numpy as np
-from numpy.testing import (
-    assert_array_equal
-)
+from numpy.testing import assert_equal
 
-import mrlib as mr
+
+import thorns as th
 
 
 
@@ -44,31 +42,32 @@ def test_dump_and_load():
     # os.unlink(store.name)
 
 
-    mr.dumpdb(
+    th.dumpdb(
         x1,y1
     )
-    mr.dumpdb(
+    th.dumpdb(
         x2,y2
     )
 
 
 
-    db = mr.loaddb()
+    db = th.loaddb()
 
 
     assert len(db) == 2
 
-    assert_array_equal(
+    assert_equal(
         db.dbspl.values,
         [50, 60]
     )
 
-    assert_array_equal(
+    assert_equal(
         db.sac.values.tolist(),
         [[1,2], [20,30]]
     )
 
 
+    ### TODO: proper setup/teardown
     shutil.rmtree('work')
 
 
@@ -88,29 +87,29 @@ def test_kwargs():
 
 
 
-    mr.dumpdb(
+    th.dumpdb(
         x1,
         y1,
         kwargs={'bla':'anf'}
     )
 
 
-    db = mr.loaddb()
+    db = th.loaddb()
 
 
     assert len(db) == 2
 
-    assert_array_equal(
+    assert_equal(
         db.dbspl.values,
         [50, 60]
     )
 
-    assert_array_equal(
+    assert_equal(
         db.sac.values.tolist(),
         [[1,2], [2,3]]
     )
 
-    assert_array_equal(
+    assert_equal(
         db.bla.values.tolist(),
         ['anf', 'anf']
     )

@@ -13,8 +13,10 @@ import numpy as np
 from numpy.testing import (
     assert_array_equal
 )
+
+### TODO: convert to py.test
 from nose.tools import with_setup
-import mrlib as mr
+import thorns as th
 
 
 def square(x):
@@ -37,13 +39,13 @@ def test_serial_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mr.map(
+    results1 = th.map(
         square,
         dicts,
         backend='serial',
         workdir=workdir
     )
-    results2 = mr.map(
+    results2 = th.map(
         square,
         dicts,
         backend='serial',
@@ -68,13 +70,13 @@ def test_multiprocessing_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mr.map(
+    results1 = th.map(
         square,
         dicts,
         backend='multiprocessing',
         workdir=workdir
     )
-    results2 = mr.map(
+    results2 = th.map(
         square,
         dicts,
         backend='multiprocessing',
@@ -99,13 +101,13 @@ def test_playdoh_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mr.map(
+    results1 = th.map(
         square,
         dicts,
         backend='playdoh',
         workdir=workdir
     )
-    results2 = mr.map(
+    results2 = th.map(
         square,
         dicts,
         backend='playdoh',
@@ -130,13 +132,13 @@ def test_ipython_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mr.map(
+    results1 = th.map(
         square,
         dicts,
         backend='ipython',
         workdir=workdir
     )
-    results2 = mr.map(
+    results2 = th.map(
         square,
         dicts,
         backend='ipython',
@@ -161,7 +163,7 @@ def test_isolated_serial_map():
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
 
-    results1 = mr.map(
+    results1 = th.map(
         square,
         dicts,
         backend='serial_isolated',
@@ -169,7 +171,7 @@ def test_isolated_serial_map():
     )
     results1 = list(results1)
 
-    results2 = mr.map(
+    results2 = th.map(
         square,
         dicts,
         backend='serial_isolated',
