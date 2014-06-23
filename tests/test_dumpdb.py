@@ -42,16 +42,16 @@ def test_dump_and_load():
     # os.unlink(store.name)
 
 
-    th.dumpdb(
+    th.util.dumpdb(
         x1,y1
     )
-    th.dumpdb(
+    th.util.dumpdb(
         x2,y2
     )
 
 
 
-    db = th.loaddb()
+    db = th.util.loaddb()
 
 
     assert len(db) == 2
@@ -87,14 +87,14 @@ def test_kwargs():
 
 
 
-    th.dumpdb(
+    th.util.dumpdb(
         x1,
         y1,
         kwargs={'bla':'anf'}
     )
 
 
-    db = th.loaddb()
+    db = th.util.loaddb()
 
 
     assert len(db) == 2
