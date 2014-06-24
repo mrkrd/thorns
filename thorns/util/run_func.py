@@ -11,7 +11,7 @@ import cPickle as pickle
 import sys
 import imp
 
-from thorns.maps import _FuncWrap
+from thorns.util.maps import _FuncWrap
 
 def main():
     socket_fname = sys.argv[1]

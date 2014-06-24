@@ -7,34 +7,33 @@ __author__ = "Marek Rudnicki"
 
 import tempfile
 import shutil
-import unittest
+import pytest
 
 import numpy as np
-from numpy.testing import (
-    assert_array_equal
-)
+from numpy.testing import assert_equal
 
-### TODO: convert to py.test
-from nose.tools import with_setup
 import thorns as th
 
 
 def square(x):
     return x**2
 
-
-def setup_dir():
+@pytest.fixture(scope="function")
+def workdir(request):
     global workdir
     workdir = tempfile.mkdtemp()
 
-def teardown_dir():
-    global workdir
-    shutil.rmtree(workdir, ignore_errors=True)
+    def fin():
+        print("Removing temp dir: {}".format(workdir))
+
+        shutil.rmtree(workdir, ignore_errors=True)
+
+    return workdir
 
 
 
-@with_setup(setup_dir, teardown_dir)
-def test_serial_map():
+
+def test_serial_map(workdir):
 
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
@@ -43,7 +42,7 @@ def test_serial_map():
         square,
         dicts,
         backend='serial',
-        workdir=workdir
+        workdir=workdir,
     )
     results2 = th.util.map(
         square,
@@ -53,18 +52,17 @@ def test_serial_map():
     )
 
 
-    assert_array_equal(
+    assert_equal(
         data**2,
         list(results1)
     )
-    assert_array_equal(
+    assert_equal(
         data**2,
         list(results2)
     )
 
 
-@with_setup(setup_dir, teardown_dir)
-def test_multiprocessing_map():
+def test_multiprocessing_map(workdir):
 
 
     data = np.arange(10)
@@ -84,19 +82,18 @@ def test_multiprocessing_map():
     )
 
 
-    assert_array_equal(
+    assert_equal(
         data**2,
         list(results1)
     )
-    assert_array_equal(
+    assert_equal(
         data**2,
         list(results2)
     )
 
 
 
-@with_setup(setup_dir, teardown_dir)
-def test_playdoh_map():
+def test_playdoh_map(workdir):
 
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
@@ -115,19 +112,18 @@ def test_playdoh_map():
     )
 
 
-    assert_array_equal(
+    assert_equal(
         data**2,
         list(results1)
     )
-    assert_array_equal(
+    assert_equal(
         data**2,
         list(results2)
     )
 
 
-@unittest.skip("not working with nosetest")
-@with_setup(setup_dir, teardown_dir)
-def test_ipython_map():
+@pytest.mark.skipif('True')
+def test_ipython_map(workdir):
 
     data = np.arange(10)
     dicts = [{'x':i} for i in data]
@@ -145,22 +141,19 @@ def test_ipython_map():
         workdir=workdir
     )
 
-
-    assert_array_equal(
+    assert_equal(
         data**2,
         list(results1)
     )
-    assert_array_equal(
+    assert_equal(
         data**2,
         list(results2)
     )
 
 
-@with_setup(setup_dir, teardown_dir)
-def test_isolated_serial_map():
+def test_isolated_serial_map(workdir):
 
-
-    data = np.arange(10)
+    data = np.arange(3)
     dicts = [{'x':i} for i in data]
 
     results1 = th.util.map(
@@ -181,11 +174,11 @@ def test_isolated_serial_map():
 
 
 
-    assert_array_equal(
+    assert_equal(
         data**2,
         results1
     )
-    assert_array_equal(
+    assert_equal(
         data**2,
         results2
     )
