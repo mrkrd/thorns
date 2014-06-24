@@ -14,6 +14,11 @@ thorns
 Installation
 ------------
 
+Quick install::
+
+   pip install matlab_wrapper
+
+
 Developer::
 
   python setup.py develop --user
