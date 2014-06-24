@@ -1,7 +1,7 @@
 thorns
 ======
 
-*Description Spike analysis software*
+*Spike analysis software*
 
 
 :Name: thorns
