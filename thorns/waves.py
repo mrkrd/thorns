@@ -13,12 +13,6 @@ import numpy as np
 import scipy.signal as dsp
 
 
-from thorns import (
-    plot_signal,
-    show
-)
-
-
 
 def align(a, fs_a, b, fs_b):
     """Align two signals (a,b) so that they have the same sampling

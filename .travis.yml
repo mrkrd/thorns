@@ -1,0 +1,20 @@
+language: python
+python:
+  - "2.7"
+
+install:
+  - "pip install pandas"
+  - "python setup.py install"
+
+virtualenv:
+  system_site_packages: true
+
+before_install:
+  - "sudo apt-get update -qq"
+  - "sudo apt-get install -qq python-numpy"
+  - "sudo apt-get install -qq python-scipy"
+
+script: py.test
+
+notifications:
+  email: false
