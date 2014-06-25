@@ -38,7 +38,7 @@ def plot_neurogram(spike_trains, fs, ax=None, **kwargs):
         **kwargs
     )
 
-    ax.set_xlabel("Time [s]")
+    ax.set_xlabel("Time (s)")
     ax.set_ylabel("Channel number")
 
     return ax
@@ -66,7 +66,7 @@ def plot_raster(spike_trains, ax=None, style='k.', **kwargs):
         ax = plt.gca()
 
     ax.plot(s, n, style, **kwargs)
-    ax.set_xlabel("Time [s]")
+    ax.set_xlabel("Time (s)")
     ax.set_xlim( (0, duration) )
     ax.set_ylabel("Trial Number")
     ax.set_ylim( (-0.5, len(trains)-0.5) )
@@ -101,7 +101,7 @@ def plot_psth(spike_trains, bin_size, ax=None, **kwargs):
     )
 
 
-    ax.set_xlabel("Time [s]")
+    ax.set_xlabel("Time (s)")
     ax.set_ylabel("Spikes per Second")
 
 
@@ -118,7 +118,7 @@ def plot_psth(spike_trains, bin_size, ax=None, **kwargs):
 
 #     if plot is None:
 #         plot = biggles.FramedPlot()
-#     plot.xlabel = "Inter-Spike Interval [ms]"
+#     plot.xlabel = "Inter-Spike Interval (ms)"
 #     plot.ylabel = "Probability Density Function"
 #     plot.add(c)
 #     plot.xrange = (0, None)
@@ -235,7 +235,7 @@ def plot_sac(
     )
 
 
-    ax.set_xlabel("Delay [s]")
+    ax.set_xlabel("Delay (s)")
     ax.set_ylabel("Normalized Number of Coincidences")
 
     return ax
