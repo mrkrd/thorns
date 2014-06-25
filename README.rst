@@ -1,7 +1,7 @@
 thorns
 ======
 
-*Description Spike analysis software*
+*Spike analysis software*
 
 
 :Name: thorns
@@ -13,6 +13,11 @@ thorns
 
 Installation
 ------------
+
+Quick install::
+
+   pip install matlab_wrapper
+
 
 Developer::
 

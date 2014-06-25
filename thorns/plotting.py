@@ -283,6 +283,13 @@ def plot_signal(signal, fs=None, ax=None):
 
 
 def show():
-    """Equivalent to plt.show()"""
+    """Equivalent of plt.show()"""
     import matplotlib.pyplot as plt
     plt.show()
+
+
+def gcf():
+    """Equivalent of plt.gcf()"""
+    import matplotlib.pyplot as plt
+    fig = plt.gcf()
+    return fig

@@ -35,6 +35,7 @@ if 'THlog' in os.environ:
 
 
 import thorns.util
+import thorns.waves
 
 
 from thorns.spikes import (
@@ -95,11 +96,6 @@ from thorns.plotting import (
     plot_sac,
     plot_period_histogram,
     plot_signal,
-    show
+    show,
+    gbf,
 )
-
-
-def gcf():
-    import matplotlib.pyplot as plt
-    fig = plt.gcf()
-    return fig
