@@ -97,5 +97,5 @@ from thorns.plotting import (
     plot_period_histogram,
     plot_signal,
     show,
-    gbf,
+    gcf,
 )

@@ -112,7 +112,7 @@ def _isolated_serial_map(func, iterable, cfg):
             'mar_maps_socket'
         )
         p = subprocess.Popen(
-            ['python', '-m', 'thorns.run_func', fname]
+            ['python', '-m', 'thorns.util.run_func', fname]
         )
 
         module_name = inspect.getfile(func)
