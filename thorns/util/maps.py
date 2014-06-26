@@ -331,32 +331,32 @@ def _get_options(backend, cache, dependencies):
 
     cfg = {}
 
-    if 'MRmap' in os.environ:
-        cfg['backend'] = os.environ['MRmap']
-    elif backend is not None:
+    if backend is not None:
         cfg['backend'] = backend
+    elif 'THmap' in os.environ:
+        cfg['backend'] = os.environ['THmap']
     else:
         cfg['backend'] = 'serial'
 
 
-    if 'MRmachines' in os.environ:
+    if 'THmachines' in os.environ:
         # TODO: must be parsed
-        cfg['machines'] = os.environ['MRmachines']
+        cfg['machines'] = os.environ['THmachines']
     else:
         cfg['machines'] = []
 
 
-    if 'MRdependencies' in os.environ:
+    if 'THdependencies' in os.environ:
         # TODO: must be parsed
-        cfg['dependencies'] = os.environ['MRdependencies']
+        cfg['dependencies'] = os.environ['THdependencies']
     elif dependencies is not None:
         cfg['dependencies'] = dependencies
     else:
         cfg['dependencies'] = []
 
 
-    if 'MRcache' in os.environ:
-        cfg['cache'] = os.environ['MRcache']
+    if 'THcache' in os.environ:
+        cfg['cache'] = os.environ['THcache']
     elif cache is not None:
         cfg['cache'] = cache
     else:
