@@ -355,10 +355,10 @@ def _get_options(backend, cache, dependencies):
         cfg['dependencies'] = []
 
 
-    if 'THcache' in os.environ:
-        cfg['cache'] = os.environ['THcache']
-    elif cache is not None:
+    if cache is not None:
         cfg['cache'] = cache
+    elif 'THcache' in os.environ:
+        cfg['cache'] = os.environ['THcache']
     else:
         cfg['cache'] = 'yes'
 
@@ -383,8 +383,8 @@ def apply(func, workdir='work', **kwargs):
 def map(
         func,
         iterable,
-        backend='serial',
-        cache='yes',
+        backend=None,
+        cache=None,
         workdir='work',
         dependencies=None,
         kwargs=None
