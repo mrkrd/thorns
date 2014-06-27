@@ -323,15 +323,9 @@ def generate_electrical_amplitudes(
 
 
 def t(signal, fs):
-    """
-    Return time vector for the signal.
+    """Return time vector for `signal` with sampling frequency `fs` (Hz)."""
 
-    signal: signal
-    fs: sampling frequency in Hz
-
-    """
-    tmax = (len(signal)-1) / fs
-    return np.linspace(0, tmax, len(signal))
+    return np.arange(0, len(signal)) / fs
 
 
 
