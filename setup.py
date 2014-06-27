@@ -28,6 +28,7 @@ setup(
         "Operating System :: Microsoft :: Windows",
         "Operating System :: MacOS :: MacOS X",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
     ],
 
     platforms = ["Linux", "Windows", "FreeBSD"],
