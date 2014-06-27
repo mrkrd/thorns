@@ -1,13 +1,11 @@
-#!/usr/bin/env python
-
 """DSP related functions.
 
 """
 
-
 from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
+
 
 import numpy as np
 import scipy.signal as dsp
@@ -15,7 +13,7 @@ import scipy.signal as dsp
 
 
 def align(a, fs_a, b, fs_b):
-    """Align two signals (a,b) so that they have the same sampling
+    """Align two signals, `a` and `b`, so that they have the same sampling
     frequency (resample to lower fs) and length (trim longer signal).
 
     """
@@ -45,6 +43,8 @@ def align(a, fs_a, b, fs_b):
 
 
 def signal_to_noise_ratio_db(signal, noise):
+    """Calculate signal-to-noise ratio given `signal` and `noise`."""
+
     assert signal.shape == noise.shape
 
     snr_db = 20 * np.log10(
@@ -59,6 +59,7 @@ snr = signal_to_noise_ratio_db
 
 
 def root_mean_square(signal):
+    """Calculate root mean squere of a `signal`."""
     return np.sqrt( np.mean(signal**2) )
 
 rms = root_mean_square
@@ -66,6 +67,24 @@ rms = root_mean_square
 
 
 def fft_filter(signal, fs, band):
+    """Filter `signal` using a FFT filter.
+
+    Parameters
+    ----------
+    signal : array_like
+        Input signal.
+    fs : float
+        Sampling frequency of the input signal.
+    band : tuple
+        Tuple with lower and upler cut of frequencies: (lo, hi).
+
+
+    Returns
+    -------
+    array_like
+        Filtered signal.
+
+    """
 
     lo, hi = band
 
@@ -83,6 +102,7 @@ def fft_filter(signal, fs, band):
 
 
 def set_dbspl(signal, dbspl):
+    """Scale the level of `signal` to the given dB_SPL."""
     p0 = 20e-6
     rms = np.sqrt( np.sum(signal**2) / signal.size )
 
@@ -91,13 +111,16 @@ def set_dbspl(signal, dbspl):
     return scalled
 
 
+
 def resample(signal, fs, new_fs):
+    """Resample `signal` from `fs` to `new_fs`."""
     new_signal = dsp.resample(signal, len(signal)*new_fs/fs)
     return new_signal
 
 
 
 def trim(a,b):
+    """Trim the longer vector, so that both have the same length."""
     assert a.ndim == b.ndim == 1
 
     length = min([len(a), len(b)])
@@ -148,7 +171,7 @@ def ramped_tone(
 
     t = np.arange(0, duration, 1/fs)
     s = np.sin(2 * np.pi * t * freq)
-    if dbspl != None:
+    if dbspl is not None:
         s = set_dbspl(s, dbspl)
 
     if ramp != 0:
@@ -349,7 +372,7 @@ def amplitude_modulated_tone(
     t = np.arange(0, duration, 1/fs)
     s = (1 + m*np.sin(2*np.pi*fm*t)) * np.sin(2*np.pi*fc*t)
 
-    if dbspl != None:
+    if dbspl is not None:
         s = set_dbspl(s, dbspl)
 
     if ramp != 0:
