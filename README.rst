@@ -6,7 +6,7 @@ thorns
 
 :Name: thorns
 :Author: Marek Rudnicki
-:Email: marekrud@gmail.com
+:Email: marek.rudnicki@tum.de
 :URL: https://github.com/mrkrd/thorns
 :License: GNU General Public License v3 or later (GPLv3+)
 
