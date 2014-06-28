@@ -81,8 +81,7 @@ from thorns.stats import (
 
     entrainment,
 
-    synchronization_index,
-    si,
+    vector_strength,
 
     count_spikes,
     count,
