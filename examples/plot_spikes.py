@@ -10,6 +10,8 @@ from __future__ import division, absolute_import, print_function
 
 __author__ = "Marek Rudnicki"
 
+import matplotlib.pyplot as plt
+import os
 
 import thorns as th
 from thorns.datasets import load_anf_zilany2014
@@ -38,8 +40,17 @@ def main():
 
     ### Plot raster plot
     th.plot_raster(spike_trains)
-    th.show()
 
+
+
+    ### Save the plot, if doesn't exist
+    fname = "raster.png"
+    if not os.path.exists(fname):
+        plt.savefig(fname)
+
+
+    ### Show the plot
+    th.show()                   # Equivalent to plt.show()
 
 if __name__ == "__main__":
     main()

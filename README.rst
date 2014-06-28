@@ -65,6 +65,7 @@ Raster plot::
   th.plot_raster(spike_trains)
   th.show()
 
+.. image:: examples/raster.png
 
 
 Requirements
