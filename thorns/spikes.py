@@ -29,7 +29,10 @@ from thorns.stats import get_duration
 
 
 def select_trains(spike_trains, **kwargs):
+    """Select trains from `spike_trains` where `kwargs` are equal to the
+    metadata.
 
+    """
     mask = np.ones(len(spike_trains), dtype=bool)
     for key,val in kwargs.items():
         mask = mask & np.array(spike_trains[key] == val)
@@ -39,15 +42,15 @@ def select_trains(spike_trains, **kwargs):
     return selected
 
 
-select_spike_trains = select_trains
-select = select_trains
-sel = select_trains
-
 
 
 
 
 def make_trains(data, **kwargs):
+    """Create spike trains from various data formats.
+
+    """
+
     if 'fs' in kwargs:
         assert 'duration' not in kwargs
 
@@ -86,7 +89,7 @@ def make_trains(data, **kwargs):
 
 
 def _arrays_to_trains(arrays, **meta):
-    """Convert a list of arrays with spike times to `spike trains'"""
+    """Convert a list of arrays with spike times to spike trains."""
 
 
     ### Make sure we have duration
@@ -119,10 +122,16 @@ def _arrays_to_trains(arrays, **meta):
 def _array_to_trains(array, fs, **meta):
     """Convert time functions to a list of spike trains.
 
-    fs: samping frequency in Hz
-    a: input array
+    Parameters
+    ----------
+    array : array_like
+        Input array.
+    fs : float
+        Samping frequency in Hz.
 
-    return: spike trains with spike timings
+    Returns
+    -------
+    spike_trains
 
     """
     assert array.ndim == 2
@@ -152,7 +161,10 @@ def _array_to_trains(array, fs, **meta):
 
 
 def trains_to_array(spike_trains, fs):
-    """Convert spike trains to signals."""
+    """Convert `spike_trains` to 2D array (signals) with samlping
+    frequency `fs`.
+
+    """
 
     duration = get_duration(spike_trains)
 
@@ -179,8 +191,7 @@ def trains_to_array(spike_trains, fs):
 
 
 
-def accumulate_spike_trains(spike_trains, ignore=None, keep=None):
-
+def accumulate(spike_trains, ignore=None, keep=None):
     """Concatenate spike trains with the same meta data. Trains will
     be sorted by the metadata.
 
@@ -221,15 +232,10 @@ def accumulate_spike_trains(spike_trains, ignore=None, keep=None):
     return acc
 
 
-accumulate_spikes = accumulate_spike_trains
-accumulate_trains = accumulate_spike_trains
-accumulate = accumulate_spike_trains
 
 
-
-
-def trim_spike_trains(spike_trains, start, stop):
-    """Remove all spikes outside of the (start, stop) range."""
+def trim(spike_trains, start, stop):
+    """Remove all spikes outside of the (`start`, `stop`) range."""
 
     tmin = start
 
@@ -265,9 +271,6 @@ def trim_spike_trains(spike_trains, start, stop):
 
 
 
-trim = trim_spike_trains
-trim_trains = trim_spike_trains
-
 
 # def remove_empty(spike_trains):
 #     new_trains = []
@@ -279,19 +282,8 @@ trim_trains = trim_spike_trains
 
 
 def fold_spike_trains(spike_trains, period):
-    """Fold the spike trains.
+    """Fold `spike_trains` by `period`."""
 
-    >>> from thorns import arrays_to_trains
-    >>> a = [np.array([1,2,3,4]), np.array([2,3,4,5])]
-    >>> spike_trains = arrays_to_trains(a, duration=9)
-    >>> fold_spike_trains(spike_trains, 3)
-    [array([1, 2]), array([0, 1]), array([2]), array([0, 1, 2])]
-
-    # >>> spike_trains = [np.array([2.]), np.array([])]
-    # >>> fold_spike_trains(spike_trains, 2)
-    # [array([], dtype=float64), array([ 0.]), array([], dtype=float64), array([], dtype=float64)]
-
-    """
     # data = {key:[] for key in spike_trains.dtype.names}
 
     rows = []
@@ -321,9 +313,6 @@ def fold_spike_trains(spike_trains, period):
 
     return folded_trains
 
-
-fold = fold_spike_trains
-fold_trains = fold_spike_trains
 
 
 

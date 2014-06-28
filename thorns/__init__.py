@@ -41,24 +41,10 @@ import thorns.waves
 
 from thorns.spikes import (
     make_trains,
-
     trains_to_array,
-
     accumulate,
-    accumulate_spikes,
-    accumulate_trains,
-    accumulate_spike_trains,
-
     select_trains,
-    select,
-    sel,
-
-    trim_spike_trains,
-    trim_trains,
     trim,
-
-    fold_spike_trains,
-    fold_trains,
     fold,
 )
 
