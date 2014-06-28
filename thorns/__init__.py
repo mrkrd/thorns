@@ -1,5 +1,4 @@
-"""
-Spike analysis software.
+"""Spike analysis software.
 
 """
 
@@ -7,7 +6,7 @@ from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
-__version__ = "0.2"
+__version__ = "0.3"
 
 import os
 import sys

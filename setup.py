@@ -7,16 +7,19 @@ with open('README.rst') as file:
 
 setup(
     name = "thorns",
-    version = "0.2",
+    version = "0.3",
     author = "Marek Rudnicki",
     author_email = "marek.rudnicki@tum.de",
 
     description = "Spike analysis software",
-    license = "GPLv3",
+    license = "GPLv3+",
     url = "https://github.com/mrkrd/thorns",
     download_url = "https://github.com/mrkrd/thorns/tarball/master",
 
     packages = find_packages(),
+    package_data = {
+        "thorns.datasets": ["anf_zilany2014.pkl"],
+    },
     long_description = long_description,
     classifiers = [
         "Development Status :: 4 - Beta",

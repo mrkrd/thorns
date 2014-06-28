@@ -94,7 +94,7 @@ Requirements
 - Numpy
 - Scipy
 - Pandas
-
+- Matplotlib
 
 
 Installation
