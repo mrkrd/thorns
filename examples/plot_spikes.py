@@ -43,14 +43,6 @@ def main():
 
 
 
-    ### Save the plot, if doesn't exist
-    fname = "raster.png"
-    if not os.path.exists(fname):
-        plt.grid('off')
-        plt.tight_layout()
-        plt.savefig(fname, dpi=80)
-
-
     ### Show the plot
     th.show()                   # Equivalent to plt.show()
 

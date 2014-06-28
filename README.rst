@@ -55,9 +55,11 @@ Initialize and load spike trains::
   spike_trains = load_anf_zilany2014()
 
 
+
 Calculate vector strength::
 
   th.vector_strength(spike_trains, freq=1000)
+
 
 
 Raster plot::
@@ -65,10 +67,9 @@ Raster plot::
   th.plot_raster(spike_trains)
   th.show()
 
-.. image:: examples/raster.png
 
 
-AM tone::
+Generate and plot AM tone::
 
   import thorns.waves as wv
 
@@ -84,7 +85,7 @@ AM tone::
 
   wv.show()
 
-.. image:: examples/am_tone.png
+
 
 
 Requirements

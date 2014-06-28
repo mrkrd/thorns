@@ -29,16 +29,6 @@ def main():
 
     wv.plot_signal(sound, fs=fs)
 
-
-
-    ### Save the plot, if doesn't exist
-    fname = "am_tone.png"
-    if not os.path.exists(fname):
-        plt.tight_layout()
-        plt.savefig(fname, dpi=80)
-
-
-
     wv.show()
 
 if __name__ == "__main__":
