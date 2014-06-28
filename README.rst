@@ -34,11 +34,17 @@ it could be easily extended.
 Usage
 -----
 
+Initialize and load spike trains::
+
+  import thorns as th
+
+  spike_trains = th.load_anf_zilany2014()
+  spike_trains.head()
+
+
 Calculate vector strength::
 
-   import thorns as th
-
-   vs = th.vector_strength(spike_trains, freq=1000)
+  th.vector_strength(spike_trains, freq=1000)
 
 
 Raster plot::
