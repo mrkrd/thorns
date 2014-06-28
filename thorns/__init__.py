@@ -65,27 +65,14 @@ from thorns.spikes import (
 
 from thorns.stats import (
     get_duration,
-
     shuffled_autocorrelogram,
-    sac,
-
     correlation_index,
-    ci,
-
     firing_rate,
-    rate,
-
     psth,
-
     isih,
-
     entrainment,
-
     vector_strength,
-
-    count_spikes,
-    count,
-
+    spike_count,
     period_histogram
 )
 

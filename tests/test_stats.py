@@ -40,7 +40,6 @@ def test_get_duration_error():
 
 
 
-
 def test_firing_rate():
 
     trains = th.make_trains(
@@ -57,7 +56,7 @@ def test_firing_rate():
 
 
 
-def test_ci():
+def test_correlation_index():
 
     trains = th.make_trains(
         [[1,3],
@@ -65,7 +64,7 @@ def test_ci():
     )
 
 
-    ci = th.ci(
+    ci = th.correlation_index(
         trains,
         normalize=False
     )
@@ -75,14 +74,14 @@ def test_ci():
 
 
 
-def test_sac():
+def test_shuffled_autocorrelogram():
 
     trains = th.make_trains(
         [[1,3],
          [1,2,3]]
     )
 
-    sac, bin_edges = th.sac(
+    sac, bin_edges = th.shuffled_autocorrelogram(
         trains,
         coincidence_window=1,
         analysis_window=3,
@@ -163,30 +162,13 @@ def test_psth_with_empty_trains():
     )
 
 
-
-def test_firint_rate():
-
+def test_spike_count():
     trains = th.make_trains(
         [[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]],
         duration=[2, 4]
     )
 
-
-    rate = th.rate(trains)
-
-
-    assert_equal(rate, 1.)
-
-
-
-
-def test_count_spikes():
-    trains = th.make_trains(
-        [[0.1, 0.2, 0.3], [0.1, 0.2, 0.3]],
-        duration=[2, 4]
-    )
-
-    count = th.count_spikes(trains)
+    count = th.spike_count(trains)
 
     assert_equal(count, 6)
 

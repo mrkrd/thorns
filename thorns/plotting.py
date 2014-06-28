@@ -4,16 +4,24 @@ from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
+
 import numpy as np
 
-from thorns import spikes
-from thorns import stats
-
-
-GOLDEN = 1.6180339887
+from . import spikes
+from . import stats
 
 
 def plot_neurogram(spike_trains, fs, ax=None, **kwargs):
+    """Visualize `spike_trains` by converting them to bit map and plot
+    using `plt.imshow()`.  Set `fs` reasonably in order to avoid
+    aliasing effects.
+
+    Note
+    ----
+    For smaller number of spike trains, it's usually better to use
+    `plot_raster`.
+
+    """
 
     neurogram = spikes.trains_to_array(
         spike_trains,

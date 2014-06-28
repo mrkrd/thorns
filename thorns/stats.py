@@ -192,7 +192,7 @@ def vector_strength(spike_trains, freq):
 
 
 
-def rate(spike_trains):
+def firing_rate(spike_trains):
     """Calculates average firing rate of neurons."""
 
     if isinstance(spike_trains, pd.Series):
@@ -211,7 +211,7 @@ def rate(spike_trains):
 
 
 
-def count(spike_trains):
+def spike_count(spike_trains):
     """Count all spikes in `spike_trains`."""
     all_spikes = np.concatenate(tuple(spike_trains['spikes']))
     return len(all_spikes)
