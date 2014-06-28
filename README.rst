@@ -1,5 +1,5 @@
-thorns
-======
+thorns and waves
+================
 
 *Spike analysis software*
 
