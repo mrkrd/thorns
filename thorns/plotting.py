@@ -282,8 +282,10 @@ def plot_signal(signal, fs=None, ax=None):
 
     ax.set_xlim((t[0],t[-1]))
 
-
     ax.plot(t, signal)
+
+
+    ax.set_xlabel("Time (s)")
 
     return ax
 

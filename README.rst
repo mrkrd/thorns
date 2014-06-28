@@ -68,6 +68,25 @@ Raster plot::
 .. image:: examples/raster.png
 
 
+AM tone::
+
+  import thorns.waves as wv
+
+  sound = wv.amplitude_modulated_tone(
+      fs=48e3,
+      fm=100,
+      fc=1e3,
+      m=0.7,
+      duration=0.1,
+  )
+
+  wv.plot_signal(sound, fs=48e3)
+
+  wv.show()
+
+.. image:: examples/am_tone.png
+
+
 Requirements
 ------------
 
