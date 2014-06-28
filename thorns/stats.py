@@ -100,9 +100,11 @@ def entrainment(spike_trains, freq, bin_size=1e-3):
 
 
 
-def synchronization_index(spike_trains, freq):
-    """Calculate synchronization index aka vector strength."""
+def vector_strength(spike_trains, freq):
+    """Calculate vector strength of `spike_trains` in response to periodic
+    stimulus (`freq`).
 
+    """
     if isinstance(spike_trains, pd.Series):
         spike_trains = pd.DataFrame(spike_trains).T
 
@@ -134,9 +136,6 @@ def synchronization_index(spike_trains, freq):
     return r
 
 
-si = synchronization_index
-vector_strength = synchronization_index
-vs = synchronization_index
 
 
 # def shuffle_spikes(spike_trains):
