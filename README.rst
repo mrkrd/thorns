@@ -28,7 +28,7 @@ it could be easily extended.
 
 
 .. _`spike trains`: https://en.wikipedia.org/wiki/Spike_train
-.. _`Werner Hemmert`: http://www.imetum.tum.de/index.php?id=24
+.. _`Werner Hemmert`: http://www.imetum.tum.de/research/bai/home/?L=1
 
 
 Usage
