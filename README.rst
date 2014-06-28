@@ -32,3 +32,10 @@ Administrator::
 User::
 
   python setup.py install --user
+
+
+
+Contributors
+------------
+
+- Jörg Encke
