@@ -47,6 +47,17 @@ Raster plot::
   th.show()
 
 
+
+Requirements
+------------
+
+- Python (2.7)
+- Numpy
+- Scipy
+- Pandas
+
+
+
 Installation
 ------------
 
