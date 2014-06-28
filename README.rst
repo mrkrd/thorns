@@ -32,7 +32,7 @@ histogram (PSTH), interspike time histogram (ISIH), vector strength
 (VS), entrainment and visualize action potentials with raster plot.
 
 *waves* is a submodule with some useful signal processing and
-generating functions, e.g. generate ramped tone, amplitude modulation
+generation functions, e.g. generate ramped tone, amplitude modulation
 tone, FFT filter, set level (dB_SPL).
 
 I developed the package during my PhD in the group of `Werner
