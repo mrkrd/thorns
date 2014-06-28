@@ -10,6 +10,7 @@ __author__ = "Marek Rudnicki"
 import numpy as np
 import scipy.signal as dsp
 
+from thorns.plotting import plot_signal, show
 
 
 def align(a, fs_a, b, fs_b):

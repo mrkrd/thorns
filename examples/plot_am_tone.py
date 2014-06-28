@@ -17,7 +17,7 @@ def main():
 
     fs = 48e3
 
-    sound = wv.am_tone(
+    sound = wv.amplitude_modulated_tone(
         fs=fs,
         fm=100,
         fc=2e3,
