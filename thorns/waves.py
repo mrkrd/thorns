@@ -42,8 +42,9 @@ def align(a, fs_a, b, fs_b):
 
 
 
-def signal_to_noise_ratio_db(signal, noise):
-    """Calculate signal-to-noise ratio given `signal` and `noise`."""
+def snr(signal, noise):
+    """Calculate signal-to-noise ratio in dB given `signal` and
+    `noise`."""
 
     assert signal.shape == noise.shape
 
@@ -54,15 +55,11 @@ def signal_to_noise_ratio_db(signal, noise):
     return snr_db
 
 
-snr_db = signal_to_noise_ratio_db
-snr = signal_to_noise_ratio_db
 
-
-def root_mean_square(signal):
+def rms(signal):
     """Calculate root mean squere of a `signal`."""
     return np.sqrt( np.mean(signal**2) )
 
-rms = root_mean_square
 
 
 
@@ -387,6 +384,3 @@ def amplitude_modulated_tone(
     sound = np.concatenate( (s, pad_signal) )
 
     return sound
-
-
-am_tone = amplitude_modulated_tone
