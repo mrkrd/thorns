@@ -5,6 +5,8 @@ from __future__ import division, print_function, absolute_import
 __author__ = "Marek Rudnicki"
 
 import shutil
+import pytest
+import tempfile
 
 import numpy as np
 from numpy.testing import assert_equal
@@ -14,7 +16,24 @@ import thorns as th
 
 
 
-def test_dump_and_load():
+@pytest.fixture(scope="function")
+def workdir(request):
+
+    workdir = tempfile.mkdtemp()
+
+    def fin():
+        print("Removing temp dir: {}".format(workdir))
+
+        shutil.rmtree(workdir, ignore_errors=True)
+
+    request.addfinalizer(fin)
+
+    return workdir
+
+
+
+
+def test_dump_and_load(workdir):
 
     x1 = [
         {'dbspl': 50, 'cf': 400},
@@ -42,16 +61,12 @@ def test_dump_and_load():
     # os.unlink(store.name)
 
 
-    th.util.dumpdb(
-        x1,y1
-    )
-    th.util.dumpdb(
-        x2,y2
-    )
+    th.util.dumpdb(x1, y1, workdir=workdir)
+    th.util.dumpdb(x2, y2, workdir=workdir)
 
 
 
-    db = th.util.loaddb()
+    db = th.util.loaddb(workdir=workdir)
 
 
     assert len(db) == 2
@@ -67,12 +82,10 @@ def test_dump_and_load():
     )
 
 
-    ### TODO: proper setup/teardown
-    shutil.rmtree('work')
 
 
 
-def test_kwargs():
+def test_kwargs(workdir):
 
     x1 = [
         {'dbspl': 50, 'cf': 400},
@@ -90,11 +103,12 @@ def test_kwargs():
     th.util.dumpdb(
         x1,
         y1,
-        kwargs={'bla':'anf'}
+        kwargs={'bla':'anf'},
+        workdir=workdir
     )
 
 
-    db = th.util.loaddb()
+    db = th.util.loaddb(workdir=workdir)
 
 
     assert len(db) == 2
@@ -113,5 +127,3 @@ def test_kwargs():
         db.bla.values.tolist(),
         ['anf', 'anf']
     )
-
-    shutil.rmtree('work')

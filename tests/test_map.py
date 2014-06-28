@@ -20,13 +20,15 @@ def square(x):
 
 @pytest.fixture(scope="function")
 def workdir(request):
-    global workdir
+
     workdir = tempfile.mkdtemp()
 
     def fin():
         print("Removing temp dir: {}".format(workdir))
 
         shutil.rmtree(workdir, ignore_errors=True)
+
+    request.addfinalizer(fin)
 
     return workdir
 
