@@ -11,16 +11,23 @@ import warnings
 
 
 def get_duration(spike_trains):
-    duration = spike_trains['duration'].values[0]
-    assert np.all(spike_trains['duration'] == duration)
+    """Return the common duration of `spike_trains`."""
 
-    return duration
+    duration = spike_trains['duration'].unique()
+
+    if len(duration) != 1:
+        raise ValueError("The duration values are not all the same: {}".format(duration))
+
+    return duration[0]
 
 
 
 
 def psth(spike_trains, bin_size, normalize=True):
+    """Calculate peristimulus time histogram (PSTH) of `spike_trains` with
+    using `bin_size`.
 
+    """
     duration = get_duration(spike_trains)
     trial_num = len(spike_trains)
 

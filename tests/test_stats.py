@@ -6,8 +6,38 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 from numpy.testing import assert_equal, assert_almost_equal
+import pytest
+
+import pandas as pd
 
 import thorns as th
+
+
+
+def test_get_duration():
+
+    trains = pd.DataFrame([
+        {'duration': 12, 'spikes': np.arange(10)},
+        {'duration': 12, 'spikes': np.arange(15)},
+    ])
+
+    duration = th.get_duration(trains)
+
+    assert_equal(duration, 12)
+
+
+
+def test_get_duration_error():
+
+    trains = pd.DataFrame([
+        {'duration': 12, 'spikes': np.arange(10)},
+        {'duration': 123, 'spikes': np.arange(15)},
+    ])
+
+    with pytest.raises(ValueError):
+        duration = th.get_duration(trains)
+
+
 
 
 
