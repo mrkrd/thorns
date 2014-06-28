@@ -37,9 +37,9 @@ Usage
 Initialize and load spike trains::
 
   import thorns as th
+  from thorns.datasets import load_anf_zilany2014
 
-  spike_trains = th.load_anf_zilany2014()
-  spike_trains.head()
+  spike_trains = load_anf_zilany2014()
 
 
 Calculate vector strength::
