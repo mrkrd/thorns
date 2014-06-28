@@ -341,6 +341,8 @@ def amplitude_modulated_tone(
 ):
     """Generate amplitude modulated tone.
 
+    Parameters
+    ----------
     fs : float
         Sampling frequency in Hz.
     fm : float
@@ -357,6 +359,12 @@ def amplitude_modulated_tone(
         Duration of the ramp in seconds (default is 2.5 ms)
     dbspl : float, optional
         Amplitude of the tone in dB SPL.  If None (default), no scaling.
+
+
+    Returns
+    -------
+    array_like
+        AM signal.
 
     """
     assert ramp < duration/2
