@@ -281,7 +281,7 @@ def trim(spike_trains, start, stop):
 
 
 
-def fold_spike_trains(spike_trains, period):
+def fold(spike_trains, period):
     """Fold `spike_trains` by `period`."""
 
     # data = {key:[] for key in spike_trains.dtype.names}

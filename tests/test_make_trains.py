@@ -154,14 +154,14 @@ def test_trains_to_array():
 
 
 
-def test_accumulate_spike_trains():
+def test_accumulate():
 
     trains = th.make_trains(
         [[1], [2], [3], []],
         cfs=[2,1,2,3]
     )
 
-    accumulated = th.accumulate_spikes(trains)
+    accumulated = th.accumulate(trains)
 
     expected = th.make_trains(
         [[2], [1,3], []],
@@ -184,7 +184,7 @@ def test_select_trains():
 
 
 
-    selected = th.sel(
+    selected = th.select_trains(
         trains,
         cfs=1,
         idx=1
@@ -233,14 +233,14 @@ def test_trim():
 
 
 
-def test_fold_trains():
+def test_fold():
     trains = th.make_trains(
         [[1.1, 2.1, 3.1], [2.1, 3.1, 5.1]],
         duration=6.5,
         cf=[1,2]
     )
 
-    folded = th.fold_trains(trains, 1)
+    folded = th.fold(trains, 1)
 
 
     expected = th.make_trains(
