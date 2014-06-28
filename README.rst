@@ -1,4 +1,4 @@
-thorns
+Þorns
 ======
 
 *Spike analysis software*
