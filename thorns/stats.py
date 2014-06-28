@@ -24,8 +24,16 @@ def get_duration(spike_trains):
 
 
 def psth(spike_trains, bin_size, normalize=True):
-    """Calculate peristimulus time histogram (PSTH) of `spike_trains` with
+    """Calculate peristimulus time histogram (PSTH) of `spike_trains`
     using `bin_size`.
+
+
+    Returns
+    -------
+    ndarray
+        Histogram values.
+    ndarray
+        Bin edges.
 
     """
     duration = get_duration(spike_trains)
@@ -58,8 +66,18 @@ def psth(spike_trains, bin_size, normalize=True):
 
 
 def isih(spike_trains, bin_size, **kwargs):
-    """Calculate inter-spike interval histogram."""
+    """Calculate inter-spike interval histogram (ISIH) of `spike_trains`
+    using `bin_size`.
 
+
+    Returns
+    -------
+    ndarray
+        Histogram values.
+    ndarray
+        Bin edges.
+
+    """
     isis = np.concatenate(
         tuple( np.diff(train) for train in spike_trains['spikes'] )
     )
@@ -82,7 +100,10 @@ def isih(spike_trains, bin_size, **kwargs):
 
 
 def entrainment(spike_trains, freq, bin_size=1e-3):
-    """Calculate entrainment."""
+    """Calculate entrainment of `spike_trains` in response to periodic
+    stimulus (`freq` Hz).
+
+    """
 
     hist, bin_edges = isih(
         spike_trains,
@@ -109,7 +130,7 @@ def entrainment(spike_trains, freq, bin_size=1e-3):
 
 def vector_strength(spike_trains, freq):
     """Calculate vector strength of `spike_trains` in response to periodic
-    stimulus (`freq`).
+    stimulus (`freq` Hz).
 
     """
     if isinstance(spike_trains, pd.Series):
@@ -170,8 +191,9 @@ def vector_strength(spike_trains, freq):
 #     print shuffle_spikes(spikes)
 
 
-def firing_rate(spike_trains):
-    """Calculates average firing rate."""
+
+def rate(spike_trains):
+    """Calculates average firing rate of neurons."""
 
     if isinstance(spike_trains, pd.Series):
         spike_trains = pd.DataFrame(spike_trains).T
@@ -186,15 +208,13 @@ def firing_rate(spike_trains):
     return rate
 
 
-rate = firing_rate
 
 
 
-def count_spikes(spike_trains):
+def count(spike_trains):
+    """Count all spikes in `spike_trains`."""
     all_spikes = np.concatenate(tuple(spike_trains['spikes']))
     return len(all_spikes)
-
-count = count_spikes
 
 
 
@@ -202,7 +222,18 @@ def correlation_index(
         spike_trains,
         coincidence_window=50e-6,
         normalize=True):
-    """Compute correlation index (Joris 2006)"""
+    """Compute correlation index from `spike_trains` as described in
+    [Joris2006]_.
+
+
+    References
+    ----------
+
+    .. [Joris2006] Joris, P. X., Louage, D. H., Cardoen, L., & van der
+       Heijden, M. (2006). Correlation index: a new metric to quantify
+       temporal coding. Hearing research, 216, 19-30.
+
+    """
 
     if len(spike_trains) == 0:
         return 0
@@ -240,7 +271,7 @@ def correlation_index(
     return ci
 
 
-ci = correlation_index
+
 
 
 def shuffled_autocorrelogram(
@@ -248,7 +279,27 @@ def shuffled_autocorrelogram(
         coincidence_window=50e-6,
         analysis_window=5e-3,
         normalize=True):
-    """Calculate Shuffled Autocorrelogram (Joris 2006)"""
+    """Calculate shuffled autocorrelogram (SAC) of `spike_trains` as
+    described in [Joris2006]_.
+
+
+
+    Returns
+    -------
+    ndarray
+        Histogram values.
+    ndarray
+        Bin edges.
+
+
+    References
+    ----------
+
+    .. [Joris2006] Joris, P. X., Louage, D. H., Cardoen, L., & van der
+       Heijden, M. (2006). Correlation index: a new metric to quantify
+       temporal coding. Hearing research, 216, 19-30.
+
+    """
 
     duration = get_duration(spike_trains)
     trains = spike_trains['spikes']
@@ -291,7 +342,6 @@ def shuffled_autocorrelogram(
     return sac, bin_edges
 
 
-sac = shuffled_autocorrelogram
 
 
 
@@ -302,6 +352,18 @@ def period_histogram(
         nbins=64,               # int(spike_fs / freq)
         **kwargs
 ):
+    """Calculate period histogram of `spike_trains` to the periodic
+    stimulus (`ferq` Hz).
+
+
+    Returns
+    -------
+    ndarray
+        Histogram values.
+    ndarray
+        Bin edges.
+
+    """
 
     all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
     folded = np.fmod(all_spikes, 1/freq)
