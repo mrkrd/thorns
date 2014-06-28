@@ -217,13 +217,13 @@ def test_entrainment():
 
 
 
-def test_si():
+def test_vector_strength():
 
     trains = th.make_trains(
         [np.linspace(0, 1, 1000)]
     )
 
-    si = th.si(
+    si = th.vector_strength(
         trains,
         freq=10
     )
@@ -235,7 +235,7 @@ def test_si():
     trains = th.make_trains(
         [np.zeros(100)]
     )
-    si = th.si(
+    si = th.vector_strength(
         trains,
         freq=10
     )
