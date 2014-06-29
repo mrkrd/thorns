@@ -22,7 +22,7 @@ import string
 import imp
 import functools
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger('thorns')
 
 
 class _FuncWrap(object):

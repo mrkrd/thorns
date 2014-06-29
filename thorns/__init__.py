@@ -29,7 +29,7 @@ if 'THlog' in os.environ:
     else:
         level = os.environ['THlog'].upper()
 
-    logger = logging.getLogger()
+    logger = logging.getLogger('thorns')
     logger.setLevel(level)
 
 
