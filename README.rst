@@ -47,6 +47,8 @@ it could be easily extended.
 Usage
 -----
 
+Please, check our IPython Notebook DEMO_.
+
 Initialize and load spike trains::
 
   import thorns as th
@@ -86,6 +88,8 @@ Generate and plot AM tone::
   wv.show()
 
 
+
+.. _DEMO: http://nbviewer.ipython.org/github/mrkrd/thorns/blob/master/examples/thorns_demo.ipynb
 
 
 Requirements
