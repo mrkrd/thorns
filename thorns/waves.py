@@ -277,8 +277,33 @@ def generate_electrical_amplitudes(
         polarity,
         ratio=None,
 ):
+    """Calculate amplitudes for each "phase" of signle electrical pulse in
+    cochlear implant.
 
-    assert (ratio is None) or (ratio >= 0)
+    The resulting pulses are charged ballanced.  The function supports
+    mono-, bi- and tri-phasic pulses.
+
+    Parameters
+    ----------
+    durations : array_like
+        List of phase durations in the pulse.
+    polarity : {-1, 1, 'c' 'cathodic', 'a', 'anodic'}
+        Polarity of the first phase.  -1, 'c' and 'cathodic' are
+        equivalent.  As well as 1, 'a' and 'anodic'.
+    ratio : float
+        Only valid for triphasic pulses.  It is equal to the charge
+        ratio between the first and second phase.
+
+    Returns
+    -------
+    tuple
+        Amplitudes of phases corresponding to `durations`.
+
+    """
+    if len(durations) == 3:
+        assert 0 <= ratio <= 1
+    else:
+        assert ratio is None
 
 
     ### Normalize polarity
@@ -298,7 +323,6 @@ def generate_electrical_amplitudes(
 
     ### Biphasic pulse
     elif len(durations) == 2:
-        assert (ratio is None) or (ratio == 1)
         amplitudes = (
             +1*polarity * (0.5 / durations[0]),
             -1*polarity * (0.5 / durations[1])
