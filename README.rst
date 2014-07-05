@@ -17,6 +17,7 @@ thorns and waves
 :Author: Marek Rudnicki
 :Email: marek.rudnicki@tum.de
 :URL: https://github.com/mrkrd/thorns
+:Documentation: https://pythonhosted.org/thorns/
 :License: GNU General Public License v3 or later (GPLv3+)
 
 
