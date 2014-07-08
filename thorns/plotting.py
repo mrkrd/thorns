@@ -16,8 +16,6 @@ def plot_neurogram(spike_trains, fs, ax=None, **kwargs):
     using `plt.imshow()`.  Set `fs` reasonably in order to avoid
     aliasing effects.
 
-    Note
-    ----
     For smaller number of spike trains, it's usually better to use
     `plot_raster`.
 
