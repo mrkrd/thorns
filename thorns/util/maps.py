@@ -393,17 +393,32 @@ def map(
     results.  This map supports multiple backends, e.g. 'serial',
     'multiprocessing', 'ipcluster'.
 
+
     Parameters
     ----------
     func : function
-        The function to be applied to the data
+        The function to be applied to the data.
     iterable : list of dicts
         Each dict is applied to the func. The keys of the dicts should
         correspond to the parameters of the func.
+    backend : {'serial', 'ipcluster', 'multiprocessing'}
+        Choose a backend for the map.
     cache : bool or {'yes', 'no', 'redo'}
         If True, each result is loaded instead calculated again.
+    workdir : str, optional
+        Directory in which to store cache.
+    dependencies : list, optional
+        List of python files that will be imported on the remote site
+        before executing the `func`.
+    kwargs : dict, optional
+        Extra parameters for the `func`.
 
-    TODO: finish the docstring
+
+    Returns
+    -------
+    list
+        List of resulst returned from `func` for each element in
+        `iterable`.
 
     """
     cfg = _get_options(
