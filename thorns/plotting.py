@@ -273,6 +273,9 @@ def plot_signal(signal, fs=None, ax=None):
 
     if fs is None:
         fs = 1
+        xlabel = "Time"
+    else:
+        xlabel = "Time (s)"
 
 
     t = np.arange(len(signal)) / fs
@@ -283,7 +286,7 @@ def plot_signal(signal, fs=None, ax=None):
     ax.plot(t, signal)
 
 
-    ax.set_xlabel("Time (s)")
+    ax.set_xlabel(xlabel)
 
     return ax
 
