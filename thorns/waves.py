@@ -243,6 +243,9 @@ def electrical_pulse(
         pad=0,
         charge=None
 ):
+    """Generate electrical pulse.
+
+    """
 
     assert len(amplitudes) == len(durations)
 
