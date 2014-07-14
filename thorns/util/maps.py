@@ -22,6 +22,7 @@ import string
 import imp
 import functools
 import pandas
+import copy
 
 logger = logging.getLogger('thorns')
 
@@ -506,9 +507,10 @@ def map(
     _publish_status(status, 'file', func_name=func.func_name)
     _publish_status(status, 'stdout', func_name=func.func_name)
     
+    data_source = copy.deepcopy(iterable)
     if output == 'pandas':
-        for i, line in enumerate(iterable):
+        for i, line in enumerate(data_source):
             line['result'] = answers[i]
-        answers = pandas.DataFrame(iterable)
+        answers = pandas.DataFrame(data_source)
 
     return(answers)
