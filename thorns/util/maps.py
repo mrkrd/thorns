@@ -18,7 +18,6 @@ import subprocess
 import multiprocessing
 import shutil
 import tempfile
-import string
 import imp
 import functools
 
