@@ -1,0 +1,15 @@
+#+TITLE: TODO list for thorns
+#+AUTHOR: Marek Rudnicki
+
+
+* DataFrame output from th.util.map
+
+  - map parameters should become MultiIndex of the output DataFrame
+  - Results should be converted to DataFrame's columnt
+  - th.util.dumpdb needs adjustments
+  - unit test
+
+
+* Implement th.savemat(fname, trains=spike_trains, bar=bar_obj)
+
+* Python 3 support
