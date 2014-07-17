@@ -108,7 +108,7 @@ def _isolated_serial_map(func, iterable, cfg):
         dirname = tempfile.mkdtemp()
         fname = os.path.join(
             dirname,
-            'mar_maps_socket'
+            'th_maps_socket'
         )
         p = subprocess.Popen(
             ['python', '-m', 'thorns.util.run_func', fname]
