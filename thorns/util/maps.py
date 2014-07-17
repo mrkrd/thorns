@@ -20,6 +20,8 @@ import shutil
 import tempfile
 import imp
 import functools
+import pandas
+import copy
 
 logger = logging.getLogger('thorns')
 
@@ -386,6 +388,7 @@ def map(
         cache=None,
         workdir='work',
         dependencies=None,
+	output='list',
         kwargs=None
 ):
     """Apply func to every item of iterable and return a list of the
@@ -409,6 +412,9 @@ def map(
     dependencies : list, optional
         List of python files that will be imported on the remote site
         before executing the `func`.
+    output : {'list', 'pandas'}
+        Choose an output format. 'list' will return a list of all the results and
+        'pandas' will return a pandas.DataFrame with the results as well as the parameters.
     kwargs : dict, optional
         Extra parameters for the `func`.
 
@@ -494,8 +500,16 @@ def map(
         status['times'].append(dt)
 
         answers.append(ans)
+	
+	
 
     _publish_status(status, 'file', func_name=func.func_name)
     _publish_status(status, 'stdout', func_name=func.func_name)
+    
+    data_source = copy.deepcopy(iterable)
+    if output == 'pandas':
+        for i, line in enumerate(data_source):
+            line['result'] = answers[i]
+        answers = pandas.DataFrame(data_source)
 
     return(answers)
