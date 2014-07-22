@@ -22,7 +22,6 @@ import string
 import imp
 import functools
 import pandas
-import copy
 import itertools
 
 logger = logging.getLogger('thorns')
@@ -521,10 +520,22 @@ def map(
     _publish_status(status, 'file', func_name=func.func_name)
     _publish_status(status, 'stdout', func_name=func.func_name)
     
-    data_source = copy.deepcopy(iterable)
     if output == 'pandas':
-        for i, line in enumerate(data_source):
-            line['result'] = answers[i]
-        answers = pandas.DataFrame(data_source)
+        #collect a list of all used parameters
+        key_list = set(sum([k.keys() for k in iterable], []))
+        
+        param_list = []
+        for p in iterable:
+            param = []
+            for k in key_list:
+                if p.has_key(k):
+                    param.append(p[k])
+                else:
+                    param.append(np.NaN)
+            param_list.append(param)
+        
+        multi_col = pandas.MultiIndex.from_tuples(param_list,names=key_list)
+    
+        answers = pandas.DataFrame(answers,index=multi_col,columns=["results"])
 
     return(answers)
