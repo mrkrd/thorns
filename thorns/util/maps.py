@@ -460,7 +460,6 @@ def map(
         k,v = zip(*list(iterable.iteritems()))
         comb = list(itertools.product(*v))
         iterable = [dict(zip(k, v)) for v in comb ]
-        print(iterable)
     
     
     for args in iterable:
