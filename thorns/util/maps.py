@@ -402,9 +402,13 @@ def map(
     ----------
     func : function
         The function to be applied to the data.
-    iterable : list of dicts
-        Each dict is applied to the func. The keys of the dicts should
-        correspond to the parameters of the func.
+    iterable : list of dicts or dict of lists
+        In both cases, the key of the dictonary(s) should correspond to
+        the parameters of the function.
+        In the case of a list of dicts, each entry of the list is applied
+        to the function.
+        In the case of a dict of lists, the parameterspace is build by using
+        all possible permutations of the list entries.
     backend : {'serial', 'ipcluster', 'multiprocessing'}
         Choose a backend for the map.
     cache : bool or {'yes', 'no', 'redo'}
