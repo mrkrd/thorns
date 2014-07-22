@@ -23,6 +23,7 @@ import imp
 import functools
 import pandas
 import copy
+import itertools
 
 logger = logging.getLogger('thorns')
 
@@ -448,6 +449,16 @@ def map(
     cache_files = []
     hows = []
     todos = []
+    
+    #convert dict of lists into list of dicts
+    #TODO write Test    
+    if type(iterable) == type(dict()):
+        k,v = zip(*list(iterable.iteritems()))
+        comb = list(itertools.product(*v))
+        iterable = [dict(zip(k, v)) for v in comb ]
+        print(iterable)
+    
+    
     for args in iterable:
         args = dict(args)
         if kwargs is not None:
