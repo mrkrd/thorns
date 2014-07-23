@@ -33,15 +33,13 @@ def get_store(workdir='work'):
 
 
 
-def dumpdb(xs=None, ys=None, name='dump', workdir='work', backend='shelve' ,kwargs=None):
+def dumpdb(data, name='dump', workdir='work', backend='shelve' ,kwargs=None):
     """Dump data in order to recall the most up-to-date records later
 
     Parameters
     ----------
-    xs : list of dicts
-        Parameters.
-    ys : list of dicts
-        Data that depends on the parameters.
+    data : pands.DataFrame
+        The DataFrame which should be saved
     name : str, optional
         Base name of the pickle file.
     workdir : str, optional
@@ -53,21 +51,7 @@ def dumpdb(xs=None, ys=None, name='dump', workdir='work', backend='shelve' ,kwar
         If given, all `xy` (parameter) dicts will be updated using `kwargs`.
 
     """
-    ## if only data is given
-    if ys is None:
-        ys = xs
-        xs = None
-
-    if xs is None:
-        xs = []
-    elif isinstance(xs, dict):
-        xs = [xs]
-
-    if ys is None:
-        ys = []
-    elif (ys is None) or isinstance(ys, dict):
-        ys = [ys]
-    
+ 
     backend_dict = {'shelve':0, 'hdf':1}
     assert backend in backend_dict, "backend unknown"
     
@@ -88,23 +72,16 @@ def dumpdb(xs=None, ys=None, name='dump', workdir='work', backend='shelve' ,kwar
         
     past = datetime.datetime.now()
     
+    #Pickle the data using shelve
     if bend == 0:
         store = shelve.open(fname, protocol=-1)
-        for x,y in izip_longest(xs, ys, fillvalue={}):
-            now = datetime.datetime.now()
-            assert past < now, "Keys are conflicting"
+        now = datetime.datetime.now()
+        assert past < now, "Keys are conflicting"
     
-            if kwargs is not None:
-                x.update(kwargs)
-            record = {
-                'x': x,
-                'y': y,
-            }
+        key = now.strftime("%Y%m%d-%H%M%S.%f")
+        store[key] = data
     
-            key = now.strftime("%Y%m%d-%H%M%S.%f")
-            store[key] = record
-    
-            past = now
+        past = now
     else:
         pass
 
@@ -141,27 +118,17 @@ def loaddb(name='dump', workdir='work', backend='shelve'):
     store = shelve.open(fname, protocol=-1)
 
     xkeys = set()
-    db = []
-    index = []
+    db = pd.DataFrame()
+    #index = []
     for key,record in sorted(store.iteritems()):
-        xkeys.update(record['x'].keys())
-        row = record['x']
-        row.update(record['y'])
+        record['timestamp'] = len(record) * [key]
+        print(len(record))
+        db = db.append(record)
+        #index.append(key)
 
-        db.append(row)
-        index.append(key)
-
-
-    db = pd.DataFrame(db, index=index)
-
-    # Has to wrap arrays to be able to compare them
-    _wrap_arrays(db)
-    db.drop_duplicates(
-        cols=list(xkeys),
-        take_last=True,
-        inplace=True
-    )
-    _unwrap_arrays(db)
+    db = db.sort('timestamp')
+    groups = db.groupby(level=db.index.names)  
+    db = groups.last()
 
     return db
 
