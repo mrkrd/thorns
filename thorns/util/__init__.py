@@ -11,7 +11,7 @@ from thorns.util.dumpdb import (
 )
 
 from thorns.util.maps import map, apply
-from throns.util import io
+from thorns.util.io import read_brainwaref32
 
 from . bisection import find_zero
 

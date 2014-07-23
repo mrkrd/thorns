@@ -13,14 +13,18 @@ import copy
 Contains functions to read and write spike data in different formats
 """
 
-def read_brainwaref32(filename, stimparams = None):
+def read_brainwaref32(filename, stimparams=None):
     """ Read the spiketimings as exported from BrainWare \
     (Tucker-Davis Technologies).
     
     Parameters
     ----------
-    filename: string
+    filename : string
         The branwaref32 file to import.
+    stimparams : dict
+        A dict with the parameter names used in the stimulation sequence.
+        the key gives the parameter number as an integer while the value \
+        is the new name as a string
     
     Returns
     -------
@@ -55,7 +59,7 @@ def read_brainwaref32(filename, stimparams = None):
 
                 #create a base dictonary with all parameters
                 for i,v in enumerate(param):
-                    name = "param%i" % i
+                    name = "param%i" % (i+1)
                     c_dict[name] = v
                 c_dict['spikes'] = []
                 c_dict['duration'] = length[0] * 1E-3 #ms -> s
@@ -67,8 +71,15 @@ def read_brainwaref32(filename, stimparams = None):
             else:
                 if len(dict_list) > 0:
                     dict_list[-1]['spikes'].append(f32[0] * 1E-3) #ms -> s
-
+    
     dataset = pds.DataFrame(dict_list)
+    
+    # Fill in column titles if given
+    if stimparams != None:
+        for k,v in stimparams.iteritems():
+            name = "param%i" % k
+            dataset = dataset.rename(columns={name: v})
+            
     f.close()
     
     return dataset
