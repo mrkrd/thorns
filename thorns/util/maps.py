@@ -417,7 +417,7 @@ def map(
     dependencies : list, optional
         List of python files that will be imported on the remote site
         before executing the `func`.
-    output : {'list', 'pandas'}
+    output : 'list' or 'pandas', optional
         Choose an output format. 'list' will return a list of all the results and
         'pandas' will return a pandas.DataFrame with the results as well as the parameters.
     kwargs : dict, optional
@@ -539,6 +539,6 @@ def map(
         if type(answers[0]) == type(dict()):
             answers = pandas.DataFrame(answers,index=multi_col)
         else:
-            answers = pandas.DataFrame(answers,index=multi_col,columns=["results"])
+            answers = pandas.DataFrame(answers,index=multi_col,columns=["result"])
 
     return(answers)

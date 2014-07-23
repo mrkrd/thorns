@@ -33,7 +33,7 @@ def get_store(workdir='work'):
 
 
 
-def dumpdb(xs=None, ys=None, name='dump', workdir='work', kwargs=None):
+def dumpdb(xs=None, ys=None, name='dump', workdir='work', backend='shelve' ,kwargs=None):
     """Dump data in order to recall the most up-to-date records later
 
     Parameters
@@ -46,6 +46,9 @@ def dumpdb(xs=None, ys=None, name='dump', workdir='work', kwargs=None):
         Base name of the pickle file.
     workdir : str, optional
         Directory for the data.
+    backend : str, optional
+        the backend that should be used to store the data
+    
     kwargs : dict, optional
         If given, all `xy` (parameter) dicts will be updated using `kwargs`.
 
@@ -64,40 +67,53 @@ def dumpdb(xs=None, ys=None, name='dump', workdir='work', kwargs=None):
         ys = []
     elif (ys is None) or isinstance(ys, dict):
         ys = [ys]
-
-
-    fname = os.path.join(workdir, name+'.db')
-
+    
+    backend_dict = {'shelve':0, 'hdf':1}
+    assert backend in backend_dict, "backend unknown"
+    
+    bend = backend_dict[backend]
+    
+    if bend == 0:
+        fname = os.path.join(workdir, name+'.db')
+    else:
+        fname = os.path.join(workdir, name+'.hdb')
+        
     if not os.path.exists(workdir):
         os.makedirs(workdir)
 
-    logger.info("Dumping pars (xs) and data (ys) into {}.".format(fname))
-
-
+    if bend == 0:
+        logger.info("Dumping pars (xs) and data (ys) into {}.".format(fname))
+    else:
+        logger.info("Dumping pars (xs) and data (ys) into {} as HDF.".format(fname))
+        
     past = datetime.datetime.now()
-    store = shelve.open(fname, protocol=-1)
-    for x,y in izip_longest(xs, ys, fillvalue={}):
-        now = datetime.datetime.now()
-        assert past < now, "Keys are conflicting"
+    
+    if bend == 0:
+        store = shelve.open(fname, protocol=-1)
+        for x,y in izip_longest(xs, ys, fillvalue={}):
+            now = datetime.datetime.now()
+            assert past < now, "Keys are conflicting"
+    
+            if kwargs is not None:
+                x.update(kwargs)
+            record = {
+                'x': x,
+                'y': y,
+            }
+    
+            key = now.strftime("%Y%m%d-%H%M%S.%f")
+            store[key] = record
+    
+            past = now
+    else:
+        pass
 
-        if kwargs is not None:
-            x.update(kwargs)
-        record = {
-            'x': x,
-            'y': y,
-        }
-
-        key = now.strftime("%Y%m%d-%H%M%S.%f")
-        store[key] = record
-
-        past = now
 
 
 
 
 
-
-def loaddb(name='dump', workdir='work'):
+def loaddb(name='dump', workdir='work', backend='shelve'):
     """Recall dumped parameters/data discarding duplicated records
 
     Parameters
@@ -106,7 +122,8 @@ def loaddb(name='dump', workdir='work'):
         Base of the data filename.
     workdir : str, optional
         Directory where the data is stored.
-
+    backend : str, optional
+        the backend that was used to store the data
 
 
     Returns
