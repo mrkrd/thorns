@@ -13,7 +13,12 @@ import copy
 Contains functions to read and write spike data in different formats
 """
 
-def read_brainwavef32(filename, stimparams = None):
+def read_brainwaref32(filename, stimparams = None):
+    """ Read the spiketimings as exported from BrainWare \
+    (Tucker-Davis Technologies).
+    
+    """
+    
     dict_list = []
 
     with open(filename,'rb') as f:
