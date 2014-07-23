@@ -17,6 +17,17 @@ def read_brainwaref32(filename, stimparams = None):
     """ Read the spiketimings as exported from BrainWare \
     (Tucker-Davis Technologies).
     
+    Parameters
+    ----------
+    filename: string
+        The branwaref32 file to import.
+    
+    Returns
+    -------
+    Pandas.DataFrame
+        A DataFrame containing the spike timings in the thonrns spike_train
+        format.
+    
     """
     
     dict_list = []
