@@ -4,7 +4,6 @@
 
 * DataFrame output from th.util.map
 
-  - Results should be converted to DataFrame's columnt
   - th.util.dumpdb needs adjustments
   - unit test
 
