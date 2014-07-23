@@ -1,6 +1,6 @@
 #+TITLE: TODO list for thorns
 #+AUTHOR: Marek Rudnicki
-
+#+CATEGORY: thorns
 
 * DataFrame output from th.util.map
 
