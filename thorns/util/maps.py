@@ -18,8 +18,11 @@ import subprocess
 import multiprocessing
 import shutil
 import tempfile
+import string
 import imp
 import functools
+import pandas
+import itertools
 
 logger = logging.getLogger('thorns')
 
@@ -108,7 +111,7 @@ def _isolated_serial_map(func, iterable, cfg):
         dirname = tempfile.mkdtemp()
         fname = os.path.join(
             dirname,
-            'th_maps_socket'
+            'mar_maps_socket'
         )
         p = subprocess.Popen(
             ['python', '-m', 'thorns.util.run_func', fname]
@@ -386,6 +389,7 @@ def map(
         cache=None,
         workdir='work',
         dependencies=None,
+	output='list',
         kwargs=None
 ):
     """Apply func to every item of iterable and return a list of the
@@ -397,9 +401,13 @@ def map(
     ----------
     func : function
         The function to be applied to the data.
-    iterable : list of dicts
-        Each dict is applied to the func. The keys of the dicts should
-        correspond to the parameters of the func.
+    iterable : list of dicts or dict of lists
+        In both cases, the key of the dictonary(s) should correspond to
+        the parameters of the function.
+        In the case of a list of dicts, each entry of the list is applied
+        to the function.
+        In the case of a dict of lists, the parameterspace is build by using
+        all possible permutations of the list entries.
     backend : {'serial', 'ipcluster', 'multiprocessing'}
         Choose a backend for the map.
     cache : bool or {'yes', 'no', 'redo'}
@@ -409,6 +417,9 @@ def map(
     dependencies : list, optional
         List of python files that will be imported on the remote site
         before executing the `func`.
+    output : {'list', 'pandas'}
+        Choose an output format. 'list' will return a list of all the results and
+        'pandas' will return a pandas.DataFrame with the results as well as the parameters.
     kwargs : dict, optional
         Extra parameters for the `func`.
 
@@ -441,6 +452,15 @@ def map(
     cache_files = []
     hows = []
     todos = []
+    
+    #convert dict of lists into list of dicts
+    #TODO write Test    
+    if type(iterable) == type(dict()):
+        k,v = zip(*list(iterable.iteritems()))
+        comb = list(itertools.product(*v))
+        iterable = [dict(zip(k, v)) for v in comb ]
+    
+    
     for args in iterable:
         args = dict(args)
         if kwargs is not None:
@@ -494,8 +514,28 @@ def map(
         status['times'].append(dt)
 
         answers.append(ans)
+	
+	
 
     _publish_status(status, 'file', func_name=func.func_name)
     _publish_status(status, 'stdout', func_name=func.func_name)
+    
+    if output == 'pandas':
+        #collect a list of all used parameters
+        key_list = set(sum([k.keys() for k in iterable], []))
+        
+        param_list = []
+        for p in iterable:
+            param = []
+            for k in key_list:
+                if p.has_key(k):
+                    param.append(p[k])
+                else:
+                    param.append(np.NaN)
+            param_list.append(param)
+        
+        multi_col = pandas.MultiIndex.from_tuples(param_list,names=key_list)
+    
+        answers = pandas.DataFrame(answers,index=multi_col,columns=["results"])
 
     return(answers)
