@@ -231,8 +231,9 @@ def test_entrainment():
 
 def test_vector_strength():
 
+    ### Uniform spikes
     trains = th.make_trains(
-        [np.linspace(0, 1, 1000)]
+        [np.arange(0, 1, 1/3600)]
     )
 
     si = th.vector_strength(
@@ -243,7 +244,7 @@ def test_vector_strength():
 
 
 
-    ### Next test
+    ### Perfect synchrony
     trains = th.make_trains(
         [np.zeros(100)]
     )
@@ -252,3 +253,17 @@ def test_vector_strength():
         freq=10
     )
     assert_equal(si, 1)
+
+
+
+    ### Carefully chosen
+    trains = th.make_trains(
+        [np.array([0, 0.25, 0, 0.25])]
+    )
+
+    si = th.vector_strength(
+        trains,
+        freq=1
+    )
+
+    assert_equal(si, np.sqrt(2)/2)
