@@ -145,21 +145,12 @@ def vector_strength(spike_trains, freq):
 
 
     folded = np.fmod(all_spikes, 1/freq)
-    ph, edges = np.histogram(
-        folded,
-        bins=1000,
-        range=(0, 1/freq)
-    )
 
-    # indexing trick is necessary, because the sample at 2*pi belongs
-    # to the next cycle
-    x = np.cos(np.linspace(0, 2*np.pi, len(ph)+1))[0:-1]
-    y = np.sin(np.linspace(0, 2*np.pi, len(ph)+1))[0:-1]
+    angles = folded * freq * 2 * np.pi
 
-    xsum2 = (np.sum(x*ph))**2
-    ysum2 = (np.sum(y*ph))**2
+    vectors = np.exp(1j*angles)
 
-    r = np.sqrt(xsum2 + ysum2) / np.sum(ph)
+    r = np.abs(np.sum(vectors)) / len(vectors)
 
     return r
 
