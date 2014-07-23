@@ -10,4 +10,4 @@
 
 * Implement th.savemat(fname, trains=spike_trains, bar=bar_obj)
 
-* Python 3 support
+* Python 3 support 
