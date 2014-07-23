@@ -535,7 +535,10 @@ def map(
             param_list.append(param)
         
         multi_col = pandas.MultiIndex.from_tuples(param_list,names=key_list)
-    
-        answers = pandas.DataFrame(answers,index=multi_col,columns=["results"])
+        
+        if type(answers[0]) == type(dict()):
+            answers = pandas.DataFrame(answers,index=multi_col)
+        else:
+            answers = pandas.DataFrame(answers,index=multi_col,columns=["results"])
 
     return(answers)
