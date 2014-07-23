@@ -115,4 +115,4 @@ Quick install::
 Contributors
 ------------
 
-- Jörg Encke
+- Joerg Encke
