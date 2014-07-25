@@ -60,7 +60,7 @@ def read_brainwaref32(filename, stimparams=None):
 
                 #create a base dictonary with all parameters
                 for i,v in enumerate(param):
-                    name = "f%i" % (i+1)
+                    name = "f%i" % i
                     c_dict[name] = v
                 c_dict['spikes'] = []
                 c_dict['duration'] = length[0] * 1E-3 #ms -> s
