@@ -35,3 +35,13 @@ thorns.util
 .. automodule:: thorns.util
    :members:
    :imported-members:
+
+
+
+thorns.io
+-----------
+
+
+.. automodule:: thorns.io
+   :members:
+   :imported-members:
