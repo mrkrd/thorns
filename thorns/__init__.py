@@ -36,6 +36,7 @@ if 'THlog' in os.environ:
 
 import thorns.util
 import thorns.waves
+import thorns.io
 
 
 from thorns.spikes import (
