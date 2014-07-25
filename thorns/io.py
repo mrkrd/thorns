@@ -9,31 +9,32 @@ import struct
 import pandas as pds
 import copy
 
-"""
-Contains functions to read and write spike data in different formats
+"""Contains functions to read and write spike data in different
+formats.
+
 """
 
 def read_brainwaref32(filename, stimparams=None):
-    """ Read the spiketimings as exported from BrainWare \
-    (Tucker-Davis Technologies).
-    
+    """Read the spike timings as exported from BrainWare (Tucker-Davis
+    Technologies).
+
     Parameters
     ----------
-    filename : string
+    filename : str
         The branwaref32 file to import.
     stimparams : dict
-        A dict with the parameter names used in the stimulation sequence.
-        the key gives the parameter number as an integer while the value \
-        is the new name as a string
-    
+        A dict with the parameter names used in the stimulation
+        sequence.  The key gives the parameter number as an integer
+        while the value is the new name as a string.
+
     Returns
     -------
-    Pandas.DataFrame
-        A DataFrame containing the spike timings in the thonrns spike_train
-        format.
-    
+    spike_trains
+        A DataFrame containing the spike timings in the thonrns
+        spike_train format.
+
     """
-    
+
     dict_list = []
 
     with open(filename,'rb') as f:
