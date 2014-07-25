@@ -6,7 +6,7 @@ from __future__ import print_function, division, absolute_import
 __author__ = "Jörg Encke"
 
 import struct
-import pandas as pds
+import pandas as pd
 import copy
 
 """Contains functions to read and write spike data in different
@@ -72,15 +72,14 @@ def read_brainwaref32(filename, stimparams=None):
             else:
                 if len(dict_list) > 0:
                     dict_list[-1]['spikes'].append(f32[0] * 1E-3) #ms -> s
-    
-    dataset = pds.DataFrame(dict_list)
-    
+
+    dataset = pd.DataFrame(dict_list)
+
     # Fill in column titles if given
     if stimparams != None:
         for k,v in stimparams.iteritems():
             name = "param%i" % k
             dataset = dataset.rename(columns={name: v})
-            
-    f.close()
-    
+
+
     return dataset
