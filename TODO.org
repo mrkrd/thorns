@@ -10,6 +10,8 @@
   - unit test
 
 
-* Implement th.savemat(fname, trains=spike_trains, bar=bar_obj)
+* Implement th.io.write_mat(fname, trains=spike_trains, bar=bar_obj)
 
 * Python 3 support
+
+* Test for th.io.read_brainwaref32()
