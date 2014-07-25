@@ -60,12 +60,12 @@ def read_brainwaref32(filename, stimparams=None):
 
                 #create a base dictonary with all parameters
                 for i,v in enumerate(param):
-                    name = "param%i" % (i+1)
+                    name = "f%i" % (i+1)
                     c_dict[name] = v
                 c_dict['spikes'] = []
                 c_dict['duration'] = length[0] * 1E-3 #ms -> s
 
-            if f32[0] == -1.0:
+            elif f32[0] == -1.0:
                 #c_dict has to be copied
                 dict_list.append(copy.deepcopy(c_dict))
 
@@ -76,9 +76,9 @@ def read_brainwaref32(filename, stimparams=None):
     dataset = pd.DataFrame(dict_list)
 
     # Fill in column titles if given
-    if stimparams != None:
+    if stimparams is not None:
         for k,v in stimparams.iteritems():
-            name = "param%i" % k
+            name = "f%i" % k
             dataset = dataset.rename(columns={name: v})
 
 
