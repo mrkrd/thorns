@@ -150,7 +150,7 @@ def vector_strength(spike_trains, freq):
 
     vectors = np.exp(1j*angles)
 
-    r = np.abs(np.sum(vectors)) / len(vectors)
+    r = np.abs(np.mean(vectors))
 
     return r
 
