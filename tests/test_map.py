@@ -12,6 +12,9 @@ import pytest
 import numpy as np
 from numpy.testing import assert_equal
 
+import pandas as pd
+from pandas.util.testing import assert_frame_equal
+
 import thorns as th
 
 
@@ -34,8 +37,32 @@ def workdir(request):
 
 
 
-
 def test_serial_map(workdir):
+
+    space = [{'x': i} for i in range(10)]
+
+    results = th.util.map(
+        square,
+        space,
+        backend='serial'
+    )
+
+
+    expected = pd.DataFrame(
+        {
+            'x': range(10),
+            0: np.arange(10)**2
+        }
+    ).set_index('x')
+
+    assert_frame_equal(results, expected)
+
+
+
+
+
+
+def test_serial_map_cache(workdir):
 
     data = np.arange(10)
     dicts = [{'x':i} for i in data]

@@ -31,7 +31,7 @@ import tempfile
 import string
 import imp
 import functools
-import pandas
+import pandas as pd
 import itertools
 
 logger = logging.getLogger('thorns')
@@ -388,7 +388,7 @@ def apply(func, workdir='work', **kwargs):
 
 def map(
         func,
-        iterable,
+        space,
         backend=None,
         cache=None,
         workdir='work',
@@ -531,13 +531,15 @@ def map(
 
 
     ### Prepare DataFrame output
+    iterable = pd.DataFrame(iterable)
     answers = pd.DataFrame(answers)
-    answers = answers.set_index(all_kwargs_names)
+
+    out = pd.concat((iterable, answers), axis=1)
+    out = out.set_index(list(all_kwargs_names))
 
 
     _publish_status(status, 'file', func_name=func.func_name)
     _publish_status(status, 'stdout', func_name=func.func_name)
 
 
-
-    return(answers)
+    return out
