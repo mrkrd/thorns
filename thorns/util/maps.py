@@ -451,6 +451,8 @@ def map(
     cache_files = []
     hows = []
     todos = []
+    all_kwargs_names = set()
+
 
 
     ### Convert a dict of lists into a list of dicts
@@ -528,23 +530,9 @@ def map(
 
 
 
-    #collect a list of all used parameters
-    key_list = set(sum([k.keys() for k in iterable], []))
-
-    param_list = []
-    for p in iterable:
-        param = []
-        for k in key_list:
-            if p.has_key(k):
-                param.append(p[k])
-            else:
-                param.append(np.NaN)
-        param_list.append(param)
-
-    multi_col = pandas.MultiIndex.from_tuples(param_list,names=key_list)
-
-    answers = pandas.DataFrame(answers,index=multi_col,columns=["results"])
-
+    ### Prepare DataFrame output
+    answers = pd.DataFrame(answers)
+    answers = answers.set_index(all_kwargs_names)
 
 
     _publish_status(status, 'file', func_name=func.func_name)
