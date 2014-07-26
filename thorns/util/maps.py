@@ -400,13 +400,13 @@ def map(
     ----------
     func : function
         The function to be applied to the data.
-    iterable : list of dicts or dict of lists
-        In both cases, the key of the dictonary(s) should correspond to
-        the parameters of the function.
+    space : (list of dicts) or (dict of lists)
+        Parameter space, where the keys of the dictonary(s) correspond
+        to the keyward arguments of the function.
         In the case of a list of dicts, each entry of the list is applied
         to the function.
-        In the case of a dict of lists, the parameterspace is build by using
-        all possible permutations of the list entries.
+        In the case of a dict of lists, the parameter space is built
+        by using all possible permutations of the list entries.
     backend : {'serial', 'ipcluster', 'multiprocessing'}
         Choose a backend for the map.
     cache : bool or {'yes', 'no', 'redo'}
@@ -449,12 +449,14 @@ def map(
     hows = []
     todos = []
 
-    #convert dict of lists into list of dicts
-    #TODO write Test
-    if type(iterable) == type(dict()):
-        k,v = zip(*list(iterable.iteritems()))
+
+    ### Convert a dict of lists into a list of dicts
+    if isinstance(space, dict):
+        k,v = zip(*list(space.iteritems()))
         comb = list(itertools.product(*v))
         iterable = [dict(zip(k, v)) for v in comb ]
+    else:
+        iterable = space
 
 
     for args in iterable:
@@ -513,11 +515,6 @@ def map(
 
 
 
-    _publish_status(status, 'file', func_name=func.func_name)
-    _publish_status(status, 'stdout', func_name=func.func_name)
-
-
-
     #collect a list of all used parameters
     key_list = set(sum([k.keys() for k in iterable], []))
 
@@ -534,6 +531,11 @@ def map(
     multi_col = pandas.MultiIndex.from_tuples(param_list,names=key_list)
 
     answers = pandas.DataFrame(answers,index=multi_col,columns=["results"])
+
+
+
+    _publish_status(status, 'file', func_name=func.func_name)
+    _publish_status(status, 'stdout', func_name=func.func_name)
 
 
 

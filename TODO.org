@@ -13,3 +13,5 @@
 * Implement th.savemat(fname, trains=spike_trains, bar=bar_obj)
 
 * Python 3 support
+
+* Test for map(dict of lists)
