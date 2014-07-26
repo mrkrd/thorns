@@ -1,8 +1,18 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from __future__ import division, absolute_import, print_function
+"""This module implements map function with various backends and
+caching.
+
+"""
+from __future__ import division, print_function, absolute_import
+from __future__ import unicode_literals
+
 
 __author__ = "Marek Rudnicki"
+__copyright__ = "Copyright 2014, Marek Rudnicki, Jörg Encke"
+__license__ = "GPLv3+"
+
 
 import cPickle as pickle
 import hashlib
@@ -207,12 +217,6 @@ def _ipython_map(func, iterable, cfg):
         with open(dep) as f:
             code = f.read()
 
-        # TODO: fix the bug with "\n" in the source code.  Trying to
-        # escape the backslash, but does not work here.  Working test
-        # file in projects/python_demos/escaping
-        # code = code.replace("\\", "\\\\")
-        # code = code.replace("\'", "\\\'")
-        # code = code.replace("\"", "\\\"")
         code = code.encode('string_escape')
 
         rc[:].execute(
@@ -407,7 +411,7 @@ def map(
         to the function.
         In the case of a dict of lists, the parameter space is built
         by using all possible permutations of the list entries.
-    backend : {'serial', 'ipcluster', 'multiprocessing'}
+    backend : {'serial', 'ipcluster', 'multiprocessing', 'serial_isolated'}
         Choose a backend for the map.
     cache : bool or {'yes', 'no', 'redo'}
         If True, each result is loaded instead calculated again.
@@ -422,9 +426,8 @@ def map(
 
     Returns
     -------
-    list
-        List of resulst returned from `func` for each element in
-        `iterable`.
+    pd.DataFrame
+        Table with parameters (MultiIndex) and results.
 
     """
     cfg = _get_options(
@@ -459,10 +462,15 @@ def map(
         iterable = space
 
 
+
+    ### Go through the parameter space and check what should be
+    ### calculated (todos) and what recalled from the cache
     for args in iterable:
         args = dict(args)
         if kwargs is not None:
             args.update(kwargs)
+
+        all_kwargs_names.update(args)
 
         fname = _pkl_name(args, func, cachedir)
         cache_files.append(fname)
@@ -476,6 +484,8 @@ def map(
             todos.append(args)
 
 
+
+    ### Submit the parameter space to the backends
     if cfg['backend'] == 'serial':
         results = _serial_map(func, todos, cfg)
     elif cfg['backend'] in ('multiprocessing', 'm'):
@@ -490,6 +500,9 @@ def map(
         raise RuntimeError("Unknown map() backend: {}".format(cfg['backend']))
 
 
+
+    ### Generate reults by either using cache (how == 'load') or
+    ### calculate using func (how == 'process')
     answers = []
     for how,fname in zip(hows,cache_files):
 
