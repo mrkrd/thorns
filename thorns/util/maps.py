@@ -389,7 +389,6 @@ def map(
         cache=None,
         workdir='work',
         dependencies=None,
-	output='list',
         kwargs=None
 ):
     """Apply func to every item of iterable and return a list of the
@@ -417,9 +416,6 @@ def map(
     dependencies : list, optional
         List of python files that will be imported on the remote site
         before executing the `func`.
-    output : {'list', 'pandas'}
-        Choose an output format. 'list' will return a list of all the results and
-        'pandas' will return a pandas.DataFrame with the results as well as the parameters.
     kwargs : dict, optional
         Extra parameters for the `func`.
 
@@ -452,15 +448,15 @@ def map(
     cache_files = []
     hows = []
     todos = []
-    
+
     #convert dict of lists into list of dicts
-    #TODO write Test    
+    #TODO write Test
     if type(iterable) == type(dict()):
         k,v = zip(*list(iterable.iteritems()))
         comb = list(itertools.product(*v))
         iterable = [dict(zip(k, v)) for v in comb ]
-    
-    
+
+
     for args in iterable:
         args = dict(args)
         if kwargs is not None:
@@ -514,28 +510,31 @@ def map(
         status['times'].append(dt)
 
         answers.append(ans)
-	
-	
+
+
 
     _publish_status(status, 'file', func_name=func.func_name)
     _publish_status(status, 'stdout', func_name=func.func_name)
-    
-    if output == 'pandas':
-        #collect a list of all used parameters
-        key_list = set(sum([k.keys() for k in iterable], []))
-        
-        param_list = []
-        for p in iterable:
-            param = []
-            for k in key_list:
-                if p.has_key(k):
-                    param.append(p[k])
-                else:
-                    param.append(np.NaN)
-            param_list.append(param)
-        
-        multi_col = pandas.MultiIndex.from_tuples(param_list,names=key_list)
-    
-        answers = pandas.DataFrame(answers,index=multi_col,columns=["results"])
+
+
+
+    #collect a list of all used parameters
+    key_list = set(sum([k.keys() for k in iterable], []))
+
+    param_list = []
+    for p in iterable:
+        param = []
+        for k in key_list:
+            if p.has_key(k):
+                param.append(p[k])
+            else:
+                param.append(np.NaN)
+        param_list.append(param)
+
+    multi_col = pandas.MultiIndex.from_tuples(param_list,names=key_list)
+
+    answers = pandas.DataFrame(answers,index=multi_col,columns=["results"])
+
+
 
     return(answers)
