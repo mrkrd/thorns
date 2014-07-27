@@ -1,7 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from __future__ import division
-from __future__ import print_function
+"""This module implements permanent store for data.
+
+"""
+from __future__ import division, print_function, absolute_import
+from __future__ import unicode_literals
 
 __author__ = "Marek Rudnicki"
 
