@@ -77,8 +77,8 @@ def dumpdb(data, name='dump', workdir='work', kwargs=None):
 
 
 
-def loaddb(name='dump', workdir='work'):
-    """Recall dumped parameters/data discarding duplicated records
+def loaddb(name='dump', workdir='work', timestamp=False):
+    """Recall dumped data discarding duplicated records.
 
     Parameters
     ----------
@@ -86,69 +86,43 @@ def loaddb(name='dump', workdir='work'):
         Base of the data filename.
     workdir : str, optional
         Directory where the data is stored.
-
-
+    timestamp : bool, optional
+        Add an extra column with timestamps to the index.
 
     Returns
     -------
     pd.DataFrame
-        All data without duplicates.
-
+        Data without duplicates.
 
     """
 
+    if timestamp:
+        raise NotImplementedError("Should add extra columnt with timestamps to the index of the output.")
+
     fname = os.path.join(workdir, name+'.db')
 
-    logger.info("Loading dumpdb from {}".format(fname))
+    logger.info("Loading data from {}".format(fname))
 
     store = shelve.open(fname, protocol=-1)
 
     xkeys = set()
     db = []
-    index = []
-    for key,record in sorted(store.iteritems()):
-        xkeys.update(record['x'].keys())
-        row = record['x']
-        row.update(record['y'])
-
-        db.append(row)
-        index.append(key)
 
 
-    db = pd.DataFrame(db, index=index)
+    ### Get all tables from the store
+    for t,df in sorted(store.items()):
+        xkeys.update(df.index.names)
+        df = df.reset_index()
+        db.append(df)
 
-    # Has to wrap arrays to be able to compare them
-    _wrap_arrays(db)
-    db.drop_duplicates(
-        cols=list(xkeys),
+
+    db = pd.concat(db)
+
+    db = db.drop_duplicates(
+        subset=list(xkeys),
         take_last=True,
-        inplace=True
     )
-    _unwrap_arrays(db)
+
+    db = db.set_index(list(xkeys))
 
     return db
-
-
-
-
-class ArrayCompareWrapper(object):
-    def __init__(self, arr):
-        self.arr = arr
-    def __eq__(self, other):
-        return np.all(self.arr == other.arr)
-
-
-def _wrap_arrays(db):
-    for col in db.columns:
-        for idx in db.index:
-            val = db[col][idx]
-            if isinstance(val, np.ndarray):
-                db[col][idx] = ArrayCompareWrapper(val)
-
-
-def _unwrap_arrays(db):
-    for col in db.columns:
-        for idx in db.index:
-            val = db[col][idx]
-            if isinstance(val, ArrayCompareWrapper):
-                db[col][idx] = val.arr
