@@ -15,3 +15,5 @@
 * timestamp=True in loaddb() should add timestamp in the output table
 
 * Fix tests for dumpdb/loaddb
+
+* Fix tests for map()
