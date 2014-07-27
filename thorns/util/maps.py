@@ -1,8 +1,18 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from __future__ import division, absolute_import, print_function
+"""This module implements map function with various backends and
+caching.
+
+"""
+from __future__ import division, print_function, absolute_import
+from __future__ import unicode_literals
+
 
 __author__ = "Marek Rudnicki"
+__copyright__ = "Copyright 2014, Marek Rudnicki, Jörg Encke"
+__license__ = "GPLv3+"
+
 
 import cPickle as pickle
 import hashlib
@@ -21,7 +31,7 @@ import tempfile
 import string
 import imp
 import functools
-import pandas
+import pandas as pd
 import itertools
 
 logger = logging.getLogger('thorns')
@@ -207,12 +217,6 @@ def _ipython_map(func, iterable, cfg):
         with open(dep) as f:
             code = f.read()
 
-        # TODO: fix the bug with "\n" in the source code.  Trying to
-        # escape the backslash, but does not work here.  Working test
-        # file in projects/python_demos/escaping
-        # code = code.replace("\\", "\\\\")
-        # code = code.replace("\'", "\\\'")
-        # code = code.replace("\"", "\\\"")
         code = code.encode('string_escape')
 
         rc[:].execute(
@@ -384,12 +388,11 @@ def apply(func, workdir='work', **kwargs):
 
 def map(
         func,
-        iterable,
+        space,
         backend=None,
         cache=None,
         workdir='work',
         dependencies=None,
-	output='list',
         kwargs=None
 ):
     """Apply func to every item of iterable and return a list of the
@@ -401,14 +404,14 @@ def map(
     ----------
     func : function
         The function to be applied to the data.
-    iterable : list of dicts or dict of lists
-        In both cases, the key of the dictonary(s) should correspond to
-        the parameters of the function.
+    space : (list of dicts) or (dict of lists)
+        Parameter space, where the keys of the dictonary(s) correspond
+        to the keyward arguments of the function.
         In the case of a list of dicts, each entry of the list is applied
         to the function.
-        In the case of a dict of lists, the parameterspace is build by using
-        all possible permutations of the list entries.
-    backend : {'serial', 'ipcluster', 'multiprocessing'}
+        In the case of a dict of lists, the parameter space is built
+        by using all possible permutations of the list entries.
+    backend : {'serial', 'ipcluster', 'multiprocessing', 'serial_isolated'}
         Choose a backend for the map.
     cache : bool or {'yes', 'no', 'redo'}
         If True, each result is loaded instead calculated again.
@@ -417,18 +420,14 @@ def map(
     dependencies : list, optional
         List of python files that will be imported on the remote site
         before executing the `func`.
-    output : 'list' or 'pandas', optional
-        Choose an output format. 'list' will return a list of all the results and
-        'pandas' will return a pandas.DataFrame with the results as well as the parameters.
     kwargs : dict, optional
         Extra parameters for the `func`.
 
 
     Returns
     -------
-    list
-        List of resulst returned from `func` for each element in
-        `iterable`.
+    pd.DataFrame
+        Table with parameters (MultiIndex) and results.
 
     """
     cfg = _get_options(
@@ -452,19 +451,28 @@ def map(
     cache_files = []
     hows = []
     todos = []
-    
-    #convert dict of lists into list of dicts
-    #TODO write Test    
-    if type(iterable) == type(dict()):
-        k,v = zip(*list(iterable.iteritems()))
+    all_kwargs_names = set()
+
+
+
+    ### Convert a dict of lists into a list of dicts
+    if isinstance(space, dict):
+        k,v = zip(*list(space.iteritems()))
         comb = list(itertools.product(*v))
         iterable = [dict(zip(k, v)) for v in comb ]
-    
-    
+    else:
+        iterable = space
+
+
+
+    ### Go through the parameter space and check what should be
+    ### calculated (todos) and what recalled from the cache
     for args in iterable:
         args = dict(args)
         if kwargs is not None:
             args.update(kwargs)
+
+        all_kwargs_names.update(args)
 
         fname = _pkl_name(args, func, cachedir)
         cache_files.append(fname)
@@ -478,6 +486,8 @@ def map(
             todos.append(args)
 
 
+
+    ### Submit the parameter space to the backends
     if cfg['backend'] == 'serial':
         results = _serial_map(func, todos, cfg)
     elif cfg['backend'] in ('multiprocessing', 'm'):
@@ -492,6 +502,9 @@ def map(
         raise RuntimeError("Unknown map() backend: {}".format(cfg['backend']))
 
 
+
+    ### Generate reults by either using cache (how == 'load') or
+    ### calculate using func (how == 'process')
     answers = []
     for how,fname in zip(hows,cache_files):
 
@@ -514,31 +527,19 @@ def map(
         status['times'].append(dt)
 
         answers.append(ans)
-	
-	
+
+
+
+    ### Prepare DataFrame output
+    iterable = pd.DataFrame(iterable)
+    answers = pd.DataFrame(answers)
+
+    out = pd.concat((iterable, answers), axis=1)
+    out = out.set_index(list(all_kwargs_names))
+
 
     _publish_status(status, 'file', func_name=func.func_name)
     _publish_status(status, 'stdout', func_name=func.func_name)
-    
-    if output == 'pandas':
-        #collect a list of all used parameters
-        key_list = set(sum([k.keys() for k in iterable], []))
-        
-        param_list = []
-        for p in iterable:
-            param = []
-            for k in key_list:
-                if p.has_key(k):
-                    param.append(p[k])
-                else:
-                    param.append(np.NaN)
-            param_list.append(param)
-        
-        multi_col = pandas.MultiIndex.from_tuples(param_list,names=key_list)
-        
-        if type(answers[0]) == type(dict()):
-            answers = pandas.DataFrame(answers,index=multi_col)
-        else:
-            answers = pandas.DataFrame(answers,index=multi_col,columns=["result"])
 
-    return(answers)
+
+    return out

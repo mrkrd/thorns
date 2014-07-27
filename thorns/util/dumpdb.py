@@ -1,7 +1,11 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from __future__ import division
-from __future__ import print_function
+"""This module implements permanent store for data.
+
+"""
+from __future__ import division, print_function, absolute_import
+from __future__ import unicode_literals
 
 __author__ = "Marek Rudnicki"
 
@@ -33,65 +37,48 @@ def get_store(workdir='work'):
 
 
 
-def dumpdb(data, name='dump', workdir='work', backend='shelve' ,kwargs=None):
-    """Dump data in order to recall the most up-to-date records later
+def dumpdb(data, name='dump', workdir='work', kwargs=None):
+    """Dump data in order to recall the most up-to-date records later.
 
     Parameters
     ----------
-    data : pands.DataFrame
-        The DataFrame which should be saved
+    data : pd.DataFrame
+        Data that will be appended to the database.
     name : str, optional
         Base name of the pickle file.
     workdir : str, optional
         Directory for the data.
-    backend : str, optional
-        the backend that should be used to store the data
-    
     kwargs : dict, optional
-        If given, all `xy` (parameter) dicts will be updated using `kwargs`.
+        Additional parameters common for all data (MultiIndex will be
+        extended).
 
     """
- 
-    backend_dict = {'shelve':0, 'hdf':1}
-    assert backend in backend_dict, "backend unknown"
-    
-    bend = backend_dict[backend]
-    
-    if bend == 0:
-        fname = os.path.join(workdir, name+'.db')
-    else:
-        fname = os.path.join(workdir, name+'.hdb')
-        
+    fname = os.path.join(workdir, name+'.db')
+
     if not os.path.exists(workdir):
         os.makedirs(workdir)
 
-    if bend == 0:
-        logger.info("Dumping pars (xs) and data (ys) into {}.".format(fname))
-    else:
-        logger.info("Dumping pars (xs) and data (ys) into {} as HDF.".format(fname))
-        
-    past = datetime.datetime.now()
-    
-    #Pickle the data using shelve
-    if bend == 0:
-        store = shelve.open(fname, protocol=-1)
-        now = datetime.datetime.now()
-        assert past < now, "Keys are conflicting"
-    
-        key = now.strftime("%Y%m%d-%H%M%S.%f")
-        store[key] = data
-    
-        past = now
-    else:
-        pass
+    logger.info("Dumping data into {}.".format(fname))
+
+
+    if kwargs is not None:
+        raise NotImplementedError("MultiIndex of data should be updated by kwargs here.")
+
+
+    now = datetime.datetime.now()
+    key = now.strftime("%Y%m%d-%H%M%S.%f")
+
+    store = shelve.open(fname, protocol=-1)
+
+    store[key] = data
 
 
 
 
 
 
-def loaddb(name='dump', workdir='work', backend='shelve'):
-    """Recall dumped parameters/data discarding duplicated records
+def loaddb(name='dump', workdir='work', timestamp=False):
+    """Recall dumped data discarding duplicated records.
 
     Parameters
     ----------
@@ -99,60 +86,43 @@ def loaddb(name='dump', workdir='work', backend='shelve'):
         Base of the data filename.
     workdir : str, optional
         Directory where the data is stored.
-    backend : str, optional
-        the backend that was used to store the data
-
+    timestamp : bool, optional
+        Add an extra column with timestamps to the index.
 
     Returns
     -------
     pd.DataFrame
-        All data without duplicates.
-
+        Data without duplicates.
 
     """
 
+    if timestamp:
+        raise NotImplementedError("Should add extra columnt with timestamps to the index of the output.")
+
     fname = os.path.join(workdir, name+'.db')
 
-    logger.info("Loading dumpdb from {}".format(fname))
+    logger.info("Loading data from {}".format(fname))
 
     store = shelve.open(fname, protocol=-1)
 
     xkeys = set()
-    db = pd.DataFrame()
-    #index = []
-    for key,record in sorted(store.iteritems()):
-        record['timestamp'] = len(record) * [key]
-        print(len(record))
-        db = db.append(record)
-        #index.append(key)
+    db = []
 
-    db = db.sort('timestamp')
-    groups = db.groupby(level=db.index.names)  
-    db = groups.last()
+
+    ### Get all tables from the store
+    for t,df in sorted(store.items()):
+        xkeys.update(df.index.names)
+        df = df.reset_index()
+        db.append(df)
+
+
+    db = pd.concat(db)
+
+    db = db.drop_duplicates(
+        subset=list(xkeys),
+        take_last=True,
+    )
+
+    db = db.set_index(list(xkeys))
 
     return db
-
-
-
-
-class ArrayCompareWrapper(object):
-    def __init__(self, arr):
-        self.arr = arr
-    def __eq__(self, other):
-        return np.all(self.arr == other.arr)
-
-
-def _wrap_arrays(db):
-    for col in db.columns:
-        for idx in db.index:
-            val = db[col][idx]
-            if isinstance(val, np.ndarray):
-                db[col][idx] = ArrayCompareWrapper(val)
-
-
-def _unwrap_arrays(db):
-    for col in db.columns:
-        for idx in db.index:
-            val = db[col][idx]
-            if isinstance(val, ArrayCompareWrapper):
-                db[col][idx] = val.arr
