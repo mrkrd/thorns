@@ -37,64 +37,40 @@ def get_store(workdir='work'):
 
 
 
-def dumpdb(xs=None, ys=None, name='dump', workdir='work', kwargs=None):
-    """Dump data in order to recall the most up-to-date records later
+def dumpdb(data, name='dump', workdir='work', kwargs=None):
+    """Dump data in order to recall the most up-to-date records later.
 
     Parameters
     ----------
-    xs : list of dicts
-        Parameters.
-    ys : list of dicts
-        Data that depends on the parameters.
+    data : pd.DataFrame
+        Data that will be appended to the database.
     name : str, optional
         Base name of the pickle file.
     workdir : str, optional
         Directory for the data.
     kwargs : dict, optional
-        If given, all `xy` (parameter) dicts will be updated using `kwargs`.
+        Additional parameters common for all data (MultiIndex will be
+        extended).
 
     """
-    ## if only data is given
-    if ys is None:
-        ys = xs
-        xs = None
-
-    if xs is None:
-        xs = []
-    elif isinstance(xs, dict):
-        xs = [xs]
-
-    if ys is None:
-        ys = []
-    elif (ys is None) or isinstance(ys, dict):
-        ys = [ys]
-
-
     fname = os.path.join(workdir, name+'.db')
 
     if not os.path.exists(workdir):
         os.makedirs(workdir)
 
-    logger.info("Dumping pars (xs) and data (ys) into {}.".format(fname))
+    logger.info("Dumping data into {}.".format(fname))
 
 
-    past = datetime.datetime.now()
+    if kwargs is not None:
+        raise NotImplementedError("MultiIndex of data should be updated by kwargs here.")
+
+
+    now = datetime.datetime.now()
+    key = now.strftime("%Y%m%d-%H%M%S.%f")
+
     store = shelve.open(fname, protocol=-1)
-    for x,y in izip_longest(xs, ys, fillvalue={}):
-        now = datetime.datetime.now()
-        assert past < now, "Keys are conflicting"
 
-        if kwargs is not None:
-            x.update(kwargs)
-        record = {
-            'x': x,
-            'y': y,
-        }
-
-        key = now.strftime("%Y%m%d-%H%M%S.%f")
-        store[key] = record
-
-        past = now
+    store[key] = data
 
 
 
