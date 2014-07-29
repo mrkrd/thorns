@@ -8,7 +8,6 @@ caching.
 from __future__ import division, print_function, absolute_import
 from __future__ import unicode_literals
 
-
 __author__ = "Marek Rudnicki"
 __copyright__ = "Copyright 2014, Marek Rudnicki, Jörg Encke"
 __license__ = "GPLv3+"
@@ -468,11 +467,11 @@ def map(
     ### Go through the parameter space and check what should be
     ### calculated (todos) and what recalled from the cache
     for args in iterable:
+        all_kwargs_names.update(args)
+
         args = dict(args)
         if kwargs is not None:
             args.update(kwargs)
-
-        all_kwargs_names.update(args)
 
         fname = _pkl_name(args, func, cachedir)
         cache_files.append(fname)
