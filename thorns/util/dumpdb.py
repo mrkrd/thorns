@@ -14,6 +14,7 @@ import datetime
 import logging
 from itertools import izip_longest
 import shelve
+import collections
 
 import numpy as np
 import pandas as pd
@@ -105,13 +106,18 @@ def loaddb(name='dump', workdir='work', timestamp=False):
 
     store = shelve.open(fname, protocol=-1)
 
-    xkeys = set()
+    xkeys = collections.OrderedDict() # poor-man's ordered set
     db = []
 
 
     ### Get all tables from the store
     for t,df in sorted(store.items()):
-        xkeys.update(df.index.names)
+
+        # Just want ordered unique values in xkeys (ordered set would
+        # simplify it: orderedset.update(df.index.names))
+        for name in df.index.names:
+            xkeys[name] = None
+
         df = df.reset_index()
         db.append(df)
 
