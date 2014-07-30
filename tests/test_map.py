@@ -119,6 +119,45 @@ def test_map_kwargs(workdir):
 
 
 
+def test_map_cache_with_kwargs(workdir):
+
+    space = [{'x': i} for i in range(10)]
+
+    th.util.map(
+        multiply,
+        space,
+        backend='serial',
+        cache='yes',
+        workdir=workdir,
+        kwargs={'y': 2},
+    )
+
+    # It should *not* recall old results, even thour space is the
+    # same.  It should calculate new results, because kwargs are not
+    # the same.
+    results = th.util.map(
+        multiply,
+        space,
+        backend='serial',
+        cache='yes',
+        workdir=workdir,
+        kwargs={'y': 3},
+    )
+
+    expected = pd.DataFrame(
+        {
+            'x': range(10),
+            0: np.arange(10)*3
+        }
+    ).set_index('x')
+
+    assert_frame_equal(results, expected)
+
+
+
+
+
+
 def test_map_multiprocessing(workdir):
 
     space = [{'x': i} for i in range(10)]
