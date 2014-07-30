@@ -227,6 +227,19 @@ def test_ipython_map(workdir):
 
 
 
+def test_cache(workdir):
+
+    square_cached = th.util.cache(square, workdir=workdir)
+
+    square_cached(x=2)
+
+    result = square_cached(x=2)
+
+    assert_equal(result, 4)
+
+
+
+
 
 if __name__ == '__main__':
     test_ipython_map()

@@ -10,7 +10,7 @@ from thorns.util.dumpdb import (
     get_store,
 )
 
-from thorns.util.maps import map, apply
+from thorns.util.maps import map, cache
 from thorns.util.io import read_brainwaref32
 
 from . bisection import find_zero

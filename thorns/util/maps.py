@@ -89,7 +89,7 @@ def _load_cache(fname):
     return data
 
 
-def _dump_cache(obj, fname):
+def _dump_cache(fname, obj):
     dirname = os.path.dirname(fname)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -376,12 +376,24 @@ def _get_options(backend, cache, dependencies):
 
 
 
-def apply(func, workdir='work', **kwargs):
+def cache(func, workdir='work'):
 
-    results = map(func, [kwargs], workdir=workdir)
-    result = list(results)[0]
+    @functools.wraps(func)
+    def wrap(**kwargs):
 
-    return result
+        cachedir = os.path.join(workdir, 'map_cache')
+
+        fname = _pkl_name(kwargs, func, cachedir)
+
+        if os.path.exists(fname):
+            result = _load_cache(fname)
+        else:
+            result = func(**kwargs)
+            _dump_cache(fname, result)
+
+        return result
+
+    return wrap
 
 
 
@@ -519,7 +531,7 @@ def map(
             status['processed'] += 1
 
             if cfg['cache'] in ('yes', 'refresh', 'redo'):
-                _dump_cache(result, fname)
+                _dump_cache(fname, result)
 
         else:
             raise RuntimeError("Should never reach this point.")
@@ -528,7 +540,6 @@ def map(
         status['times'].append(dt)
 
         answers.append(ans)
-
 
 
     ### Prepare DataFrame output
@@ -541,6 +552,7 @@ def map(
 
     _publish_status(status, 'file', func_name=func.func_name)
     _publish_status(status, 'stdout', func_name=func.func_name)
+
 
 
     return out
