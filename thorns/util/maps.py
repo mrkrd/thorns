@@ -32,6 +32,7 @@ import imp
 import functools
 import pandas as pd
 import itertools
+import warnings
 
 logger = logging.getLogger('thorns')
 
@@ -456,6 +457,7 @@ def map(
 
     ### Convert a dict of lists into a list of dicts
     if isinstance(space, dict):
+        warnings.warn("Not included in tests.")
         k,v = zip(*list(space.iteritems()))
         comb = list(itertools.product(*v))
         iterable = [dict(zip(k, v)) for v in comb ]
