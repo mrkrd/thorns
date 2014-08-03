@@ -2,16 +2,14 @@
 #+AUTHOR: Marek Rudnicki
 #+CATEGORY: thorns
 
-* DataFrame output from th.util.map
-
-  - map parameters should become MultiIndex of the output DataFrame
-  - Results should be converted to DataFrame's columnt
-  - th.util.dumpdb needs adjustments
-  - unit test
-
+* Test for map(dict of lists)
 
 * Implement th.io.write_mat(fname, trains=spike_trains, bar=bar_obj)
 
+* kwargs in dumpdb()
+
 * Python 3 support
 
-* Test for th.io.read_brainwaref32()
+* Use datetime64 (like pandas) instead of str for keys in the dumpdb store
+
+* timestamp=True in loaddb() should add timestamp in the output table

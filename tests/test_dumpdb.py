@@ -10,10 +10,10 @@ import tempfile
 
 import numpy as np
 from numpy.testing import assert_equal
-
+import pandas as pd
+from pandas.util.testing import assert_frame_equal
 
 import thorns as th
-
 
 
 @pytest.fixture(scope="function")
@@ -33,97 +33,60 @@ def workdir(request):
 
 
 
-def test_dump_and_load(workdir):
+def test_dump_and_load_drop_duplicates(workdir):
 
-    x1 = [
-        {'dbspl': 50, 'cf': 400},
-        {'dbspl': 60, 'cf': 400}
-    ]
-    y1 = [
-        {'sac': np.array([1,2])},
-        {'sac': np.array([2,3])}
-    ]
+    data1 = pd.DataFrame([
+        {'x': 50, 'y': 400, 'f': np.array([1,2])},
+        {'x': 60, 'y': 400, 'f': np.array([2,3])},
+    ]).set_index(['x','y'])
 
-
-    x2 = [
-        {'dbspl': 50, 'cf': 400},
-        {'dbspl': 60, 'cf': 400}
-    ]
-    y2 = [
-        {'sac': np.array([1,2])},
-        {'sac': np.array([20,30])}
-    ]
+    data2 = pd.DataFrame([
+        {'x': 50, 'y': 400, 'f': np.array([1,2])},
+        {'x': 60, 'y': 400, 'f': np.array([20,30])},
+    ]).set_index(['x','y'])
 
 
 
-
-    # store = tempfile.NamedTemporaryFile()
-    # os.unlink(store.name)
-
-
-    th.util.dumpdb(x1, y1, workdir=workdir)
-    th.util.dumpdb(x2, y2, workdir=workdir)
+    th.util.dumpdb(data1, workdir=workdir)
+    th.util.dumpdb(data2, workdir=workdir)
 
 
 
     db = th.util.loaddb(workdir=workdir)
 
 
-    assert len(db) == 2
+    expected = data2
 
-    assert_equal(
-        db.dbspl.values,
-        [50, 60]
-    )
 
-    assert_equal(
-        db.sac.values.tolist(),
-        [[1,2], [20,30]]
-    )
+    assert_frame_equal(db, expected)
 
 
 
 
-
+@pytest.mark.xfail
 def test_kwargs(workdir):
 
-    x1 = [
-        {'dbspl': 50, 'cf': 400},
-        {'dbspl': 60, 'cf': 400}
-    ]
-    y1 = [
-        {'sac': np.array([1,2])},
-        {'sac': np.array([2,3])}
-    ]
-
-
+    data = pd.DataFrame([
+        {'x': 50, 'y': 400, 'f': np.array([1,2])},
+        {'x': 60, 'y': 400, 'f': np.array([2,3])},
+    ]).set_index(['x','y'])
 
 
 
     th.util.dumpdb(
-        x1,
-        y1,
-        kwargs={'bla':'anf'},
-        workdir=workdir
+        data,
+        kwargs={'type':'anf'},
+        workdir=workdir,
     )
 
 
     db = th.util.loaddb(workdir=workdir)
 
 
-    assert len(db) == 2
+    expected = pd.DataFrame([
+        {'x': 50, 'y': 400, 'type': 'anf', 'f': np.array([1,2])},
+        {'x': 60, 'y': 400, 'type': 'anf', 'f': np.array([2,3])},
+    ]).set_index(['x','y'])
 
-    assert_equal(
-        db.dbspl.values,
-        [50, 60]
-    )
 
-    assert_equal(
-        db.sac.values.tolist(),
-        [[1,2], [2,3]]
-    )
-
-    assert_equal(
-        db.bla.values.tolist(),
-        ['anf', 'anf']
-    )
+    assert_frame_equal(db, expected)

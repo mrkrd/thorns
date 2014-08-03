@@ -1,8 +1,17 @@
 #!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
-from __future__ import division, absolute_import, print_function
+"""This module implements map function with various backends and
+caching.
+
+"""
+from __future__ import division, print_function, absolute_import
+from __future__ import unicode_literals
 
 __author__ = "Marek Rudnicki"
+__copyright__ = "Copyright 2014, Marek Rudnicki, Jörg Encke"
+__license__ = "GPLv3+"
+
 
 import cPickle as pickle
 import hashlib
@@ -18,8 +27,12 @@ import subprocess
 import multiprocessing
 import shutil
 import tempfile
+import string
 import imp
 import functools
+import pandas as pd
+import itertools
+import warnings
 
 logger = logging.getLogger('thorns')
 
@@ -76,7 +89,7 @@ def _load_cache(fname):
     return data
 
 
-def _dump_cache(obj, fname):
+def _dump_cache(fname, obj):
     dirname = os.path.dirname(fname)
     if not os.path.exists(dirname):
         os.makedirs(dirname)
@@ -108,7 +121,7 @@ def _isolated_serial_map(func, iterable, cfg):
         dirname = tempfile.mkdtemp()
         fname = os.path.join(
             dirname,
-            'th_maps_socket'
+            'mar_maps_socket'
         )
         p = subprocess.Popen(
             ['python', '-m', 'thorns.util.run_func', fname]
@@ -204,12 +217,6 @@ def _ipython_map(func, iterable, cfg):
         with open(dep) as f:
             code = f.read()
 
-        # TODO: fix the bug with "\n" in the source code.  Trying to
-        # escape the backslash, but does not work here.  Working test
-        # file in projects/python_demos/escaping
-        # code = code.replace("\\", "\\\\")
-        # code = code.replace("\'", "\\\'")
-        # code = code.replace("\"", "\\\"")
         code = code.encode('string_escape')
 
         rc[:].execute(
@@ -369,19 +376,31 @@ def _get_options(backend, cache, dependencies):
 
 
 
-def apply(func, workdir='work', **kwargs):
+def cache(func, workdir='work'):
 
-    results = map(func, [kwargs], workdir=workdir)
-    result = list(results)[0]
+    @functools.wraps(func)
+    def wrap(**kwargs):
 
-    return result
+        cachedir = os.path.join(workdir, 'map_cache')
+
+        fname = _pkl_name(kwargs, func, cachedir)
+
+        if os.path.exists(fname):
+            result = _load_cache(fname)
+        else:
+            result = func(**kwargs)
+            _dump_cache(fname, result)
+
+        return result
+
+    return wrap
 
 
 
 
 def map(
         func,
-        iterable,
+        space,
         backend=None,
         cache=None,
         workdir='work',
@@ -397,10 +416,14 @@ def map(
     ----------
     func : function
         The function to be applied to the data.
-    iterable : list of dicts
-        Each dict is applied to the func. The keys of the dicts should
-        correspond to the parameters of the func.
-    backend : {'serial', 'ipcluster', 'multiprocessing'}
+    space : (list of dicts) or (dict of lists)
+        Parameter space, where the keys of the dictonary(s) correspond
+        to the keyward arguments of the function.
+        In the case of a list of dicts, each entry of the list is applied
+        to the function.
+        In the case of a dict of lists, the parameter space is built
+        by using all possible permutations of the list entries.
+    backend : {'serial', 'ipcluster', 'multiprocessing', 'serial_isolated'}
         Choose a backend for the map.
     cache : bool or {'yes', 'no', 'redo'}
         If True, each result is loaded instead calculated again.
@@ -415,9 +438,8 @@ def map(
 
     Returns
     -------
-    list
-        List of resulst returned from `func` for each element in
-        `iterable`.
+    pd.DataFrame
+        Table with parameters (MultiIndex) and results.
 
     """
     cfg = _get_options(
@@ -441,7 +463,26 @@ def map(
     cache_files = []
     hows = []
     todos = []
+    all_kwargs_names = set()
+
+
+
+    ### Convert a dict of lists into a list of dicts
+    if isinstance(space, dict):
+        warnings.warn("Not included in tests.")
+        k,v = zip(*list(space.iteritems()))
+        comb = list(itertools.product(*v))
+        iterable = [dict(zip(k, v)) for v in comb ]
+    else:
+        iterable = space
+
+
+
+    ### Go through the parameter space and check what should be
+    ### calculated (todos) and what recalled from the cache
     for args in iterable:
+        all_kwargs_names.update(args)
+
         args = dict(args)
         if kwargs is not None:
             args.update(kwargs)
@@ -458,6 +499,8 @@ def map(
             todos.append(args)
 
 
+
+    ### Submit the parameter space to the backends
     if cfg['backend'] == 'serial':
         results = _serial_map(func, todos, cfg)
     elif cfg['backend'] in ('multiprocessing', 'm'):
@@ -472,6 +515,9 @@ def map(
         raise RuntimeError("Unknown map() backend: {}".format(cfg['backend']))
 
 
+
+    ### Generate reults by either using cache (how == 'load') or
+    ### calculate using func (how == 'process')
     answers = []
     for how,fname in zip(hows,cache_files):
 
@@ -485,7 +531,7 @@ def map(
             status['processed'] += 1
 
             if cfg['cache'] in ('yes', 'refresh', 'redo'):
-                _dump_cache(result, fname)
+                _dump_cache(fname, result)
 
         else:
             raise RuntimeError("Should never reach this point.")
@@ -495,7 +541,18 @@ def map(
 
         answers.append(ans)
 
+
+    ### Prepare DataFrame output
+    iterable = pd.DataFrame(iterable)
+    answers = pd.DataFrame(answers)
+
+    out = pd.concat((iterable, answers), axis=1)
+    out = out.set_index(list(all_kwargs_names))
+
+
     _publish_status(status, 'file', func_name=func.func_name)
     _publish_status(status, 'stdout', func_name=func.func_name)
 
-    return(answers)
+
+
+    return out

@@ -12,11 +12,18 @@ import pytest
 import numpy as np
 from numpy.testing import assert_equal
 
+import pandas as pd
+from pandas.util.testing import assert_frame_equal
+
 import thorns as th
 
 
 def square(x):
     return x**2
+
+def multiply(x,y):
+    return x*y
+
 
 @pytest.fixture(scope="function")
 def workdir(request):
@@ -34,94 +41,198 @@ def workdir(request):
 
 
 
+def test_map_serial(workdir):
 
-def test_serial_map(workdir):
+    space = [{'x': i} for i in range(10)]
 
-    data = np.arange(10)
-    dicts = [{'x':i} for i in data]
-
-    results1 = th.util.map(
+    results = th.util.map(
         square,
-        dicts,
+        space,
         backend='serial',
+        cache='no',
         workdir=workdir,
     )
-    results2 = th.util.map(
+
+
+    expected = pd.DataFrame(
+        {
+            'x': range(10),
+            0: np.arange(10)**2
+        }
+    ).set_index('x')
+
+    assert_frame_equal(results, expected)
+
+
+
+
+
+
+def test_map_cache(workdir):
+
+    data = np.arange(10)
+    dicts = [{'x':i} for i in data]
+
+    df1 = th.util.map(
         square,
         dicts,
         backend='serial',
-        workdir=workdir
+        cache='yes',
+        workdir=workdir,
     )
-
-
-    assert_equal(
-        data**2,
-        list(results1)
-    )
-    assert_equal(
-        data**2,
-        list(results2)
-    )
-
-
-def test_multiprocessing_map(workdir):
-
-
-    data = np.arange(10)
-    dicts = [{'x':i} for i in data]
-
-    results1 = th.util.map(
+    df2 = th.util.map(
         square,
         dicts,
+        backend='serial',
+        cache='yes',
+        workdir=workdir,
+    )
+
+
+    assert_frame_equal(df1, df2)
+
+
+
+def test_map_kwargs(workdir):
+
+    space = [{'x': i} for i in range(10)]
+    kwargs = {'y': 2}
+
+
+    results = th.util.map(
+        multiply,
+        space,
+        backend='serial',
+        cache='no',
+        workdir=workdir,
+        kwargs=kwargs,
+    )
+
+    expected = pd.DataFrame(
+        {
+            'x': range(10),
+            0: np.arange(10)*2
+        }
+    ).set_index('x')
+
+    assert_frame_equal(results, expected)
+
+
+
+def test_map_cache_with_kwargs(workdir):
+
+    space = [{'x': i} for i in range(10)]
+
+    th.util.map(
+        multiply,
+        space,
+        backend='serial',
+        cache='yes',
+        workdir=workdir,
+        kwargs={'y': 2},
+    )
+
+    # It should *not* recall old results, even thour space is the
+    # same.  It should calculate new results, because kwargs are not
+    # the same.
+    results = th.util.map(
+        multiply,
+        space,
+        backend='serial',
+        cache='yes',
+        workdir=workdir,
+        kwargs={'y': 3},
+    )
+
+    expected = pd.DataFrame(
+        {
+            'x': range(10),
+            0: np.arange(10)*3
+        }
+    ).set_index('x')
+
+    assert_frame_equal(results, expected)
+
+
+
+
+
+
+def test_map_multiprocessing(workdir):
+
+    space = [{'x': i} for i in range(10)]
+
+    results = th.util.map(
+        square,
+        space,
         backend='multiprocessing',
-        workdir=workdir
+        cache='no',
+        workdir=workdir,
     )
-    results2 = th.util.map(
+
+
+    expected = pd.DataFrame(
+        {
+            'x': range(10),
+            0: np.arange(10)**2
+        }
+    ).set_index('x')
+
+    assert_frame_equal(results, expected)
+
+
+
+
+
+
+def test_map_playdoh(workdir):
+
+    space = [{'x': i} for i in range(10)]
+
+    results = th.util.map(
         square,
-        dicts,
-        backend='multiprocessing',
-        workdir=workdir
-    )
-
-
-    assert_equal(
-        data**2,
-        list(results1)
-    )
-    assert_equal(
-        data**2,
-        list(results2)
-    )
-
-
-
-def test_playdoh_map(workdir):
-
-    data = np.arange(10)
-    dicts = [{'x':i} for i in data]
-
-    results1 = th.util.map(
-        square,
-        dicts,
+        space,
         backend='playdoh',
-        workdir=workdir
+        cache='no',
+        workdir=workdir,
     )
-    results2 = th.util.map(
+
+
+    expected = pd.DataFrame(
+        {
+            'x': range(10),
+            0: np.arange(10)**2
+        }
+    ).set_index('x')
+
+    assert_frame_equal(results, expected)
+
+
+
+
+def test_map_serial_isolated(workdir):
+
+    space = [{'x': i} for i in range(10)]
+
+    results = th.util.map(
         square,
-        dicts,
-        backend='playdoh',
-        workdir=workdir
+        space,
+        backend='serial_isolated',
+        cache='no',
+        workdir=workdir,
     )
 
 
-    assert_equal(
-        data**2,
-        list(results1)
-    )
-    assert_equal(
-        data**2,
-        list(results2)
-    )
+    expected = pd.DataFrame(
+        {
+            'x': range(10),
+            0: np.arange(10)**2
+        }
+    ).set_index('x')
+
+    assert_frame_equal(results, expected)
+
+
 
 
 @pytest.mark.skipif('True')
@@ -153,37 +264,19 @@ def test_ipython_map(workdir):
     )
 
 
-def test_isolated_serial_map(workdir):
-
-    data = np.arange(3)
-    dicts = [{'x':i} for i in data]
-
-    results1 = th.util.map(
-        square,
-        dicts,
-        backend='serial_isolated',
-        workdir=workdir
-    )
-    results1 = list(results1)
-
-    results2 = th.util.map(
-        square,
-        dicts,
-        backend='serial_isolated',
-        workdir=workdir
-    )
-    results2 = list(results2)
 
 
+def test_cache(workdir):
 
-    assert_equal(
-        data**2,
-        results1
-    )
-    assert_equal(
-        data**2,
-        results2
-    )
+    square_cached = th.util.cache(square, workdir=workdir)
+
+    square_cached(x=2)
+
+    result = square_cached(x=2)
+
+    assert_equal(result, 4)
+
+
 
 
 
