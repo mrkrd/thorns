@@ -2,13 +2,12 @@
 #+AUTHOR: Marek Rudnicki
 #+CATEGORY: thorns
 
-* Test for map(dict of lists)
-
 * Implement th.io.write_mat(fname, trains=spike_trains, bar=bar_obj)
 
-* kwargs in dumpdb()
-
 * Python 3 support
+
+* Test for map(dict of lists)
+
 
 * Use datetime64 (like pandas) instead of str for keys in the dumpdb store
 
