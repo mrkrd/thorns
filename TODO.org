@@ -8,8 +8,6 @@
 
 * Test for map(dict of lists)
 
-* kwargs in dumpdb()
-
 * Use datetime64 (like pandas) instead of str for keys in the dumpdb store
 
 * timestamp=True in loaddb() should add timestamp in the output table

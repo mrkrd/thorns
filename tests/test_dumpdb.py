@@ -63,7 +63,6 @@ def test_dump_and_load_drop_duplicates(workdir):
 
 
 
-@pytest.mark.xfail
 def test_kwargs(workdir):
 
     data = pd.DataFrame([
@@ -86,7 +85,7 @@ def test_kwargs(workdir):
     expected = pd.DataFrame([
         {'x': 50, 'y': 400, 'type': 'anf', 'f': np.array([1,2])},
         {'x': 60, 'y': 400, 'type': 'anf', 'f': np.array([2,3])},
-    ]).set_index(['x','y'])
+    ]).set_index(['x','y','type'])
 
 
     assert_frame_equal(db, expected)

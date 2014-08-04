@@ -63,7 +63,9 @@ def dumpdb(data, name='dump', workdir='work', kwargs=None):
 
 
     if kwargs is not None:
-        raise NotImplementedError("MultiIndex of data should be updated by kwargs here.")
+        for k,v in kwargs.items():
+            data[k] = v
+        data = data.set_index(kwargs.keys(), append=True)
 
 
     now = datetime.datetime.now()
