@@ -234,9 +234,12 @@ def accumulate(spike_trains, ignore=None, keep=None):
 
 
 
-def trim(spike_trains, start, stop):
-    """Remove all spikes outside of the (`start`, `stop`) range."""
+def trim(spike_trains, start=0, stop=None):
+    """Trim the spike trains.
 
+    Remove all spikes outside of the (`start`, `stop`) range.
+
+    """
     tmin = start
 
     if stop is None:
