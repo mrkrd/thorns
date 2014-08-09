@@ -256,3 +256,47 @@ def test_fold():
         folded,
         expected,
     )
+
+
+
+
+
+def test_trim():
+
+    trains = th.make_trains(
+        [[1, 2], [2, 3]],
+        duration=10,
+        cf=1e3
+    )
+
+    trimmed = th.trim(trains, 1.5, 2.5)
+
+    expected = th.make_trains(
+        [[0.5], [0.5]],
+        duration=1,
+        cf=1e3
+    )
+
+
+    assert_frame_equal(trimmed, expected)
+
+
+
+
+def test_trim_without_stop():
+
+    trains = th.make_trains(
+        [[1, 2], [2, 3]],
+        duration=10,
+        cf=1e3
+    )
+
+    trimmed = th.trim(trains, 2)
+
+    expected = th.make_trains(
+        [[0], [0, 1]],
+        duration=8,
+        cf=1e3
+    )
+
+    assert_frame_equal(trimmed, expected)
