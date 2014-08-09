@@ -68,12 +68,11 @@ def dumpdb(data, name='dump', workdir='work', kwargs=None):
         data = data.set_index(kwargs.keys(), append=True)
 
 
-    now = datetime.datetime.now()
-    key = now.strftime("%Y%m%d-%H%M%S.%f")
+    now = np.datetime64(datetime.datetime.now())
 
     store = shelve.open(fname, protocol=-1)
 
-    store[key] = data
+    store[now] = data
 
 
 
