@@ -108,7 +108,7 @@ def _arrays_to_trains(arrays, **meta):
             meta['duration'] = np.array(meta['duration']).astype(float)
 
 
-    trains = {'spikes': [np.array(a) for a in arrays]}
+    trains = {'spikes': [np.array(a, dtype=float) for a in arrays]}
     trains.update(meta)
 
     trains = pd.DataFrame(trains)
