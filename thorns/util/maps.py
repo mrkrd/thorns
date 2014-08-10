@@ -114,7 +114,7 @@ def _serial_map(func, iterable, cfg):
 
 
 
-def _isolated_serial_map(func, iterable, cfg):
+def _serial_isolated_map(func, iterable, cfg):
 
 
     for args in iterable:
@@ -510,7 +510,7 @@ def map(
     elif cfg['backend'] in ('ipython', 'ipcluster'):
         results = _ipython_map(func, todos, cfg)
     elif cfg['backend'] == 'serial_isolated':
-        results = _isolated_serial_map(func, todos, cfg)
+        results = _serial_isolated_map(func, todos, cfg)
     else:
         raise RuntimeError("Unknown map() backend: {}".format(cfg['backend']))
 
