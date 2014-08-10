@@ -174,7 +174,7 @@ def _multiprocessing_map(func, iterable, cfg):
 
 
     for result in results:
-        yield result.get()
+        yield result.get(9999999)
 
 
 
