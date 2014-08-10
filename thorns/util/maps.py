@@ -500,7 +500,7 @@ def map(
 
 
 
-    ### Submit the parameter space to the backends
+    ### Submit the parameter space to one of the backends
     if cfg['backend'] == 'serial':
         results = _serial_map(func, todos, cfg)
     elif cfg['backend'] in ('multiprocessing', 'm'):
