@@ -76,7 +76,7 @@ def dumpdb(data, name='dump', workdir='work', backend='shelve' ,kwargs=None):
 
 
     now = datetime.datetime.now()
-    key = now.strftime("%Y%m%d-%H%M%S.%f")
+    key = now.strftime("T%Y%m%d_%H%M%S_%f")
 
     if backend == 'shelve':
         store = shelve.open(fname, protocol=-1)
