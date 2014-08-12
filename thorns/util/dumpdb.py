@@ -16,6 +16,8 @@ from itertools import izip_longest
 import shelve
 import collections
 
+import tables
+
 import numpy as np
 import pandas as pd
 
@@ -38,7 +40,7 @@ def get_store(workdir='work'):
 
 
 
-def dumpdb(data, name='dump', workdir='work', kwargs=None):
+def dumpdb(data, name='dump', workdir='work', backend='shelve' ,kwargs=None):
     """Dump data in order to recall the most up-to-date records later.
 
     Parameters
@@ -54,7 +56,12 @@ def dumpdb(data, name='dump', workdir='work', kwargs=None):
         extended).
 
     """
-    fname = os.path.join(workdir, name+'.db')
+    if backend == 'shelve':
+        fname = os.path.join(workdir, name+'.db')
+    elif backend == 'hdf':
+        fname = os.path.join(workdir, name+'.h5')
+    else:
+        NotImplementedError('Backend unknown')
 
     if not os.path.exists(workdir):
         os.makedirs(workdir)
@@ -71,16 +78,20 @@ def dumpdb(data, name='dump', workdir='work', kwargs=None):
     now = datetime.datetime.now()
     key = now.strftime("%Y%m%d-%H%M%S.%f")
 
-    store = shelve.open(fname, protocol=-1)
+    if backend == 'shelve':
+        store = shelve.open(fname, protocol=-1)
+        store[key] = data
+    elif backend == 'hdf':
+        store = pd.io.pytables.HDFStore(fname, 'a')
+        store[key] = data
+        store.close()
 
-    store[key] = data
 
 
 
 
 
-
-def loaddb(name='dump', workdir='work', timestamp=False):
+def loaddb(name='dump', workdir='work', backend='shelve', timestamp=False):
     """Recall dumped data discarding duplicated records.
 
     Parameters
@@ -102,7 +113,13 @@ def loaddb(name='dump', workdir='work', timestamp=False):
     if timestamp:
         raise NotImplementedError("Should add extra columnt with timestamps to the index of the output.")
 
-    fname = os.path.join(workdir, name+'.db')
+    if backend == 'shelve':
+        fname = os.path.join(workdir, name+'.db')
+    elif backend == 'hdf':
+        #fname = os.path.join(workdir, name+'.h5')
+        NotImplementedError("Loading from HDF backend not supportet")
+    else:
+        NotImplementedError("Backend unknown")
 
     logger.info("Loading data from {}".format(fname))
 
