@@ -60,7 +60,31 @@ def test_dump_and_load_drop_duplicates(workdir):
 
     assert_frame_equal(db, expected)
 
+def test_dump_and_load_drop_duplicates_hdf(workdir):
 
+    data1 = pd.DataFrame([
+        {'x': 50, 'y': 400, 'f': np.array([1,2])},
+        {'x': 60, 'y': 400, 'f': np.array([2,3])},
+    ]).set_index(['x','y'])
+
+    data2 = pd.DataFrame([
+        {'x': 50, 'y': 400, 'f': np.array([1,2])},
+        {'x': 60, 'y': 400, 'f': np.array([20,30])},
+    ]).set_index(['x','y'])
+
+
+
+    th.util.dumpdb(data1, workdir=workdir, backend='hdf')
+    th.util.dumpdb(data2, workdir=workdir, backend='hdf')
+
+
+
+    db = th.util.loaddb(workdir=workdir, backend='hdf')
+
+
+    expected = data2
+
+    assert_frame_equal(db, expected)
 
 
 def test_kwargs(workdir):
