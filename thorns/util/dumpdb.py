@@ -51,6 +51,12 @@ def dumpdb(data, name='dump', workdir='work', backend='shelve' ,kwargs=None):
         Base name of the pickle file.
     workdir : str, optional
         Directory for the data.
+    backend : {'shelve', 'hdf'}
+        The backend that is used to store the data:
+
+            - shelve : The data is pickled and stored in a shelve
+            - hdf : Native data is stored in the file without pickleing it.
+                    Objects are still pickled.
     kwargs : dict, optional
         Additional parameters common for all data (MultiIndex will be
         extended).
@@ -100,6 +106,12 @@ def loaddb(name='dump', workdir='work', backend='shelve', timestamp=False):
         Base of the data filename.
     workdir : str, optional
         Directory where the data is stored.
+    backend : {'shelve', 'hdf'}
+        The backend that is used to store the data:
+
+            - shelve : The data is pickled and stored in a shelve
+            - hdf : Native data is stored in the file without pickleing it.
+                    Objects are still pickled.
     timestamp : bool, optional
         Add an extra column with timestamps to the index.
 
