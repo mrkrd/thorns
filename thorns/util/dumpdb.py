@@ -115,15 +115,16 @@ def loaddb(name='dump', workdir='work', backend='shelve', timestamp=False):
 
     if backend == 'shelve':
         fname = os.path.join(workdir, name+'.db')
+        store = shelve.open(fname, protocol=-1)
     elif backend == 'hdf':
-        #fname = os.path.join(workdir, name+'.h5')
-        NotImplementedError("Loading from HDF backend not supportet")
+        fname = os.path.join(workdir, name+'.h5')
+        store = pd.io.pytables.HDFStore(fname, 'r')
     else:
-        NotImplementedError("Backend unknown")
+        NotImplementedError("Backend not Implemented")
 
     logger.info("Loading data from {}".format(fname))
 
-    store = shelve.open(fname, protocol=-1)
+
 
     xkeys = collections.OrderedDict() # poor-man's ordered set
     db = []
@@ -131,6 +132,9 @@ def loaddb(name='dump', workdir='work', backend='shelve', timestamp=False):
 
     ### Get all tables from the store
     for t,df in sorted(store.items()):
+
+        if backend == 'hdf':
+            df = store[t]
 
         # Just want ordered unique values in xkeys (ordered set would
         # simplify it: orderedset.update(df.index.names))
@@ -149,5 +153,7 @@ def loaddb(name='dump', workdir='work', backend='shelve', timestamp=False):
     )
 
     db = db.set_index(list(xkeys))
+
+    store.close()
 
     return db
