@@ -63,7 +63,7 @@ def test_dump_and_load_drop_duplicates(workdir):
 
 
 
-def test_dump_and_load_drop_duplicates_hdf(workdir):
+def test_dump_and_load_drop_duplicates_shelve(workdir):
 
     data1 = pd.DataFrame([
         {'x': 50, 'y': 400, 'f': np.array([1,2])},
@@ -77,12 +77,12 @@ def test_dump_and_load_drop_duplicates_hdf(workdir):
 
 
 
-    th.util.dumpdb(data1, workdir=workdir, backend='hdf')
-    th.util.dumpdb(data2, workdir=workdir, backend='hdf')
+    th.util.dumpdb(data1, workdir=workdir, backend='shelve')
+    th.util.dumpdb(data2, workdir=workdir, backend='shelve')
 
 
 
-    db = th.util.loaddb(workdir=workdir, backend='hdf')
+    db = th.util.loaddb(workdir=workdir, backend='shelve')
 
 
     expected = data2
