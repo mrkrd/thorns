@@ -60,6 +60,9 @@ def test_dump_and_load_drop_duplicates(workdir):
 
     assert_frame_equal(db, expected)
 
+
+
+
 def test_dump_and_load_drop_duplicates_hdf(workdir):
 
     data1 = pd.DataFrame([
@@ -85,6 +88,9 @@ def test_dump_and_load_drop_duplicates_hdf(workdir):
     expected = data2
 
     assert_frame_equal(db, expected)
+
+
+
 
 
 def test_kwargs(workdir):
