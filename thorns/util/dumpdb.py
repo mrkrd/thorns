@@ -145,10 +145,8 @@ def loaddb(name='dump', workdir='work', backend='hdf5', timestamp=False):
     db = []
 
     ### Get all tables from the store
-    for t,df in sorted(store.items()):
-
-        if backend == 'hdf5':
-            df = store[t]
+    for t in sorted(store.keys()):
+        df = store[t]
 
         # Just want ordered unique values in xkeys (ordered set would
         # simplify it: orderedset.update(df.index.names))
