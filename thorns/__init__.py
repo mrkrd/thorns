@@ -6,7 +6,7 @@ from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
-__version__ = "0.4"
+__version__ = "0.5"
 
 import os
 import sys
