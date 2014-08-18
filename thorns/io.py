@@ -1,6 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+"""Contains functions to read and write spike data in different
+formats.
+
+"""
+
 from __future__ import print_function, division, absolute_import
 
 __author__ = "Jörg Encke"
@@ -8,15 +13,14 @@ __author__ = "Jörg Encke"
 import struct
 import pandas as pd
 import copy
+import warnings
 
-"""Contains functions to read and write spike data in different
-formats.
 
-"""
 
 def read_brainwaref32(filename, stimparams=None):
-    """Read the spike timings as exported from BrainWare (Tucker-Davis
-    Technologies).
+    """Read the spike timings as exported from BrainWare.
+
+    BrainWare is software by Tucker-Davis Technologies.
 
     Parameters
     ----------
@@ -34,6 +38,7 @@ def read_brainwaref32(filename, stimparams=None):
         spike_train format.
 
     """
+    warnings.warn("read_brainwaref32: no unitest, might break in the future.")
 
     dict_list = []
 
