@@ -48,7 +48,7 @@ it could be easily extended.
 Usage
 -----
 
-Please, check our IPython Notebook DEMO_.
+Check our IPython Notebook DEMO_!
 
 Initialize and load spike trains::
 
@@ -106,7 +106,7 @@ Requirements
 Installation
 ------------
 
-Quick install::
+::
 
    pip install thorns
 
