@@ -280,5 +280,42 @@ def test_cache(workdir):
 
 
 
+def test_dict_of_lists():
+
+    dict_of_lists = {
+        'x': [1,2,3],
+        'y': [4,5]
+    }
+
+    actual = th.util.map(
+        multiply,
+        dict_of_lists,
+        cache='no',
+        backend='serial',
+    )
+
+
+    list_of_dicts = [
+        {'x': 1, 'y': 4},
+        {'x': 2, 'y': 4},
+        {'x': 3, 'y': 4},
+        {'x': 1, 'y': 5},
+        {'x': 2, 'y': 5},
+        {'x': 3, 'y': 5},
+    ]
+
+
+    expected = th.util.map(
+        multiply,
+        list_of_dicts,
+        cache='no',
+        backend='serial',
+    )
+
+
+    assert_frame_equal(actual, expected)
+
+
+
 if __name__ == '__main__':
     test_ipython_map()

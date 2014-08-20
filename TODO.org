@@ -6,8 +6,8 @@
 
 * Python 3 support
 
-* Test for map(dict of lists)
-
+* DONE Test for map(dict of lists)
+<2014-08-20 Wed>
 
 * timestamp=True in loaddb() should add timestamp in the output table
 
