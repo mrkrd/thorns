@@ -40,7 +40,7 @@ def get_store(workdir='work'):
 
 
 
-def dumpdb(data, name='dump', workdir='work', backend='hdf5', kwargs=None):
+def dumpdb(data, name='dump', workdir='work', kwargs=None):
     """Dump data in order to recall the most up-to-date records later.
 
     Parameters
@@ -51,21 +51,12 @@ def dumpdb(data, name='dump', workdir='work', backend='hdf5', kwargs=None):
         Base name of the pickle file.
     workdir : str, optional
         Directory for the data.
-    backend : {'shelve', 'hdf5'}, optional
-        The backend that is used to store the data.  Use 'shelve' for
-        the Python `shelve` backend.  Use 'hdf5' for the
-        Pandas/PyTables HDF5 backend.
     kwargs : dict, optional
         Additional parameters common for all data (MultiIndex will be
         extended).
 
     """
-    if backend == 'shelve':
-        fname = os.path.join(workdir, name+'.db')
-    elif backend == 'hdf5':
-        fname = os.path.join(workdir, name+'.h5')
-    else:
-        NotImplementedError("Unknown backend: {}".format(backend))
+    fname = os.path.join(workdir, name+'.h5')
 
     if not os.path.exists(workdir):
         os.makedirs(workdir)
@@ -82,14 +73,8 @@ def dumpdb(data, name='dump', workdir='work', backend='hdf5', kwargs=None):
     now = datetime.datetime.now()
     key = now.strftime("T%Y%m%d_%H%M%S_%f")
 
-
-    if backend == 'shelve':
-        store = shelve.open(fname, protocol=-1)
-        store[key] = data
-
-    elif backend == 'hdf5':
-        store = pd.io.pytables.HDFStore(fname, 'a')
-        store[key] = data
+    store = pd.io.pytables.HDFStore(fname, 'a')
+    store[key] = data
 
     store.close()
 
@@ -97,7 +82,7 @@ def dumpdb(data, name='dump', workdir='work', backend='hdf5', kwargs=None):
 
 
 
-def loaddb(name='dump', workdir='work', backend='hdf5', timestamp=False):
+def loaddb(name='dump', workdir='work', timestamp=False):
     """Recall dumped data discarding duplicated records.
 
     Parameters
@@ -106,9 +91,6 @@ def loaddb(name='dump', workdir='work', backend='hdf5', timestamp=False):
         Base of the data filename.
     workdir : str, optional
         Directory where the data is stored.
-    backend : {'shelve', 'hdf5'}, optional
-        The backend that is used to read the data.  See `dumpdb` for
-        details.
     timestamp : bool, optional
         Add an extra column with timestamps to the index.
 
@@ -123,18 +105,8 @@ def loaddb(name='dump', workdir='work', backend='hdf5', timestamp=False):
         raise NotImplementedError("Should add extra columnt with timestamps to the index of the output.")
 
 
-
-    if backend == 'shelve':
-        fname = os.path.join(workdir, name+'.db')
-        store = shelve.open(fname, protocol=-1)
-
-    elif backend == 'hdf5':
-        fname = os.path.join(workdir, name+'.h5')
-        store = pd.io.pytables.HDFStore(fname, 'r')
-
-    else:
-        NotImplementedError("Unknown backend: {}".format(backend))
-
+    fname = os.path.join(workdir, name+'.h5')
+    store = pd.io.pytables.HDFStore(fname, 'r')
 
 
     logger.info("Loading data from {}".format(fname))

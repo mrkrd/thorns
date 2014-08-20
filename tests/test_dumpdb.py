@@ -63,33 +63,6 @@ def test_dump_and_load_drop_duplicates(workdir):
 
 
 
-def test_dump_and_load_drop_duplicates_shelve(workdir):
-
-    data1 = pd.DataFrame([
-        {'x': 50, 'y': 400, 'f': np.array([1,2])},
-        {'x': 60, 'y': 400, 'f': np.array([2,3])},
-    ]).set_index(['x','y'])
-
-    data2 = pd.DataFrame([
-        {'x': 50, 'y': 400, 'f': np.array([1,2])},
-        {'x': 60, 'y': 400, 'f': np.array([20,30])},
-    ]).set_index(['x','y'])
-
-
-
-    th.util.dumpdb(data1, workdir=workdir, backend='shelve')
-    th.util.dumpdb(data2, workdir=workdir, backend='shelve')
-
-
-
-    db = th.util.loaddb(workdir=workdir, backend='shelve')
-
-
-    expected = data2
-
-    assert_frame_equal(db, expected)
-
-
 
 
 
