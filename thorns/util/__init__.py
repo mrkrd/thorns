@@ -3,15 +3,12 @@
 """
 
 from __future__ import division, print_function, absolute_import
+from __future__ import unicode_literals
 
-from thorns.util.dumpdb import (
-    dumpdb,
-    loaddb,
-    get_store,
-)
+import os
 
-from thorns.util.maps import map, cache
-
+from . dumpdb import dumpdb, loaddb, get_store
+from . maps import map, cache
 from . bisection import find_zero
 
 def mkdir(dirname):
