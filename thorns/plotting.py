@@ -248,7 +248,7 @@ def plot_sac(
 
 
 
-def plot_signal(signal, fs=None, ax=None):
+def plot_signal(signal, fs=None, ax=None, **kwargs):
     """Plot time signal.
 
     Parameters
@@ -257,7 +257,8 @@ def plot_signal(signal, fs=None, ax=None):
         Time signal.
     fs : float, optional
         Sampling freuency of the signal.
-
+    ax : plt.Axis
+        Axis to plot onto.
 
     Returns
     -------
@@ -283,7 +284,7 @@ def plot_signal(signal, fs=None, ax=None):
 
     ax.set_xlim((t[0],t[-1]))
 
-    ax.plot(t, signal)
+    ax.plot(t, signal, **kwargs)
 
 
     ax.set_xlabel(xlabel)
