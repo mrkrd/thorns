@@ -26,11 +26,12 @@ The progress bar is now displayed in the title of the terminal window
 (if possible).
 
 
-* loaddb() should load the last table by default
+* DONE loaddb() should load the last table by default
 
   - add `load_all=True' parameter to load all tables (but drop
     duplicates)
 
+<2014-08-23 Sat>
 
 * Allow nested map()
 

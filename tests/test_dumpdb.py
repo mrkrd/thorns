@@ -33,10 +33,11 @@ def workdir(request):
 
 
 
-def test_dump_and_load_drop_duplicates(workdir):
+def test_dump_and_load(workdir):
 
     data1 = pd.DataFrame([
         {'x': 50, 'y': 400, 'f': np.array([1,2])},
+        {'x': 55, 'y': 400, 'f': np.array([5,5])},
         {'x': 60, 'y': 400, 'f': np.array([2,3])},
     ]).set_index(['x','y'])
 
@@ -56,6 +57,41 @@ def test_dump_and_load_drop_duplicates(workdir):
 
 
     expected = data2
+
+
+    assert_frame_equal(db, expected)
+
+
+
+
+def test_dump_and_load_all(workdir):
+
+    data1 = pd.DataFrame([
+        {'x': 50, 'y': 400, 'f': np.array([1,2])},
+        {'x': 55, 'y': 400, 'f': np.array([5,5])},
+        {'x': 60, 'y': 400, 'f': np.array([2,3])},
+    ]).set_index(['x','y'])
+
+    data2 = pd.DataFrame([
+        {'x': 50, 'y': 400, 'f': np.array([1,2])},
+        {'x': 60, 'y': 400, 'f': np.array([20,30])},
+    ]).set_index(['x','y'])
+
+
+
+    th.util.dumpdb(data1, workdir=workdir)
+    th.util.dumpdb(data2, workdir=workdir)
+
+
+
+    db = th.util.loaddb(workdir=workdir, load_all=True)
+
+
+    expected = pd.DataFrame([
+        {'x': 55, 'y': 400, 'f': np.array([5,5])},
+        {'x': 50, 'y': 400, 'f': np.array([1,2])},
+        {'x': 60, 'y': 400, 'f': np.array([20,30])},
+    ]).set_index(['x','y'])
 
 
     assert_frame_equal(db, expected)

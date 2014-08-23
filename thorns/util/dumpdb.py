@@ -82,7 +82,7 @@ def dumpdb(data, name='dump', workdir='work', kwargs=None):
 
 
 
-def loaddb(name='dump', workdir='work', timestamp=False):
+def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
     """Recall dumped data discarding duplicated records.
 
     Parameters
@@ -93,6 +93,10 @@ def loaddb(name='dump', workdir='work', timestamp=False):
         Directory where the data is stored.
     timestamp : bool, optional
         Add an extra column with timestamps to the index.
+    load_all : bool, optional
+        If True, data from all experiments will be loaded from the
+        dumpdb file.  The default is to load only the most recent
+        data.
 
     Returns
     -------
@@ -112,32 +116,37 @@ def loaddb(name='dump', workdir='work', timestamp=False):
     logger.info("Loading data from {}".format(fname))
 
 
+    if load_all:
+        xkeys = collections.OrderedDict() # poor-man's ordered set
+        db = []
 
-    xkeys = collections.OrderedDict() # poor-man's ordered set
-    db = []
+        ### Get all tables from the store
+        for t in sorted(store.keys()):
+            df = store[t]
 
-    ### Get all tables from the store
-    for t in sorted(store.keys()):
-        df = store[t]
+            # Just want ordered unique values in xkeys (ordered set would
+            # simplify it: orderedset.update(df.index.names))
+            for name in df.index.names:
+                xkeys[name] = None
 
-        # Just want ordered unique values in xkeys (ordered set would
-        # simplify it: orderedset.update(df.index.names))
-        for name in df.index.names:
-            xkeys[name] = None
+            df = df.reset_index()
+            db.append(df)
 
-        df = df.reset_index()
-        db.append(df)
-
-    store.close()
+        store.close()
 
 
-    db = pd.concat(db)
+        db = pd.concat(db)
 
-    db = db.drop_duplicates(
-        subset=list(xkeys),
-        take_last=True,
-    )
+        db = db.drop_duplicates(
+            subset=list(xkeys),
+            take_last=True,
+        )
 
-    db = db.set_index(list(xkeys))
+        db = db.set_index(list(xkeys))
+
+    else:
+        last_key = sorted(store.keys())[-1]
+        db = store[last_key]
+
 
     return db
