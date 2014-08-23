@@ -11,10 +11,19 @@
 
 * timestamp=True in loaddb() should add timestamp in the output table
 
-* Implement a heads-up display for a progress bar in map()
+* DONE Implement a heads-up display for a progress bar in map()
 
   - try with standard '\r' or some terminal commands
   - try the package blessings
+
+<2014-08-23 Sat>
+
+It's quite messy to use the terminal as the output for the progress
+bar and the subprocesses at the same time.  I prefer to a clean output
+of the task processes.
+
+The progress bar is now displayed in the title of the terminal window
+(if possible).
 
 
 * loaddb() should load the last table by default

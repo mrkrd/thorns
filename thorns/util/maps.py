@@ -303,7 +303,7 @@ def _publish_status(status, where='stdout', func_name=""):
 
     seconds = time.time() - status['start_time']
 
-    msg = "{func_name:<22} [{bar}]  {loaded}/{processed}/{remaining}  {time}".format(
+    msg = "[{bar}]  {loaded}/{processed}/{remaining}  {time}  ({func_name})".format(
         loaded=status['loaded'],
         processed=status['processed'],
         remaining=(status['all']-status['loaded']-status['processed']),
@@ -324,12 +324,14 @@ def _publish_status(status, where='stdout', func_name=""):
         with open(fname, 'w') as f:
             f.write(msg)
 
-
     elif where == 'stdout':
-        print(msg)
+        sys.stderr.write(msg)
+        sys.stderr.write('\n')
+        sys.stderr.flush()
 
-
-
+    elif where == 'title':
+        sys.stderr.write("\033]2;{}\007\r".format(msg))
+        sys.stderr.flush()
 
 
 
@@ -521,6 +523,7 @@ def map(
     for how,fname in zip(hows,cache_files):
 
         _publish_status(status, 'file', func_name=func.func_name)
+        _publish_status(status, 'title', func_name=func.func_name)
         if how == 'load':
             result = _load_cache(fname)
             status['loaded'] += 1
@@ -550,6 +553,7 @@ def map(
 
 
     _publish_status(status, 'file', func_name=func.func_name)
+    _publish_status(status, 'title', func_name=func.func_name)
     _publish_status(status, 'stdout', func_name=func.func_name)
 
 
