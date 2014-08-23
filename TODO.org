@@ -38,3 +38,4 @@ The progress bar is now displayed in the title of the terminal window
   - inhibit _publish_status() in the nested maps
   - possible communication channel: sys.environ (how's multiprocessing
     doing it?)
+* Implement make_brian_group(trains)
