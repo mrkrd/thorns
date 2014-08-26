@@ -248,10 +248,10 @@ def correlation_index(
 
     if normalize:
         trial_num = len(spike_trains)
-        firing_rate = firing_rate(spike_trains)
+        rate = firing_rate(spike_trains)
         duration = get_duration(spike_trains)
 
-        norm = trial_num*(trial_num-1) * firing_rate**2 * coincidence_window * duration
+        norm = trial_num*(trial_num-1) * rate**2 * coincidence_window * duration
 
         ci = Nc / norm
 
