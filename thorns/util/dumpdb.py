@@ -132,7 +132,7 @@ def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
             df = df.reset_index()
             db.append(df)
 
-        store.close()
+
 
 
         db = pd.concat(db)
@@ -147,6 +147,10 @@ def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
     else:
         last_key = sorted(store.keys())[-1]
         db = store[last_key]
+
+    store.close()
+
+
 
 
     return db
