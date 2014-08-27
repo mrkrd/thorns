@@ -84,7 +84,13 @@ def plot_raster(spike_trains, ax=None, style='k.', **kwargs):
 
 
 
-def plot_psth(spike_trains, bin_size, ax=None, **kwargs):
+def plot_psth(
+        spike_trains,
+        bin_size,
+        ax=None,
+        drawstyle='steps-post',
+        **kwargs
+):
     """Plots PSTH of spike_trains."""
 
 
@@ -102,7 +108,7 @@ def plot_psth(spike_trains, bin_size, ax=None, **kwargs):
     ax.plot(
         bin_edges[:-1],
         psth,
-        drawstyle='steps-post',
+        drawstyle=drawstyle,
         **kwargs
     )
 
@@ -137,9 +143,11 @@ def plot_period_histogram(
         spike_trains,
         freq,
         nbins=64,
+        shift=0,
         ax=None,
         style='',
         density=False,
+        drawstyle='steps-post',
         **kwargs
 ):
     """Plot period histogram of the given spike trains.
@@ -152,6 +160,8 @@ def plot_period_histogram(
         Stimulus frequency.
     nbins : int
         Number of bins for the histogram.
+    shift : float
+        Defines how much should the phase be shifted in the plot.
     ax : plt.Ax, optional
         Matplotlib Ax to plot on.
     style : str, optional
@@ -161,7 +171,8 @@ def plot_period_histogram(
         each bin. If True, the result is the value of the probability
         density function at the bin, normalized such that the integral
         over the range is 1. (See `np.histogram()` for reference)
-
+    drawstyle : {'default', 'steps', 'steps-pre', 'steps-mid', 'steps-post'}
+        Set the drawstyle of the plot.
 
     Returns
     -------
@@ -178,6 +189,9 @@ def plot_period_histogram(
     )
 
 
+    shift_samp = int(np.round( (shift*nbins) / (2*np.pi) ))
+    hist = np.roll(hist, shift_samp)
+
 
     if ax is None:
         import matplotlib.pyplot as plt
@@ -188,6 +202,7 @@ def plot_period_histogram(
         bin_edges[:-1],
         hist,
         style,
+        drawstyle=drawstyle,
         **kwargs
     )
 
@@ -201,8 +216,12 @@ def plot_period_histogram(
     ax.set_xticks([0, np.pi, 2*np.pi])
     ax.set_xticklabels([0, r"$\pi$", r"2$\pi$"])
 
-    ax.set_xlabel("Stimulus Phase")
-    # ax.set_ylabel("Probability Density Function")
+    ax.set_xlabel("Stimulus phase")
+
+    if density:
+        ax.set_ylabel("Probability density function")
+    else:
+        ax.set_ylabel("Spike count")
 
     return ax
 
@@ -285,7 +304,6 @@ def plot_signal(signal, fs=None, ax=None, **kwargs):
     ax.set_xlim((t[0],t[-1]))
 
     ax.plot(t, signal, **kwargs)
-
 
     ax.set_xlabel(xlabel)
 
