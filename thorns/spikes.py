@@ -1,5 +1,22 @@
-#!/usr/bin/env python
 # -*- coding: utf-8 -*-
+#
+# Copyright 2014 Marek Rudnicki
+#
+# This file is part of thorns.
+#
+# thorns is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# thorns is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with thorns.  If not, see <http://www.gnu.org/licenses/>.
+
 
 """Contains `spike_trains` creation and manipulation functions.
 
@@ -139,8 +156,8 @@ def _array_to_trains(array, fs, **meta):
     trains = []
     for a in array.T:
         a = a.astype(int)
-        t = np.arange(len(a))
-        spikes = np.repeat(t, a) / fs
+        t = np.arange(len(a)) / fs
+        spikes = np.repeat(t, a)
 
         trains.append( spikes )
 
