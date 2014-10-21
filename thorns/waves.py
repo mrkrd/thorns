@@ -150,11 +150,14 @@ def ramped_tone(
     duration : float
         Duration of the tone in seconds.
     pad : float, optional
-        Duration of the pad in seconds (default is 0)
+        Duration of the pad in seconds (default is 0).  Pad will be
+        appended at the end of the signal.
     ramp : float, optional
         Duration of the ramp in seconds (default is 2.5 ms)
     dbspl : float, optional
-        Amplitude of the tone in dB SPL.  If None (default), no scaling.
+        Amplitude of the tone in dB SPL.  If None (default), no
+        scaling.  Scaling is done before ramping and appending the
+        pad.
 
 
     Returns
@@ -162,7 +165,6 @@ def ramped_tone(
 
     array_like
         The output tone with optional padding.
-
 
     """
     assert ramp < duration/2
