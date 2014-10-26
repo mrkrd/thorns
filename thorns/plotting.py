@@ -74,7 +74,7 @@ def plot_raster(spike_trains, ax=None, style='k.', **kwargs):
     ax.plot(s, n, style, **kwargs)
     ax.set_xlabel("Time (s)")
     ax.set_xlim( (0, duration) )
-    ax.set_ylabel("Trial Number")
+    ax.set_ylabel("Train Number")
     ax.set_ylim( (-0.5, len(trains)-0.5) )
 
 
