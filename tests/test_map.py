@@ -209,7 +209,7 @@ def test_map_playdoh(workdir):
 
 
 
-
+@pytest.mark.skipif('True')
 def test_map_serial_isolated(workdir):
 
     space = [{'x': i} for i in range(10)]
