@@ -189,6 +189,9 @@ def firing_rate(spike_trains):
     if isinstance(spike_trains, pd.Series):
         spike_trains = pd.DataFrame(spike_trains).T
 
+    if len(spike_trains) == 0:
+        return np.nan
+
     duration = np.sum( spike_trains['duration'] )
 
     trains = spike_trains['spikes']
