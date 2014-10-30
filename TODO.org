@@ -33,10 +33,15 @@ The progress bar is now displayed in the title of the terminal window
 
 <2014-08-23 Sat>
 
-* Allow nested map()
+* TODO Allow nested map()
 
   - force the serial backend in the nested maps
   - inhibit _publish_status() in the nested maps
   - possible communication channel: sys.environ (how's multiprocessing
     doing it?)
+
+<2014-10-28 Tue>
+
+
+
 * Implement make_brian_group(trains)
