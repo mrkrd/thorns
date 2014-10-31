@@ -179,24 +179,6 @@ def _multiprocessing_map(func, iterable, cfg):
 
 
 
-def _playdoh_map(func, iterable, cfg):
-
-    import playdoh
-
-    wrap = _func_wrap(func)
-
-    jobrun = playdoh.map_async(
-        wrap,
-        iterable,
-        machines=cfg['machines'],
-        codedependencies=cfg['dependencies'],
-    )
-    results = jobrun.get_results()
-
-    for result in results:
-        yield result
-
-
 
 def _ipython_map(func, iterable, cfg):
 
@@ -506,8 +488,6 @@ def map(
         results = _serial_map(func, todos, cfg)
     elif cfg['backend'] in ('multiprocessing', 'm'):
         results = _multiprocessing_map(func, todos, cfg)
-    elif cfg['backend'] == 'playdoh':
-        results = _playdoh_map(func, todos, cfg)
     elif cfg['backend'] in ('ipython', 'ipcluster'):
         results = _ipython_map(func, todos, cfg)
     elif cfg['backend'] == 'serial_isolated':

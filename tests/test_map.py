@@ -185,30 +185,6 @@ def test_map_multiprocessing(workdir):
 
 
 
-def test_map_playdoh(workdir):
-
-    space = [{'x': i} for i in range(10)]
-
-    results = th.util.map(
-        square,
-        space,
-        backend='playdoh',
-        cache='no',
-        workdir=workdir,
-    )
-
-
-    expected = pd.DataFrame(
-        {
-            'x': range(10),
-            0: np.arange(10)**2
-        }
-    ).set_index('x')
-
-    assert_frame_equal(results, expected)
-
-
-
 @pytest.mark.skipif('True')
 def test_map_serial_isolated(workdir):
 
