@@ -36,6 +36,8 @@ import warnings
 
 logger = logging.getLogger('thorns')
 
+is_inside_map = False
+
 
 class _FuncWrap(object):
     def __init__(self, func):
@@ -44,9 +46,13 @@ class _FuncWrap(object):
     def __call__(self, data):
         func = self.func
 
+        global is_inside_map
+
+        is_inside_map = True
         start = time.time()
         ans = func(**data)
         dt = time.time() - start
+        is_inside_map = False
 
         return ans,dt
 
@@ -304,8 +310,11 @@ def _publish_status(status, where='stdout', func_name=""):
 def _get_options(backend, cache, dependencies):
 
     cfg = {}
+    global is_inside_map
 
-    if backend is not None:
+    if is_inside_map:
+        cfg['backend'] = 'serial'
+    elif backend is not None:
         cfg['backend'] = backend
     elif 'THmap' in os.environ:
         cfg['backend'] = os.environ['THmap']
@@ -336,6 +345,8 @@ def _get_options(backend, cache, dependencies):
     else:
         cfg['cache'] = 'yes'
 
+
+    cfg['publish_status'] = not is_inside_map
 
     return cfg
 
@@ -486,8 +497,11 @@ def map(
     answers = []
     for how,fname in zip(hows,cache_files):
 
-        _publish_status(status, 'file', func_name=func.func_name)
-        _publish_status(status, 'title', func_name=func.func_name)
+        if cfg['publish_status']:
+            _publish_status(status, 'file', func_name=func.func_name)
+            _publish_status(status, 'title', func_name=func.func_name)
+
+
         if how == 'load':
             result = _load_cache(fname)
             status['loaded'] += 1
@@ -516,9 +530,10 @@ def map(
     out = out.set_index(list(all_kwargs_names))
 
 
-    _publish_status(status, 'file', func_name=func.func_name)
-    _publish_status(status, 'title', func_name=func.func_name)
-    _publish_status(status, 'stdout', func_name=func.func_name)
+    if cfg['publish_status']:
+        _publish_status(status, 'file', func_name=func.func_name)
+        _publish_status(status, 'title', func_name=func.func_name)
+        _publish_status(status, 'stdout', func_name=func.func_name)
 
 
 

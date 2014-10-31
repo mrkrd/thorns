@@ -33,7 +33,7 @@ The progress bar is now displayed in the title of the terminal window
 
 <2014-08-23 Sat>
 
-* TODO Allow nested map()
+* DONE Allow nested map()
 
   - force the serial backend in the nested maps
   - inhibit _publish_status() in the nested maps
@@ -41,7 +41,8 @@ The progress bar is now displayed in the title of the terminal window
     doing it?)
 
 <2014-10-28 Tue>
+<2014-10-31 Fri>
 
-
+Using global variable: thorns.util.maps.is_inside_map
 
 * Implement make_brian_group(trains)
