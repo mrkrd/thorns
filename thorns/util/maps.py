@@ -42,29 +42,13 @@ class _FuncWrap(object):
         self.func = func
 
     def __call__(self, data):
-        result = _apply_data(self.func, data)
-        return result
+        func = self.func
 
+        start = time.time()
+        ans = func(**data)
+        dt = time.time() - start
 
-
-def _func_wrap(func):
-    @functools.wraps(func)
-    def wrap(data):
-        result = _apply_data(func, data)
-        return result
-
-    return wrap
-
-
-
-def _apply_data(func, data):
-
-    start = time.time()
-    ans = func(**data)
-    dt = time.time() - start
-
-    return ans,dt
-
+        return ans,dt
 
 
 
@@ -80,6 +64,7 @@ def _pkl_name(obj, func, cachedir):
     )
 
     return pkl_name
+
 
 
 def _load_cache(fname):
@@ -115,7 +100,6 @@ def _serial_map(func, iterable, cfg):
 
 
 def _serial_isolated_map(func, iterable, cfg):
-
 
     for args in iterable:
         dirname = tempfile.mkdtemp()
