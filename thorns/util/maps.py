@@ -308,12 +308,11 @@ def _publish_status(status, where='stdout', func_name=""):
     elif (where == 'notify') and (seconds > 5):
         try:
             import pynotify
-
             pynotify.init(name)
-
             notice = pynotify.Notification(name, msg)
             notice.show()
-        except ImportError:
+        except Exception:
+            ### ImportError, GError (?)
             pass
 
 
