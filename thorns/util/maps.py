@@ -311,7 +311,7 @@ def _publish_status(status, where='stdout', func_name=""):
 
             pynotify.init("th.util.map")
 
-            notice = pynotify.Notification("th.util.map: finished", msg)
+            notice = pynotify.Notification(msg)
             notice.show()
         except ImportError:
             pass
