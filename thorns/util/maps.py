@@ -305,6 +305,17 @@ def _publish_status(status, where='stdout', func_name=""):
         sys.stderr.write("\033]2;{}\007\r".format(msg))
         sys.stderr.flush()
 
+    elif where == 'notify':
+        try:
+            import pynotify
+
+            pynotify.init("th.util.map")
+
+            notice = pynotify.Notification("th.util.map: finished", msg)
+            notice.show()
+        except ImportError:
+            pass
+
 
 
 def _get_options(backend, cache, dependencies):
@@ -534,6 +545,7 @@ def map(
         _publish_status(status, 'file', func_name=func.func_name)
         _publish_status(status, 'title', func_name=func.func_name)
         _publish_status(status, 'stdout', func_name=func.func_name)
+        _publish_status(status, 'notify', func_name=func.func_name)
 
 
 
