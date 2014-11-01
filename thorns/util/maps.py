@@ -309,7 +309,7 @@ def _publish_status(status, where='stdout', func_name=""):
         try:
             import pynotify
 
-            pynotify.init("th.util.map")
+            pynotify.init("thorns.util.map")
 
             notice = pynotify.Notification(msg)
             notice.show()
