@@ -305,13 +305,13 @@ def _publish_status(status, where='stdout', func_name=""):
         sys.stderr.write("\033]2;{}\007\r".format(msg))
         sys.stderr.flush()
 
-    elif where == 'notify':
+    elif (where == 'notify') and (seconds > 5):
         try:
             import pynotify
 
-            pynotify.init("thorns.util.map")
+            pynotify.init(name)
 
-            notice = pynotify.Notification(msg)
+            notice = pynotify.Notification(name, msg)
             notice.show()
         except ImportError:
             pass
