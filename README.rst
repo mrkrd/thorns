@@ -93,6 +93,7 @@ Generate and plot AM tone::
 .. _DEMO: http://nbviewer.ipython.org/github/mrkrd/thorns/blob/master/examples/thorns_demo.ipynb
 
 
+
 Requirements
 ------------
 
@@ -101,6 +102,9 @@ Requirements
 - Scipy
 - Pandas
 - Matplotlib
+
+- py-notify (optional, enables map notifications)
+
 
 
 Installation
