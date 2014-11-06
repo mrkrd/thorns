@@ -275,10 +275,10 @@ def _publish_status(status, where='stdout', func_name=""):
 
     seconds = time.time() - status['start_time']
 
-    msg = "[{bar}]  {loaded}/{processed}/{remaining}  {time}  ({func_name})".format(
+    msg = "[{bar}]  {loaded}|{processed}/{all}  {time}  ({func_name})".format(
         loaded=status['loaded'],
         processed=status['processed'],
-        remaining=(status['all']-status['loaded']-status['processed']),
+        all=status['all'],
         bar=bar,
         time=datetime.timedelta(seconds=seconds),
         func_name=func_name
