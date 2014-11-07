@@ -366,7 +366,9 @@ def _get_options(backend, cache, dependencies):
 
 
 def cache(func, workdir='work'):
+    """Wrap a function and cache its output.
 
+    """
     @functools.wraps(func)
     def wrap(**kwargs):
 
