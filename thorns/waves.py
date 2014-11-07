@@ -135,6 +135,7 @@ def ramped_tone(
         freq,
         duration,
         pad=0,
+        pre=0,
         ramp=2.5e-3,
         dbspl=None
 ):
@@ -152,6 +153,9 @@ def ramped_tone(
     pad : float, optional
         Duration of the pad in seconds (default is 0).  Pad will be
         appended at the end of the signal.
+    pre : float, optional
+        Duration of the pre-pad in seconds.  This pad will be attached
+        at the end of the siganl.
     ramp : float, optional
         Duration of the ramp in seconds (default is 2.5 ms)
     dbspl : float, optional
@@ -181,7 +185,8 @@ def ramped_tone(
 
 
     pad_signal = np.zeros(pad * fs)
-    sound = np.concatenate( (s, pad_signal) )
+    pre_signal = np.zeros(pre * fs)
+    sound = np.concatenate( (pre_signal, s, pad_signal) )
 
     return sound
 
