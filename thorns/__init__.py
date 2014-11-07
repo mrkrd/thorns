@@ -65,6 +65,7 @@ from thorns.stats import (
 from thorns.plotting import (
     plot_raster,
     plot_psth,
+    plot_isih,
     plot_neurogram,
     plot_sac,
     plot_period_histogram,

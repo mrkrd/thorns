@@ -120,23 +120,54 @@ def plot_psth(
     return ax
 
 
-# def isih(spike_trains, bin_size=1e-3, plot=None, **style):
-#     """Plot inter-spike interval histogram."""
 
-#     hist = stats.isih(spike_trains, bin_size)
 
-#     c = biggles.Histogram(hist, x0=0, binsize=bin_size)
-#     c.style(**style)
 
-#     if plot is None:
-#         plot = biggles.FramedPlot()
-#     plot.xlabel = "Inter-Spike Interval (ms)"
-#     plot.ylabel = "Probability Density Function"
-#     plot.add(c)
-#     plot.xrange = (0, None)
-#     plot.yrange = (0, None)
+def plot_isih(
+        spike_trains,
+        bin_size,
+        ax=None,
+        drawstyle='steps-post',
+        density=True,
+        **kwargs
+):
+    """Plot inter-spike interval histogram.
 
-#     return plot
+    """
+
+    hist, bin_edges = stats.isih(
+        spike_trains=spike_trains,
+        bin_size=bin_size,
+        density=density,
+    )
+
+    if ax is None:
+        import matplotlib.pyplot as plt
+        ax = plt.gca()
+
+
+
+    ax.plot(
+        bin_edges[:-1],
+        hist,
+        drawstyle=drawstyle,
+        **kwargs
+    )
+
+
+    ax.set_xlabel("Inter-Spike Interval (s)")
+
+    if density:
+        ax.set_ylabel("Probability Density Function")
+    else:
+        ax.set_ylabel("Spike count")
+
+
+    return ax
+
+
+
+
 
 
 def plot_period_histogram(
