@@ -258,7 +258,7 @@ def test_vector_strength():
 
     ### Carefully chosen
     trains = th.make_trains(
-        [np.array([0, 0.25, 0, 0.25])]
+        [np.tile([0, 0.25], 10)]
     )
 
     si = th.vector_strength(
