@@ -87,9 +87,11 @@ def make_trains(data, **kwargs):
         trains = _arrays_to_trains(arrays, **meta)
 
     elif ('brian' in sys.modules) and isinstance(data, sys.modules['brian'].SpikeMonitor):
-        meta.setdefault('duration', float(data.clock.t))
+        import brian
 
-        spikes = [spks for spks in data.spiketimes.itervalues()]
+        meta.setdefault('duration', float(data.clock.t/brian.second))
+
+        spikes = [float(spike/brian.second) for spike in data.spiketimes.itervalues()]
         trains = _arrays_to_trains(spikes, **meta)
 
     elif len(data) == 0:
