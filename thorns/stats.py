@@ -23,25 +23,21 @@ def get_duration(spike_trains):
 
 
 
-def psth(spike_trains, bin_size, normalize=True):
-    """Calculate peristimulus time histogram (PSTH) of `spike_trains`
-    using `bin_size`.
+def psth(spike_trains, bin_size, normalize=True, **kwargs):
+    """Calculate peristimulus time histogram (PSTH).
 
 
     Returns
     -------
-    ndarray
+    array_like
         Histogram values.
-    ndarray
+    array_like
         Bin edges.
 
     """
+    all_spikes = np.concatenate(tuple(spike_trains['spikes']))
+
     duration = get_duration(spike_trains)
-    trial_num = len(spike_trains)
-
-    trains = spike_trains['spikes']
-    all_spikes = np.concatenate(tuple(trains))
-
     nbins = np.ceil(duration / bin_size)
 
     if nbins == 0:
@@ -50,12 +46,12 @@ def psth(spike_trains, bin_size, normalize=True):
     hist, bin_edges = np.histogram(
         all_spikes,
         bins=nbins,
-        range=(0, nbins*bin_size)
+        range=(0, nbins*bin_size),
+        **kwargs
     )
 
-
     if normalize:
-        psth = hist / bin_size / trial_num
+        psth = hist / bin_size / len(spike_trains)
     else:
         psth = hist
 
@@ -66,15 +62,13 @@ def psth(spike_trains, bin_size, normalize=True):
 
 
 def isih(spike_trains, bin_size, **kwargs):
-    """Calculate inter-spike interval histogram (ISIH) of `spike_trains`
-    using `bin_size`.
-
+    """Calculate inter-spike interval histogram (ISIH).
 
     Returns
     -------
-    ndarray
+    array_like
         Histogram values.
-    ndarray
+    array_like
         Bin edges.
 
     """

@@ -134,7 +134,6 @@ def plot_isih(
     """Plot inter-spike interval histogram.
 
     """
-
     hist, bin_edges = stats.isih(
         spike_trains=spike_trains,
         bin_size=bin_size,
@@ -144,7 +143,6 @@ def plot_isih(
     if ax is None:
         import matplotlib.pyplot as plt
         ax = plt.gca()
-
 
 
     ax.plot(
@@ -160,7 +158,7 @@ def plot_isih(
     if density:
         ax.set_ylabel("Probability Density Function")
     else:
-        ax.set_ylabel("Spike count")
+        ax.set_ylabel("Interval Count per Bin")
 
 
     return ax
@@ -326,7 +324,7 @@ def plot_signal(signal, fs=None, ax=None, style='', **kwargs):
 
     if fs is None:
         fs = 1
-        xlabel = "Time"
+        xlabel = "Sample Number"
     else:
         xlabel = "Time (s)"
 
@@ -339,6 +337,7 @@ def plot_signal(signal, fs=None, ax=None, style='', **kwargs):
     ax.plot(t, signal, style, **kwargs)
 
     ax.set_xlabel(xlabel)
+    ax.set_ylabel("Amplitude")
 
     return ax
 
