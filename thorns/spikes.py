@@ -91,7 +91,7 @@ def make_trains(data, **kwargs):
 
         meta.setdefault('duration', float(data.clock.t/brian.second))
 
-        spikes = [float(spike/brian.second) for spike in data.spiketimes.itervalues()]
+        spikes = [np.array(spiketimes/brian.second) for spiketimes in data.spiketimes.itervalues()]
         trains = _arrays_to_trains(spikes, **meta)
 
     elif len(data) == 0:
