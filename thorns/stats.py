@@ -133,8 +133,9 @@ def vector_strength(spike_trains, freq):
     all_spikes = np.concatenate( tuple(spike_trains['spikes']) )
 
     rate = firing_rate(spike_trains)
-    if rate < 10:
-        warnings.warn("Firing rate too small to reliably calculate SI: {}".format(rate))
+
+    if (rate < 10) or (len(all_spikes) < 8):
+        warnings.warn("Spike count ({count}) or firing rate ({rate}) too small to reliably calculate vector strength.".format(rate=rate, count=len(all_spikes)))
         return np.nan
 
 
