@@ -282,7 +282,7 @@ def electrical_pulse(
 
 
 
-def generate_electrical_amplitudes(
+def electrical_amplitudes(
         durations,
         polarity,
         ratio=None,

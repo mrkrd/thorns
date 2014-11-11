@@ -15,11 +15,11 @@ from numpy.testing import assert_equal
 import thorns.waves as wv
 
 
-def test_generate_electrical_amplitudes_2():
+def test_electrical_amplitudes_2():
 
     durations = [1, 0.5]
 
-    amplitudes = wv.generate_electrical_amplitudes(
+    amplitudes = wv.electrical_amplitudes(
         durations=durations,
         polarity=1,
     )
@@ -28,13 +28,13 @@ def test_generate_electrical_amplitudes_2():
     assert_equal(amplitudes, [0.5, -1])
 
 
-def test_generate_electrical_amplitudes_3():
+def test_electrical_amplitudes_3():
 
     durations = [0.5, 1, 0.5]
     ratio = 0.3
     polarity = 1
 
-    amplitudes = wv.generate_electrical_amplitudes(
+    amplitudes = wv.electrical_amplitudes(
         durations=durations,
         polarity=polarity,
         ratio=ratio
