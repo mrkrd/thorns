@@ -15,6 +15,28 @@ from numpy.testing import assert_equal
 import thorns.waves as wv
 
 
+
+def test_electrical_pulse_charge():
+
+    durations = [1, 1, 1]
+    amplitudes = [-1, 2, -1]
+
+    fs = 100
+
+    pulse = wv.electrical_pulse(
+        fs=fs,
+        amplitudes=amplitudes,
+        durations=durations,
+        charge=1
+    )
+
+
+    charge = np.sum(np.abs(pulse))/fs
+
+    assert_equal(charge, 1)
+
+
+
 def test_electrical_amplitudes_2():
 
     durations = [1, 0.5]

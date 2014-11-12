@@ -252,9 +252,34 @@ def electrical_pulse(
 ):
     """Generate electrical pulse.
 
-    """
+    Parameters
+    ----------
+    fs : scalar
+        Sampling frequency of the output.
+    amplitudes : array_like
+        A list of amplitudes in Ampere of each phase of the output
+        pulse.
+    durations : array_like
+        A list of desired durations of each phase of the output pulse
+        in seconds.  Must have the same number of elements as
+        `amplitudes`.
+    gap : scalar
+        Desired duration of the gaps between phases of the output pulse.
+    pad : scalar
+        Desired duration of the zero signal appended at the end of the pulse.
+    charge : None, scalar, optional
+        If scalar, then it is equal to the absolute charge of the
+        output pulse.  Amplitudes of the phases will be re-scaled, but
+        will preserve their ratios to one other.
 
-    assert len(amplitudes) == len(durations)
+    Returns
+    -------
+    array_like
+        Output signal (a pulse).
+
+    """
+    if not len(amplitudes) == len(durations):
+        raise ValueError("`amplitudes` and `durations` must have the same length.")
 
     gap_signal = np.zeros(gap * fs)
     pad_signal = np.zeros(pad * fs)
@@ -274,8 +299,8 @@ def electrical_pulse(
 
 
     if charge is not None:
-        c = np.sum(np.abs(signal))/fs
-        signal /= c
+        charge_orig = np.sum(np.abs(np.array(amplitudes) * np.array(durations)))
+        signal *= charge / charge_orig
 
 
     return signal
