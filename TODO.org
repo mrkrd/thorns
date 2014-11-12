@@ -46,3 +46,16 @@ The progress bar is now displayed in the title of the terminal window
 Using global variable: thorns.util.maps.is_inside_map
 
 * Implement make_brian_group(trains)
+* Implement kernel density estimation in the place of histograms
+
+  - PSTH
+  - ISIH
+  - period histogram
+
+
+#+BEGIN_SRC python
+h = scipy.stats.gaussian_kde(all_spikes, bin_size/np.std(all_spikes,ddof=1))
+
+bins = np.arange(0, duration, h.factor*np.std(all_spikes,ddof=1)/10)
+hist = h.evaluate(bins)
+#+END_SRC
