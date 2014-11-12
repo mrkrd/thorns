@@ -87,8 +87,9 @@ def plot_raster(spike_trains, ax=None, style='k.', **kwargs):
 def plot_psth(
         spike_trains,
         bin_size,
+        normalize=True,
+        kde=False,
         ax=None,
-        drawstyle='steps-post',
         **kwargs
 ):
     """Plots PSTH of spike_trains."""
@@ -96,7 +97,9 @@ def plot_psth(
 
     psth, bin_edges = stats.psth(
         spike_trains,
-        bin_size
+        bin_size,
+        kde=kde,
+        normalize=normalize,
     )
 
 
@@ -105,8 +108,14 @@ def plot_psth(
         ax = plt.gca()
 
 
+    if kde:
+        drawstyle = 'line'
+    else:
+        drawstyle = 'steps-post'
+
+
     ax.plot(
-        bin_edges[:-1],
+        bin_edges,
         psth,
         drawstyle=drawstyle,
         **kwargs

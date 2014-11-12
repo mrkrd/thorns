@@ -121,7 +121,7 @@ def test_psth():
     )
     assert_equal(
         bin_edges,
-        [0, 1, 2, 3]
+        [0, 1, 2]
     )
 
 
@@ -158,7 +158,7 @@ def test_psth_with_empty_trains():
     )
     assert_equal(
         bin_edges,
-        [0,1,2]
+        [0,1]
     )
 
 

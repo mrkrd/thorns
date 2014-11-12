@@ -8,6 +8,7 @@ __author__ = "Marek Rudnicki"
 import numpy as np
 import pandas as pd
 import warnings
+import scipy.stats
 
 
 def get_duration(spike_trains):
@@ -23,8 +24,15 @@ def get_duration(spike_trains):
 
 
 
-def psth(spike_trains, bin_size, normalize=True, **kwargs):
+def psth(spike_trains, bin_size, normalize=True, kde=False, **kwargs):
     """Calculate peristimulus time histogram (PSTH).
+
+
+    Parameters
+    ----------
+    kde : bool
+        Calculate kernel density estimation instead of a histogram.
+        You probably want to use it!
 
 
     Returns
@@ -32,23 +40,33 @@ def psth(spike_trains, bin_size, normalize=True, **kwargs):
     array_like
         Histogram values.
     array_like
-        Bin edges.
+        Bins.
 
     """
     all_spikes = np.concatenate(tuple(spike_trains['spikes']))
 
     duration = get_duration(spike_trains)
-    nbins = np.ceil(duration / bin_size)
 
-    if nbins == 0:
+    if duration == 0:
         return None, None
 
-    hist, bin_edges = np.histogram(
-        all_spikes,
-        bins=nbins,
-        range=(0, nbins*bin_size),
-        **kwargs
-    )
+
+    if kde:
+        h = scipy.stats.gaussian_kde(all_spikes, bin_size/np.std(all_spikes,ddof=1))
+
+        bins = np.arange(0, duration, h.factor*np.std(all_spikes,ddof=1)/10)
+        hist = h.evaluate(bins)
+
+    else:
+        nbins = np.ceil(duration / bin_size)
+        hist, bin_edges = np.histogram(
+            all_spikes,
+            bins=nbins,
+            range=(0, nbins*bin_size),
+            **kwargs
+        )
+        bins = bin_edges[:-1]
+
 
     if normalize:
         psth = hist / bin_size / len(spike_trains)
@@ -56,7 +74,10 @@ def psth(spike_trains, bin_size, normalize=True, **kwargs):
         psth = hist
 
 
-    return psth, bin_edges
+    # psth = hist / len(spike_trains) / (bin_size/np.std(all_spikes))
+
+
+    return psth, bins
 
 
 
