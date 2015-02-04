@@ -26,9 +26,12 @@ logger = logging.getLogger('thorns')
 
 
 
-def get_store(workdir='work'):
+def get_store(name='store', workdir='work'):
+    """Return a quick and dirty shelve based persisten dict-like store.
 
-    fname = os.path.join(workdir, 'store.db')
+    """
+
+    fname = os.path.join(workdir, name + '.db')
 
     if not os.path.exists(workdir):
         os.makedirs(workdir)
