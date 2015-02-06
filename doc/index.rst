@@ -7,15 +7,12 @@ Welcome to thorns' and waves' documentation!
 .. moduleauthor:: Marek Rudnicki
 
 
-.. include:: ../README.rst
-   :start-after: ================
-   :end-before: Description
+The module is available at https://github.com/mrkrd/thorns
 
 
 .. toctree::
    :maxdepth: 2
 
-   readme
    api
 
 

@@ -92,11 +92,11 @@ Features
 - Analyzes and displays spike trains
 - Uses pandas.DataFrame as the main data container (spike trains,
   results)
-- Handy signal processing and generating functions (``thorns.waves``)
-- Map implementation with various backend (also parallel) and caching
-  (``thorns.util.map()``)
+- Handy signal processing and generating functions: ``thorns.waves``
+- Map implementation with various backend (also parallel) and caching:
+  ``thorns.util.map()``
 - Dumpdb: quickly dump ``map()``'s results in one script and load from
-  another one (``thorns.util.dumpdb()``, ``thorns.util.loaddb()``)
+  another one: ``thorns.util.dumpdb()``, ``thorns.util.loaddb()``
 - Pure Python
 
 
