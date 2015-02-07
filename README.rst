@@ -22,9 +22,9 @@ raster plot.
 generation functions, e.g. generate ramped tone, amplitude modulation
 tone, FFT filter, set level (dB_SPL).
 
-I developed the package during my PhD in the group of `Werner
-Hemmert`_ at the TUM.  It is oriented towards auditory research, but
-it could be easily extended.
+The software was originally developed during my PhD in the group of
+`Werner Hemmert`_ at the TUM.  It is oriented towards auditory
+research, but it could be easily extended.
 
 .. _`spike trains`: https://en.wikipedia.org/wiki/Spike_train
 .. _`Werner Hemmert`: http://www.imetum.tum.de/research/bai/home/?L=1
