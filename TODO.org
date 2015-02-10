@@ -46,7 +46,7 @@ The progress bar is now displayed in the title of the terminal window
 Using global variable: thorns.util.maps.is_inside_map
 
 * Implement make_brian_group(trains)
-* Implement kernel density estimation in the place of histograms
+* Implement kernel density estimation in the place of histograms     :cancel:
 
   - PSTH
   - ISIH
