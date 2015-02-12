@@ -118,10 +118,9 @@ def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
 
     logger.info("Loading data from {}".format(fname))
 
-
     if load_all:
         xkeys = collections.OrderedDict() # poor-man's ordered set
-        db = []
+        dbs = []
 
         ### Get all tables from the store
         for t in sorted(store.keys()):
@@ -130,29 +129,35 @@ def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
             # Just want ordered unique values in xkeys (ordered set would
             # simplify it: orderedset.update(df.index.names))
             for name in df.index.names:
-                xkeys[name] = None
+                xkeys.setdefault(name)
 
             df = df.reset_index()
-            db.append(df)
+            dbs.append(df)
 
 
+        db = pd.concat(dbs)
 
-
-        db = pd.concat(db)
-
-        db = db.drop_duplicates(
-            subset=list(xkeys),
-            take_last=True,
-        )
-
-        db = db.set_index(list(xkeys))
 
     else:
         last_key = sorted(store.keys())[-1]
-        db = store[last_key]
+        df = store[last_key]
+
+        xkeys = df.index.names
+
+        db = df.reset_index()
+
 
     store.close()
 
+
+
+    ### Drop duplicates and set index
+    db = db.drop_duplicates(
+        subset=list(xkeys),
+        take_last=True,
+    )
+
+    db = db.set_index(list(xkeys))
 
 
 

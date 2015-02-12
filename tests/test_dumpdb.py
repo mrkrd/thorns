@@ -33,6 +33,29 @@ def workdir(request):
 
 
 
+def test_dump_and_load_single_df(workdir):
+
+    data = pd.DataFrame([
+        {'a': 1, 'b': 1.1, 'c': 1   },
+        {'a': 2, 'b': 2.2, 'c': 4   },
+        {'a': 3, 'b': 3.3, 'c': 9   },
+        {'a': 1, 'b': 1.1, 'c': 1.11}, # duplicate of the 0th row
+    ]).set_index(['a', 'b'])
+
+    expected = pd.DataFrame([
+        {'a': 2, 'b': 2.2, 'c': 4   },
+        {'a': 3, 'b': 3.3, 'c': 9   },
+        {'a': 1, 'b': 1.1, 'c': 1.11},
+    ]).set_index(['a', 'b'])
+
+
+    th.util.dumpdb(data, workdir=workdir)
+
+    actual = th.util.loaddb(workdir=workdir)
+
+    assert_frame_equal(actual, expected)
+
+
 def test_dump_and_load(workdir):
 
     data1 = pd.DataFrame([
