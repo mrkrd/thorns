@@ -9,33 +9,30 @@ from __future__ import division, print_function, absolute_import
 
 __author__ = "Marek Rudnicki"
 
+import pandas as pd
 import thorns as th
 
 def main():
 
     ### Create data with duplicates (records)
-    space = [
-        {'a': 1, 'b': 1.1},
-        {'a': 2, 'b': 2.2},
-        {'a': 3, 'b': 3.3},
-        {'a': 1, 'b': 1.1},
-    ]
-    results = [
-        {'c': 1},
-        {'c': 4},
-        {'c': 9},
-        {'c': 1.11},
-    ]
+    data = pd.DataFrame([
+        {'a': 1, 'b': 1.1, 'c': 1   },
+        {'a': 2, 'b': 2.2, 'c': 4   },
+        {'a': 3, 'b': 3.3, 'c': 9   },
+        {'a': 1, 'b': 1.1, 'c': 1.11}, # duplicate of the 0th row
+    ])
+
+    data = data.set_index(['a', 'b'])
 
 
     ### Dump the data
-    th.dumpdb(space, results)
+    th.util.dumpdb(data)
 
 
 
     ### Load the data, note that duplicated resuts are dropped (only
     ### the most recent data is returned)
-    db = th.loaddb()
+    db = th.util.loaddb()
 
 
 
