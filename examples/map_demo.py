@@ -11,10 +11,7 @@ __author__ = "Marek Rudnicki"
 __copyright__ = "Copyright 2014-2015, Marek Rudnicki"
 __license__ = "GPLv3+"
 
-
 import numpy as np
-import pandas as pd
-
 import thorns as th
 
 
