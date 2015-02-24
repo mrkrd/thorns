@@ -30,17 +30,12 @@ def align(a, fs_a, b, fs_b):
         fs = fs_a,
         b = resample(b, fs_b, fs)
 
-
     if len(a) > len(b):
         a = a[0:len(b)]
     elif len(a) < len(b):
         b = b[0:len(a)]
 
     return a, b, fs
-
-
-
-
 
 
 def snr(signal, noise):
@@ -56,12 +51,9 @@ def snr(signal, noise):
     return snr_db
 
 
-
 def rms(signal):
     """Calculate root mean squere of a `signal`."""
-    return np.sqrt( np.mean(signal**2) )
-
-
+    return np.sqrt(np.mean(signal**2))
 
 
 def fft_filter(signal, fs, band):
@@ -88,26 +80,22 @@ def fft_filter(signal, fs, band):
 
     freqs = np.linspace(0, fs/2, len(signal)/2+1)
 
-
     signal_fft = np.fft.rfft(signal)
-    signal_fft[ (freqs < lo) | (freqs > hi) ] = 0
+    signal_fft[(freqs < lo) | (freqs > hi)] = 0
 
     filtered = np.fft.irfft(signal_fft)
 
     return filtered
 
 
-
-
 def set_dbspl(signal, dbspl):
     """Scale the level of `signal` to the given dB_SPL."""
     p0 = 20e-6
-    rms = np.sqrt( np.sum(signal**2) / signal.size )
+    rms = np.sqrt(np.sum(signal**2) / signal.size)
 
     scalled = signal * 10**(dbspl / 20.0) * p0 / rms
 
     return scalled
-
 
 
 def resample(signal, fs, new_fs):
@@ -116,8 +104,7 @@ def resample(signal, fs, new_fs):
     return new_signal
 
 
-
-def trim(a,b):
+def trim(a, b):
     """Trim the longer vector, so that both have the same length."""
     assert a.ndim == b.ndim == 1
 
@@ -126,8 +113,6 @@ def trim(a,b):
     bb = b[0:length]
 
     return aa, bb
-
-
 
 
 def ramped_tone(
@@ -183,13 +168,11 @@ def ramped_tone(
         s[0:len(ramp_signal)] = s[0:len(ramp_signal)] * ramp_signal
         s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
 
-
     pad_signal = np.zeros(pad * fs)
     pre_signal = np.zeros(pre * fs)
-    sound = np.concatenate( (pre_signal, s, pad_signal) )
+    sound = np.concatenate((pre_signal, s, pad_signal))
 
     return sound
-
 
 
 def white_noise(
@@ -204,11 +187,10 @@ def white_noise(
 
     np.random.seed(seed)
 
-
     lo, hi = band
 
-    n = int( np.round(duration * fs) )
-    freqs_abs = np.abs( np.fft.fftfreq(n, 1/fs) )
+    n = int(np.round(duration * fs))
+    freqs_abs = np.abs(np.fft.fftfreq(n, 1/fs))
 
     passband_mask = (freqs_abs > lo) & (freqs_abs < hi)
 
@@ -218,28 +200,22 @@ def white_noise(
     imags = np.sin(angles)
 
     ss = reals + 1j*imags
-    ss[ np.invert(passband_mask) ] = 0
+    ss[np.invert(passband_mask)] = 0
 
     s = np.fft.ifft(ss).real
 
     s = set_dbspl(s, dbspl)
 
-
-    ### Ramping
+    # Ramping
     ramp_signal = np.linspace(0, 1, np.round(ramp*fs))
     s[0:len(ramp_signal)] = s[0:len(ramp_signal)] * ramp_signal
     s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
 
-
-    ### Padding
+    # Padding
     pad_signal = np.zeros(pad * fs)
-    s = np.concatenate( (s, pad_signal) )
-
+    s = np.concatenate((s, pad_signal))
 
     return s
-
-
-
 
 
 def electrical_pulse(
@@ -279,32 +255,31 @@ def electrical_pulse(
 
     """
     if not len(amplitudes) == len(durations):
-        raise ValueError("`amplitudes` and `durations` must have the same length.")
+        raise ValueError("`amplitudes` and `durations`" +
+                         " must have the same length.")
 
     gap_signal = np.zeros(gap * fs)
     pad_signal = np.zeros(pad * fs)
 
     signals = []
-    for amp,dur in zip(amplitudes, durations):
-        signals.append( amp * np.ones(dur * fs) )
-        signals.append( gap_signal )
+    for amp, dur in zip(amplitudes, durations):
+        signals.append(amp * np.ones(dur * fs))
+        signals.append(gap_signal)
 
     # Remove the last gap
     signals.pop(-1)
 
+    signals.append(pad_signal)
 
-    signals.append( pad_signal )
-
-    signal = np.concatenate( signals )
-
+    signal = np.concatenate(signals)
 
     if charge is not None:
-        charge_orig = np.sum(np.abs(np.array(amplitudes) * np.array(durations)))
+        charge_orig = np.sum(np.abs(
+            np.array(amplitudes) * np.array(durations)
+        ))
         signal *= charge / charge_orig
 
-
     return signal
-
 
 
 def electrical_amplitudes(
@@ -340,8 +315,7 @@ def electrical_amplitudes(
     else:
         assert ratio is None
 
-
-    ### Normalize polarity
+    # Normalize polarity
     if polarity in ('c', 'cathodic', -1):
         polarity = -1
     elif polarity in ('a', 'anodic', 1):
@@ -349,22 +323,19 @@ def electrical_amplitudes(
     else:
         raise RuntimeError("Unknown polarity")
 
-
-    ### Monophasic pulse
+    # Monophasic pulse
     if len(durations) == 1:
         amplitude = polarity / durations[0]
         amplitudes = (amplitude,)
 
-
-    ### Biphasic pulse
+    # Biphasic pulse
     elif len(durations) == 2:
         amplitudes = (
             +1*polarity * (0.5 / durations[0]),
             -1*polarity * (0.5 / durations[1])
         )
 
-
-    ### Triphasic pulse
+    # Triphasic pulse
     elif len(durations) == 3:
         amplitudes = (
             +1*polarity * (0.5 * ratio / durations[0]),
@@ -378,12 +349,10 @@ def electrical_amplitudes(
     return amplitudes
 
 
-
 def t(signal, fs):
     """Return time vector for `signal` with sampling frequency `fs` (Hz)."""
 
     return np.arange(0, len(signal)) / fs
-
 
 
 def amplitude_modulated_tone(
@@ -439,8 +408,7 @@ def amplitude_modulated_tone(
         s[0:len(ramp_signal)] = s[0:len(ramp_signal)] * ramp_signal
         s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
 
-
     pad_signal = np.zeros(pad * fs)
-    sound = np.concatenate( (s, pad_signal) )
+    sound = np.concatenate((s, pad_signal))
 
     return sound

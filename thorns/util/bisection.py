@@ -10,6 +10,7 @@ __author__ = "Marek Rudnicki"
 
 import numpy as np
 
+
 def find_zero(func, x1, x2, xtol=None, kwargs=None):
     """Find a zero crossing of a function using binary search.
 
