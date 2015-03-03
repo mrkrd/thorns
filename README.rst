@@ -127,15 +127,17 @@ Next, type in your command line::
 Contribute
 ----------
 
+- Open tasks: TODO.org_ (best viewed in Emacs org-mode)
 - Issue Tracker: https://github.com/mrkrd/thorns/issues
 - Source Code: https://github.com/mrkrd/thorns
+
 
 
 Support
 -------
 
-If you are having issues, please let us know by sending an email at
-Marek Rudnicki <marekrud@gmail.com>.
+If you are having issues, please let us know.  We have a mailing list
+located at: cochlea-and-thorns@googlegroups.com
 
 
 
