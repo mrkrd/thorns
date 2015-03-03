@@ -412,3 +412,32 @@ def amplitude_modulated_tone(
     sound = np.concatenate((s, pad_signal))
 
     return sound
+
+
+def roex(freqs, cf, p_lo, p_hi, w, t):
+    """Calculate rounded exponential (roex) function.
+
+    Currently the roex(p,w,t) version is implemented.
+
+    """
+    freqs_lo = freqs[freqs <= cf]
+    freqs_hi = freqs[freqs > cf]
+
+    g_lo = -(freqs_lo - cf) / cf
+    g_hi = (freqs_hi - cf) / cf
+
+    h_lo = (
+        (1 - w)*(1 + p_lo*g_lo)*np.exp(-p_lo*g_lo) +
+        w*(1 + p_lo*g_lo/t)*np.exp(-p_lo*g_lo/t)
+    )
+
+    h_hi = (
+        (1 - w)*(1 + p_hi*g_hi)*np.exp(-p_hi*g_hi) +
+        w*(1 + p_hi*g_hi/t)*np.exp(-p_hi*g_hi/t)
+    )
+
+    # w_hi = (1 + p_hi*g_hi)*np.exp(-p_hi*g_hi)
+
+    h = np.concatenate((h_lo, h_hi))
+
+    return h
