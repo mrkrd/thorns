@@ -9,11 +9,13 @@ __author__ = "Marek Rudnicki"
 __version__ = "0.7.1"
 
 import os
-import sys
 
 
 if 'THpdb' in os.environ:
-    import pdb, sys, traceback
+    import pdb
+    import sys
+    import traceback
+
     def info(type, value, tb):
         traceback.print_exception(type, value, tb)
         pdb.pm()
@@ -33,11 +35,9 @@ if 'THlog' in os.environ:
     logger.setLevel(level)
 
 
-
 import thorns.util
 import thorns.waves
 import thorns.io
-
 
 from thorns.spikes import (
     make_trains,
@@ -47,7 +47,6 @@ from thorns.spikes import (
     trim,
     fold,
 )
-
 
 from thorns.stats import (
     get_duration,
