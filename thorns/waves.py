@@ -290,8 +290,8 @@ def electrical_amplitudes(
     """Calculate amplitudes for each "phase" of signle electrical pulse in
     cochlear implant.
 
-    The resulting pulses are charged ballanced.  The function supports
-    mono-, bi- and tri-phasic pulses.
+    The resulting pulses are charged ballanced (if possible).  The
+    function supports mono-, bi- and tri-phasic pulses.
 
     Parameters
     ----------
@@ -300,7 +300,7 @@ def electrical_amplitudes(
     polarity : {-1, 1, 'c' 'cathodic', 'a', 'anodic'}
         Polarity of the first phase.  -1, 'c' and 'cathodic' are
         equivalent.  As well as 1, 'a' and 'anodic'.
-    ratio : float
+    ratio : float, optional
         Only valid for triphasic pulses.  It is equal to the charge
         ratio between the first and second phase.
 

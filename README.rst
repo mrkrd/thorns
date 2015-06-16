@@ -81,7 +81,7 @@ You can also browse the API documentation at
 https://pythonhosted.org/thorns/
 
 
-.. _DEMO: http://nbviewer.ipython.org/github/mrkrd/thorns/blob/master/examples/thorns_demo.ipynb
+.. _DEMO: https://github.com/mrkrd/thorns/blob/master/examples/thorns_demo.ipynb
 .. _examples: examples
 
 
