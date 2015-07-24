@@ -9,7 +9,9 @@
 * DONE Test for map(dict of lists)
 <2014-08-20 Wed>
 
-* timestamp=True in loaddb() should add timestamp in the output table
+* TODO timestamp=True in loaddb() should add timestamp in the output table
+
+  https://github.com/mrkrd/thorns/pull/3
 
 * DONE Implement a heads-up display for a progress bar in map()
 
