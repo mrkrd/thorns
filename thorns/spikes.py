@@ -262,7 +262,7 @@ def trim(spike_trains, start=0, stop=None):
     Remove all spikes outside of the (`start`, `stop`) range.
 
     """
-    tmin = start
+    tmin = float(start)
 
     if stop is None:
         tmaxs = spike_trains['duration']
