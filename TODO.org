@@ -64,6 +64,6 @@ h = scipy.stats.gaussian_kde(all_spikes, bin_size/np.std(all_spikes,ddof=1))
 bins = np.arange(0, duration, h.factor*np.std(all_spikes,ddof=1)/10)
 hist = h.evaluate(bins)
 #+END_SRC
-* PR #4: Updated IPython import in map
+* DONE PR #4: Updated IPython import in map
 
 https://github.com/mrkrd/thorns/pull/4
