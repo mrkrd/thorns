@@ -174,7 +174,7 @@ def _ipython_map(func, iterable, cfg):
 
     import IPython
 
-    if int(IPython.__version__.split('.')[0]) < 4:
+    if IPython.version_info[0] < 4:
         from IPython.parallel import Client
     else:
         from ipyparallel import Client
