@@ -172,8 +172,9 @@ def _multiprocessing_map(func, iterable, cfg):
 
 def _ipython_map(func, iterable, cfg):
 
+    import IPython
+
     if int(IPython.__version__.split('.')[0]) < 4:
-        import IPython
         from IPython.parallel import Client
     else:
         from ipyparallel import Client
