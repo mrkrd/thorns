@@ -67,3 +67,6 @@ hist = h.evaluate(bins)
 * DONE PR #4: Updated IPython import in map
 
 https://github.com/mrkrd/thorns/pull/4
+
+<2015-08-26 Wed 14:15>
+* Detect unknown/misspelled THxx environment variables
