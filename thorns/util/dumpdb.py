@@ -154,7 +154,7 @@ def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
     ### Drop duplicates and set index
     db = db.drop_duplicates(
         subset=list(xkeys),
-        take_last=True,
+        keep='last',
     )
 
     db = db.set_index(list(xkeys))
