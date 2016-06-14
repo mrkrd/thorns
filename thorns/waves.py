@@ -168,8 +168,8 @@ def ramped_tone(
         s[0:len(ramp_signal)] = s[0:len(ramp_signal)] * ramp_signal
         s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
 
-    pad_signal = np.zeros(pad * fs)
-    pre_signal = np.zeros(pre * fs)
+    pad_signal = np.zeros(int(pad * fs))
+    pre_signal = np.zeros(int(pre * fs))
     sound = np.concatenate((pre_signal, s, pad_signal))
 
     return sound
