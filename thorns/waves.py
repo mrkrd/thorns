@@ -122,7 +122,8 @@ def ramped_tone(
         pad=0,
         pre=0,
         ramp=2.5e-3,
-        dbspl=None
+        dbspl=None,
+        phase=0,
 ):
     """Generate ramped tone singal.
 
@@ -147,6 +148,8 @@ def ramped_tone(
         Amplitude of the tone in dB SPL.  If None (default), no
         scaling.  Scaling is done before ramping and appending the
         pad.
+    phase : float, optional
+        starting phase of the sine signal (default is 0)
 
 
     Returns
@@ -159,7 +162,7 @@ def ramped_tone(
     assert ramp < duration/2
 
     t = np.arange(0, duration, 1/fs)
-    s = np.sin(2 * np.pi * t * freq)
+    s = np.sin(2 * np.pi * t * freq + phase)
     if dbspl is not None:
         s = set_dbspl(s, dbspl)
 
