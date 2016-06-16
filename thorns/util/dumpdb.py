@@ -7,8 +7,6 @@
 from __future__ import division, print_function, absolute_import
 from __future__ import unicode_literals
 
-__author__ = "Marek Rudnicki"
-
 import os
 import datetime
 import logging

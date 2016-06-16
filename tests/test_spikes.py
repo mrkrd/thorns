@@ -2,8 +2,6 @@
 
 from __future__ import division, print_function, absolute_import
 
-__author__ = "Marek Rudnicki"
-
 from numpy.testing import assert_equal
 from pandas.util.testing import assert_frame_equal
 

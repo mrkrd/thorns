@@ -8,7 +8,6 @@ formats.
 
 from __future__ import print_function, division, absolute_import
 
-__author__ = "Jörg Encke"
 
 import struct
 import pandas as pd

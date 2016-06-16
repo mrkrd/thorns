@@ -7,8 +7,6 @@
 
 from __future__ import division, print_function, absolute_import
 
-__author__ = "Marek Rudnicki"
-
 import pandas as pd
 import thorns as th
 

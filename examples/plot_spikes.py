@@ -8,8 +8,6 @@ Zilany et al. (2014) model.
 
 from __future__ import division, absolute_import, print_function
 
-__author__ = "Marek Rudnicki"
-
 import matplotlib.pyplot as plt
 import os
 

@@ -6,8 +6,6 @@
 
 from __future__ import division, absolute_import, print_function
 
-__author__ = "Marek Rudnicki"
-
 from os.path import join, dirname
 
 import numpy as np

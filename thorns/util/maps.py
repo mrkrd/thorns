@@ -8,11 +8,6 @@ caching.
 from __future__ import division, print_function, absolute_import
 from __future__ import unicode_literals
 
-__author__ = "Marek Rudnicki"
-__copyright__ = "Copyright 2014, Marek Rudnicki, Jörg Encke"
-__license__ = "GPLv3+"
-
-
 import cPickle as pickle
 import hashlib
 import os

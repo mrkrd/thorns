@@ -2,8 +2,6 @@
 
 from __future__ import division
 
-__author__ = "Marek Rudnicki"
-
 
 raise NotImplementedError
 
