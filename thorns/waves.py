@@ -149,7 +149,7 @@ def ramped_tone(
         scaling.  Scaling is done before ramping and appending the
         pad.
     phase : float, optional
-        starting phase of the sine signal (default is 0)
+        Starting phase in radians of the sine signal (default is 0).
 
 
     Returns
