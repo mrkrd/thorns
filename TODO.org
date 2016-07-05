@@ -2,9 +2,9 @@
 #+AUTHOR: Marek Rudnicki
 #+CATEGORY: thorns
 
-* Implement th.io.write_mat(fname, trains=spike_trains, bar=bar_obj)
+* TODO Implement th.io.write_mat(fname, trains=spike_trains, bar=bar_obj)
 
-* Python 3 support
+* TODO Python 3 support
 
 * DONE Test for map(dict of lists)
 <2014-08-20 Wed>
@@ -50,8 +50,8 @@ The progress bar is now displayed in the title of the terminal window
 
 Using global variable: thorns.util.maps.is_inside_map
 
-* Implement make_brian_group(trains)
-* Implement kernel density estimation in the place of histograms     :cancel:
+* TODO Implement make_brian_group(trains)
+* CANCELED Implement kernel density estimation in the place of histograms
 
   - PSTH
   - ISIH
@@ -69,4 +69,4 @@ hist = h.evaluate(bins)
 https://github.com/mrkrd/thorns/pull/4
 
 <2015-08-26 Wed 14:15>
-* Detect unknown/misspelled THxx environment variables
+* TODO Detect unknown/misspelled THxx environment variables
