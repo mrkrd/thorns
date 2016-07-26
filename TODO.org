@@ -50,7 +50,11 @@ The progress bar is now displayed in the title of the terminal window
 
 Using global variable: thorns.util.maps.is_inside_map
 
-* TODO Implement make_brian_group(trains)
+* CANCELED Implement make_brian_group(trains)
+  CLOSED: [2016-07-26 Tue 17:35]
+
+  Cancel: It's implemented in mrkrd/cochlea at the moment.
+
 * CANCELED Implement kernel density estimation in the place of histograms
 
   - PSTH
