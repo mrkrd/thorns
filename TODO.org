@@ -2,7 +2,8 @@
 #+AUTHOR: Marek Rudnicki
 #+CATEGORY: thorns
 
-* TODO Implement th.io.write_mat(fname, trains=spike_trains, bar=bar_obj)
+* MAYBE Implement th.io.write_mat(fname, trains=spike_trains, bar=bar_obj)
+  CLOSED: [2016-08-21 Sun 16:57]
 
 * TODO Python 3 support
 
