@@ -8,7 +8,12 @@ caching.
 from __future__ import division, print_function, absolute_import
 from __future__ import unicode_literals
 
-import cPickle as pickle
+from sys import version
+if version[0]=='2':
+    import cPickle as pickle
+else:
+    import pickle
+
 import hashlib
 import os
 import time
