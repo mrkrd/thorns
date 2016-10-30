@@ -244,7 +244,8 @@ def test_vector_strength():
 
     ### Perfect synchrony
     trains = th.make_trains(
-        [np.zeros(100)]
+        [np.zeros(100)],
+        duration=0.1
     )
     si = th.vector_strength(
         trains,
