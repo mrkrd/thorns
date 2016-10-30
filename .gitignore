@@ -10,3 +10,4 @@ dist
 .ipynb_checkpoints
 _build
 *.html
+.cache
