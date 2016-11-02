@@ -75,7 +75,8 @@ https://github.com/mrkrd/thorns/pull/4
 
 <2015-08-26 Wed 14:15>
 * TODO Detect unknown/misspelled THxx environment variables
-* TODO PR #7: compatibility with Python 3
+* DONE PR #7: compatibility with Python 3
+  CLOSED: [2016-11-02 Wed 17:03]
 
   https://github.com/mrkrd/thorns/pull/7
 
