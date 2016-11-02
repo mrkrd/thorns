@@ -9,9 +9,10 @@ from __future__ import division, print_function, absolute_import
 from __future__ import unicode_literals
 
 from sys import version
-if version[0]=='2':
+
+try:
     import cPickle as pickle
-else:
+except ImportError:
     import pickle
 
 import hashlib

@@ -12,10 +12,6 @@ import datetime
 import logging
 
 from sys import version
-import itertools
-if version[0]=='2':
-    itertools.zip_longest=itertools.izip_longest
-from itertools import zip_longest
 import shelve
 import collections
 
