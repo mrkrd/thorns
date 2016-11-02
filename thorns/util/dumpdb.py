@@ -10,7 +10,12 @@ from __future__ import unicode_literals
 import os
 import datetime
 import logging
-from itertools import izip_longest
+
+from sys import version
+import itertools
+if version[0]=='2':
+    itertools.zip_longest=itertools.izip_longest
+from itertools import zip_longest
 import shelve
 import collections
 
