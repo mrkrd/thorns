@@ -5,6 +5,7 @@ from __future__ import division, print_function, absolute_import
 import shutil
 import pytest
 import tempfile
+import os
 
 import numpy as np
 from numpy.testing import assert_equal
@@ -12,6 +13,8 @@ import pandas as pd
 from pandas.util.testing import assert_frame_equal
 
 import thorns as th
+
+import transit.reader
 
 
 @pytest.fixture(scope="function")
@@ -149,3 +152,28 @@ def test_kwargs(workdir):
 
 
     assert_frame_equal(db, expected)
+
+
+
+
+def test_dump_transit(workdir):
+
+    data = pd.DataFrame([
+        {'a': 1, 'b': 1.1, 'c': 1   },
+        {'a': 2, 'b': 2.2, 'c': 4   },
+        {'a': 3, 'b': 3.3, 'c': 9   },
+    ]).set_index(['a', 'b'])
+
+    th.util.dumpdb(data, workdir=workdir, backend='transit')
+
+    reader = transit.reader.Reader('json')
+
+    fname = os.path.join(workdir, 'dump.json')
+
+    with open(fname, 'r') as f:
+        actual = reader.read(f)
+
+    desired = data.reset_index().to_dict('records')
+
+    for a, d in zip(actual, desired):
+        assert dict(a) == d

@@ -20,9 +20,57 @@ import tables
 import numpy as np
 import pandas as pd
 
+from math import isnan
 
 logger = logging.getLogger('thorns')
 
+
+class NDArrayHandler(object):
+    @staticmethod
+    def tag(a):
+        return 'array'
+
+    @staticmethod
+    def rep(a):
+        return a.tolist()
+
+    @staticmethod
+    def string_rep(a):
+        return None
+
+
+class NumpyIntHandler(object):
+    @staticmethod
+    def tag(i):
+        return 'i'
+
+    @staticmethod
+    def rep(i):
+        return int(i)
+
+    @staticmethod
+    def string_rep(i):
+        return str(i)
+
+
+class NumpyFloatHandler(object):
+    @staticmethod
+    def tag(f):
+        return "z" if isnan(f) or f in (float('Inf'), float('-Inf')) else "d"
+
+    @staticmethod
+    def rep(f):
+        if isnan(f):
+            return "NaN"
+        if f == float('Inf'):
+            return "INF"
+        if f == float("-Inf"):
+            return "-INF"
+        return float(f)
+
+    @staticmethod
+    def string_rep(f):
+        return str(f)
 
 
 def get_store(name='store', workdir='work'):
@@ -42,7 +90,7 @@ def get_store(name='store', workdir='work'):
 
 
 
-def dumpdb(data, name='dump', workdir='work', kwargs=None):
+def dumpdb(data, name='dump', workdir='work', backend='hdf', kwargs=None):
     """Dump data in order to recall the most up-to-date records later.
 
     Parameters
@@ -53,34 +101,55 @@ def dumpdb(data, name='dump', workdir='work', kwargs=None):
         Base name of the pickle file.
     workdir : str, optional
         Directory for the data.
+    backend : str, optional
+        Data storage format.
     kwargs : dict, optional
         Additional parameters common for all data (MultiIndex will be
         extended).
 
     """
-    fname = os.path.join(workdir, name+'.h5')
-
     if not os.path.exists(workdir):
         os.makedirs(workdir)
-
-    logger.info("Dumping data into {}.".format(fname))
-
 
     if kwargs is not None:
         for k,v in kwargs.items():
             data[k] = v
         data = data.set_index(kwargs.keys(), append=True)
 
+    if backend == 'hdf':
+        fname = os.path.join(workdir, name+'.h5')
 
-    now = datetime.datetime.now()
-    key = now.strftime("T%Y%m%d_%H%M%S_%f")
+        logger.info("Dumping data into {}.".format(fname))
 
-    store = pd.io.pytables.HDFStore(fname, 'a')
-    store[key] = data
+        now = datetime.datetime.now()
+        key = now.strftime("T%Y%m%d_%H%M%S_%f")
 
-    store.close()
+        store = pd.io.pytables.HDFStore(fname, 'a')
+        store[key] = data
 
+        store.close()
 
+    elif backend == 'transit':
+        from transit.writer import Writer
+        from transit.reader import Reader
+
+        fname = os.path.join(workdir, name+'.json')
+
+        logger.info("Dumping data into {}.".format(fname))
+
+        d = data.reset_index().to_dict('records')
+
+        with open(fname, 'w') as f:
+            writer = Writer(f, 'json')
+
+            writer.register(np.ndarray, NDArrayHandler)
+            writer.register(np.int64, NumpyIntHandler)
+            writer.register(np.float64, NumpyFloatHandler)
+
+            writer.write(d)
+
+    else:
+        raise NotImplementedError()
 
 
 

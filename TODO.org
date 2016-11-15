@@ -81,4 +81,5 @@ https://github.com/mrkrd/thorns/pull/4
   https://github.com/mrkrd/thorns/pull/7
 
   https://docs.python.org/3/howto/pyporting.html#use-feature-detection-instead-of-version-detection
-* TODO Add transit backend for dumpdb
+* DONE Add transit backend for dumpdb
+  CLOSED: [2016-11-16 Wed 00:07]
