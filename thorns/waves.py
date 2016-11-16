@@ -212,7 +212,7 @@ def white_noise(
     s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
 
     # Padding
-    pad_signal = np.zeros(pad * fs)
+    pad_signal = np.zeros(int(pad * fs))
     s = np.concatenate((s, pad_signal))
 
     return s
@@ -258,8 +258,8 @@ def electrical_pulse(
         raise ValueError("`amplitudes` and `durations`" +
                          " must have the same length.")
 
-    gap_signal = np.zeros(gap * fs)
-    pad_signal = np.zeros(pad * fs)
+    gap_signal = np.zeros(int(gap * fs))
+    pad_signal = np.zeros(int(pad * fs))
 
     signals = []
     for amp, dur in zip(amplitudes, durations):
@@ -408,7 +408,7 @@ def amplitude_modulated_tone(
         s[0:len(ramp_signal)] = s[0:len(ramp_signal)] * ramp_signal
         s[-len(ramp_signal):] = s[-len(ramp_signal):] * ramp_signal[::-1]
 
-    pad_signal = np.zeros(pad * fs)
+    pad_signal = np.zeros(int(pad * fs))
     sound = np.concatenate((s, pad_signal))
 
     return sound
