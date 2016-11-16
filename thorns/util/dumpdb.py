@@ -129,6 +129,20 @@ def dumpdb(data, name='dump', workdir='work', backend='hdf', kwargs=None):
 
         store.close()
 
+    elif backend == 'shelve':
+        fname = os.path.join(workdir, name+'.db')
+
+        logger.info("Dumping data into {}.".format(fname))
+
+        now = datetime.datetime.now()
+        key = now.strftime("T%Y%m%d_%H%M%S_%f")
+
+        store = shelve.open(fname, protocol=-1)
+
+        store[key] = data
+
+        store.close()
+
     elif backend == 'transit':
         from transit.writer import Writer
         from transit.reader import Reader
@@ -153,7 +167,7 @@ def dumpdb(data, name='dump', workdir='work', backend='hdf', kwargs=None):
 
 
 
-def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
+def loaddb(name='dump', workdir='work', backend='hdf', timestamp=False, load_all=False):
     """Recall dumped data discarding duplicated records.
 
     Parameters
@@ -162,6 +176,8 @@ def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
         Base of the data filename.
     workdir : str, optional
         Directory where the data is stored.
+    backend : str, optional
+        Backend used for data storage.
     timestamp : bool, optional
         Add an extra column with timestamps to the index.
     load_all : bool, optional
@@ -175,14 +191,25 @@ def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
         Data without duplicates.
 
     """
-
     if timestamp:
         raise NotImplementedError("Should add extra columnt with timestamps to the index of the output.")
 
 
+    if backend == 'hdf':
+        db = _loaddb_hdf(name, workdir, load_all)
+    elif backend == 'shelve':
+        db = _loaddb_shelve(name, workdir, load_all)
+    else:
+        raise NotImplementedError()
+
+    return db
+
+
+
+def _loaddb_hdf(name, workdir, load_all):
+
     fname = os.path.join(workdir, name+'.h5')
     store = pd.io.pytables.HDFStore(fname, 'r')
-
 
     logger.info("Loading data from {}".format(fname))
 
@@ -202,9 +229,7 @@ def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
             df = df.reset_index()
             dbs.append(df)
 
-
         db = pd.concat(dbs)
-
 
     else:
         last_key = sorted(store.keys())[-1]
@@ -214,10 +239,7 @@ def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
 
         db = df.reset_index()
 
-
     store.close()
-
-
 
     ### Drop duplicates and set index
     db = db.drop_duplicates(
@@ -227,6 +249,37 @@ def loaddb(name='dump', workdir='work', timestamp=False, load_all=False):
 
     db = db.set_index(list(xkeys))
 
+    return db
 
+
+
+
+def _loaddb_shelve(name, workdir, load_all):
+
+    if load_all:
+        raise NotImplementedError()
+
+    fname = os.path.join(workdir, name+'.db')
+    store = shelve.open(fname, protocol=-1)
+
+    logger.info("Loading data from {}".format(fname))
+
+    last_key = sorted(store.keys())[-1]
+
+    df = store[last_key]
+
+    store.close()
+
+    # Drop records with duplicated keys
+    xkeys = df.index.names
+
+    db = df.reset_index()
+
+    db = db.drop_duplicates(
+        subset=list(xkeys),
+        keep='last',
+    )
+
+    db = db.set_index(list(xkeys))
 
     return db
