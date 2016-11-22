@@ -36,7 +36,7 @@ def psth(spike_trains, bin_size, normalize=True, **kwargs):
     all_spikes = np.concatenate(tuple(spike_trains['spikes']))
 
     duration = get_duration(spike_trains)
-    nbins = np.ceil(duration / bin_size)
+    nbins = int(np.ceil(duration / bin_size))
 
     if nbins == 0:
         return None, None
