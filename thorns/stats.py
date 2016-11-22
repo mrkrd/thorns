@@ -77,7 +77,7 @@ def isih(spike_trains, bin_size, **kwargs):
     if len(isis) == 0:
         return None, None
 
-    nbins = np.ceil(np.max(isis) / bin_size)
+    nbins = int(np.ceil(np.max(isis) / bin_size))
 
     hist, bin_edges = np.histogram(
         isis,
@@ -292,7 +292,7 @@ def shuffled_autocorrelogram(
     trains = spike_trains['spikes']
     trial_num = len(trains)
 
-    nbins = np.ceil(analysis_window / coincidence_window)
+    nbins = int(np.ceil(analysis_window / coincidence_window))
 
     cum = []
     for i,train in enumerate(trains):
