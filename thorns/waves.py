@@ -287,8 +287,8 @@ def electrical_amplitudes(
         polarity,
         ratio=None,
 ):
-    """Calculate amplitudes for each "phase" of signle electrical pulse in
-    cochlear implant.
+    """Calculate amplitudes of each "phase" in a signle electrical pulse
+    in a cochlear implant.
 
     The resulting pulses are charged ballanced (if possible).  The
     function supports mono-, bi- and tri-phasic pulses.
