@@ -14,6 +14,7 @@ import logging
 from sys import version
 import shelve
 import collections
+import cPickle as pickle
 
 import tables
 
@@ -77,7 +78,6 @@ def get_store(name='store', workdir='work'):
     """Return a quick and dirty shelve based persisten dict-like store.
 
     """
-
     fname = os.path.join(workdir, name + '.db')
 
     if not os.path.exists(workdir):
@@ -87,6 +87,31 @@ def get_store(name='store', workdir='work'):
 
     return store
 
+
+def dump(data, name, workdir='work', backend='pickle'):
+    """Dump a data object."""
+    if not os.path.exists(workdir):
+        os.makedirs(workdir)
+
+    if backend == 'pickle':
+        fname = os.path.join(workdir, name+'.pkl')
+
+        with open(fname, 'w') as f:
+            pickle.dump(data, f, -1)
+
+    elif backend == 'transit':
+        fname = os.path.join(workdir, name+'.json')
+
+        from transit.writer import Writer
+
+        with open(fname, 'w') as f:
+            writer = Writer(f, 'json')
+
+            writer.register(np.ndarray, NDArrayHandler)
+            writer.register(np.int64, NumpyIntHandler)
+            writer.register(np.float64, NumpyFloatHandler)
+
+            writer.write(data)
 
 
 
@@ -145,22 +170,12 @@ def dumpdb(data, name='dump', workdir='work', backend='hdf', kwargs=None):
 
     elif backend == 'transit':
         from transit.writer import Writer
-        from transit.reader import Reader
-
-        fname = os.path.join(workdir, name+'.json')
 
         logger.info("Dumping data into {}.".format(fname))
 
         d = data.reset_index().to_dict('records')
 
-        with open(fname, 'w') as f:
-            writer = Writer(f, 'json')
-
-            writer.register(np.ndarray, NDArrayHandler)
-            writer.register(np.int64, NumpyIntHandler)
-            writer.register(np.float64, NumpyFloatHandler)
-
-            writer.write(d)
+        dump(d, name=name, workdir=workdir, backend='transit')
 
     else:
         raise NotImplementedError()
