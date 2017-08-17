@@ -7,7 +7,7 @@ with open('README.rst') as file:
 
 setup(
     name = "thorns",
-    version = "0.8",
+    version = "0.9",
     author = "Marek Rudnicki",
     author_email = "marek.rudnicki@tum.de",
 
