@@ -398,7 +398,7 @@ def amplitude_modulated_tone(
     assert fs/2 >= fc > fm
 
     t = np.arange(0, duration, 1/fs)
-    s = (1 + m*np.sin(2*np.pi*fm*t)) * np.sin(2*np.pi*fc*t)
+    s = (1 - m*np.cos(2*np.pi*fm*t)) * np.sin(2*np.pi*fc*t)
 
     if dbspl is not None:
         s = set_dbspl(s, dbspl)
