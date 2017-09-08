@@ -188,7 +188,7 @@ def trains_to_array(spike_trains, fs):
 
     duration = get_duration(spike_trains)
 
-    nbins = np.ceil(duration * fs)
+    nbins = int(np.ceil(duration * fs))
     tmax = nbins / fs
 
     signals = []

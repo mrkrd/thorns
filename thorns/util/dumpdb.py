@@ -171,7 +171,7 @@ def dumpdb(data, name='dump', workdir='work', backend='hdf', kwargs=None):
     elif backend == 'transit':
         from transit.writer import Writer
 
-        logger.info("Dumping data into {}.".format(fname))
+        logger.info("Dumping data into {}.".format(name))
 
         d = data.reset_index().to_dict('records')
 
