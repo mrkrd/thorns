@@ -263,7 +263,7 @@ def electrical_pulse(
 
     signals = []
     for amp, dur in zip(amplitudes, durations):
-        signals.append(amp * np.ones(dur * fs))
+        signals.append(amp * np.ones(int(dur * fs)))
         signals.append(gap_signal)
 
     # Remove the last gap
