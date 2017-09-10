@@ -293,7 +293,7 @@ def _publish_status(status, where='stdout', func_name=""):
 
     if where == 'file':
         dirname = status['dir']
-        fname = os.path.join(dirname, 'status_' + name)
+        fname = os.path.join(dirname, name)
 
         if not os.path.exists(dirname):
             os.makedirs(dirname)
@@ -451,7 +451,7 @@ def map(
         'bar': [],
         'times':[],
         'start_time':time.time(),
-        'dir': workdir
+        'dir': os.path.join(workdir, 'status')
     }
 
     cachedir = os.path.join(workdir, 'map_cache')
