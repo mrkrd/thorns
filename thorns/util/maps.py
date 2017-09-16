@@ -270,7 +270,7 @@ def _publish_status(status, where='stdout', func_name=""):
     )[0]
 
     ### Bar
-    bar_len = 20
+    bar_len = 10
 
     bar = (
         "O" * int(round(bar_len * status['loaded']/status['all'])) +
