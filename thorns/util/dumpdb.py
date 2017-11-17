@@ -114,6 +114,26 @@ def dump(data, name, workdir='work', backend='pickle'):
             writer.write(data)
 
 
+def load(name, workdir='work', backend='pickle'):
+    """Load a simple object from a store (no db)."""
+    if not os.path.exists(workdir):
+        os.makedirs(workdir)
+
+    if backend == 'transit':
+        fname = os.path.join(workdir, name+'.json')
+
+        from transit.reader import Reader
+
+        with open(fname, 'r') as f:
+            reader = Reader('json')
+
+            data = reader.read(f)
+
+    else:
+        raise NotImplementedError("load: {} backend not implemented".format(backend))
+
+    return data
+
 
 def dumpdb(data, name='dump', workdir='work', backend='hdf', kwargs=None):
     """Dump data in order to recall the most up-to-date records later.

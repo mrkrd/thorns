@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 
 import os
 
-from . dumpdb import dumpdb, loaddb, get_store, dump
+from . dumpdb import dumpdb, loaddb, get_store, dump, load
 from . maps import map, cache
 from . bisection import find_zero
 
