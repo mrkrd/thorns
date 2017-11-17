@@ -47,11 +47,15 @@ class _FuncWrap(object):
     def __call__(self, data):
         func = self.func
 
+        ## Trim the data dict to the function spec
+        arg_names = inspect.getargspec(func).args
+        data_filtered = {k: data[k] for k in arg_names}
+
         global is_inside_map
 
         is_inside_map = True
         start = time.time()
-        ans = func(**data)
+        ans = func(**data_filtered)
         dt = time.time() - start
         is_inside_map = False
 

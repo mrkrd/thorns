@@ -18,7 +18,7 @@ import thorns as th
 def square(x):
     return x**2
 
-def multiply(x,y):
+def multiply(x, y):
     return x*y
 
 
@@ -129,7 +129,7 @@ def test_map_cache_with_kwargs(workdir):
         kwargs={'y': 2},
     )
 
-    # It should *not* recall old results, even thour space is the
+    # It should *not* recall old results, even though space is the
     # same.  It should calculate new results, because kwargs are not
     # the same.
     results = th.util.map(
@@ -152,7 +152,32 @@ def test_map_cache_with_kwargs(workdir):
 
 
 
+def test_larger_dict_than_required_kwargs(workdir):
 
+    space = [{
+        'x': 1,
+        'y': 2,
+        'bla': 12,
+    }]
+
+    results = th.util.map(
+        multiply,
+        space,
+        backend='serial',
+        cache='no',
+        workdir=workdir,
+    )
+
+    assert set(results.index.names) == set(space[0].keys())
+
+    expected = pd.DataFrame({
+        'x': [1],
+        'y': [2],
+        'bla': [12],
+        0: [2],
+    }).set_index(results.index.names)
+
+    assert_frame_equal(results, expected)
 
 
 def test_map_multiprocessing(workdir):
