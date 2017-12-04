@@ -49,7 +49,10 @@ class _FuncWrap(object):
 
         ## Trim the data dict to the function spec
         arg_names = inspect.getargspec(func).args
-        data_filtered = {k: data[k] for k in arg_names}
+        data_filtered = {}
+        for k in arg_names:
+            if k in data:
+                data_filtered[k] = data[k]
 
         global is_inside_map
 
