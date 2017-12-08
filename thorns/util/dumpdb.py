@@ -14,7 +14,10 @@ import logging
 from sys import version
 import shelve
 import collections
-import cPickle as pickle
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 import tables
 

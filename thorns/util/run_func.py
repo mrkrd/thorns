@@ -5,9 +5,13 @@ from __future__ import print_function
 
 import time
 import socket
-import cPickle as pickle
 import sys
 import imp
+
+try:
+    import cPickle as pickle
+except ImportError:
+    import pickle
 
 from thorns.util.maps import _FuncWrap
 
