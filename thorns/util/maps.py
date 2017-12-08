@@ -126,7 +126,7 @@ def _serial_isolated_map(func, iterable, cfg):
         )
 
         module_name = inspect.getfile(func)
-        func_name = func.func_name
+        func_name = func.__name__
         data = (module_name, func_name, args)
 
         ### make a socket
@@ -522,8 +522,8 @@ def map(
     for how,fname in zip(hows,cache_files):
 
         if cfg['publish_status']:
-            _publish_status(status, 'file', func_name=func.func_name)
-            _publish_status(status, 'title', func_name=func.func_name)
+            _publish_status(status, 'file', func_name=func.__name__)
+            _publish_status(status, 'title', func_name=func.__name__)
 
 
         if how == 'load':
@@ -555,10 +555,10 @@ def map(
 
 
     if cfg['publish_status']:
-        _publish_status(status, 'file', func_name=func.func_name)
-        _publish_status(status, 'title', func_name=func.func_name)
-        _publish_status(status, 'stdout', func_name=func.func_name)
-        _publish_status(status, 'notify', func_name=func.func_name)
+        _publish_status(status, 'file', func_name=func.__name__)
+        _publish_status(status, 'title', func_name=func.__name__)
+        _publish_status(status, 'stdout', func_name=func.__name__)
+        _publish_status(status, 'notify', func_name=func.__name__)
 
 
 
