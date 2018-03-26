@@ -97,7 +97,11 @@ def set_dbspl(signal, dbspl):
 
 def resample(signal, fs, new_fs):
     """Resample `signal` from `fs` to `new_fs`."""
-    new_signal = dsp.resample(signal, len(signal)*new_fs/fs)
+    new_signal = dsp.resample(
+        signal,
+        int(len(signal)*new_fs/fs)
+    )
+
     return new_signal
 
 
