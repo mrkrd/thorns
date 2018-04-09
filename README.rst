@@ -27,7 +27,7 @@ The software was originally developed during my PhD in the group of
 research, but it could be easily extended.
 
 .. _`spike trains`: https://en.wikipedia.org/wiki/Spike_train
-.. _`Werner Hemmert`: http://www.imetum.tum.de/en/research-groups/bai/
+.. _`Werner Hemmert`: https://www.ei.tum.de/en/bai/home/
 
 
 
