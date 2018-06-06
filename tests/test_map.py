@@ -311,7 +311,11 @@ def test_dict_of_lists():
     )
 
 
-    assert_frame_equal(actual, expected)
+    assert_frame_equal(
+        actual,
+        expected,
+        check_like=True,
+    )
 
 
 

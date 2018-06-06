@@ -162,7 +162,7 @@ def dumpdb(data, name='dump', workdir='work', backend='hdf', kwargs=None):
     if kwargs is not None:
         for k,v in kwargs.items():
             data[k] = v
-        data = data.set_index(kwargs.keys(), append=True)
+        data = data.set_index(list(kwargs), append=True)
 
     if backend == 'hdf':
         fname = os.path.join(workdir, name+'.h5')

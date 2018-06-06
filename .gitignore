@@ -11,3 +11,4 @@ dist
 _build
 *.html
 .cache
+.pytest_cache

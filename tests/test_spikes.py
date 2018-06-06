@@ -166,7 +166,11 @@ def test_accumulate():
         cfs=[1,2,3]
     )
 
-    assert_frame_equal(accumulated, expected)
+    assert_frame_equal(
+        accumulated,
+        expected,
+        check_like=True,
+    )
 
 
 
