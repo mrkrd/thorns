@@ -19,8 +19,6 @@ try:
 except ImportError:
     import pickle
 
-import tables
-
 import numpy as np
 import pandas as pd
 
