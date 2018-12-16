@@ -35,5 +35,5 @@ setup(
     ],
 
     platforms = ["Linux", "Windows", "FreeBSD"],
-    install_requires=["numpy", "pandas", "scipy"],
+    install_requires=["numpy", "pandas", "scipy", "tables"],
 )
