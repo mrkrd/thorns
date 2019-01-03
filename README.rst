@@ -113,6 +113,7 @@ dependencies first:
 - Numpy
 - Scipy
 - Pandas
+- PyTables / tables
 - Matplotlib
 
 - py-notify (optional, enables notifications)
