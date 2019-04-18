@@ -1,0 +1,173 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /home/marek/projects/thorns/TODO.org
+
+
+* CANCELED Implement th.io.write_mat(fname, trains=spike_trains, bar=bar_obj)
+  CLOSED: [2016-10-02 Sun 20:41]
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:28
+  :ARCHIVE_FILE: ~/projects/thorns/TODO.org
+  :ARCHIVE_CATEGORY: thorns
+  :ARCHIVE_TODO: CANCELED
+  :END:
+
+
+Archived entries from file /home/marek/projects/thorns/TODO.org
+
+
+* DONE Test for map(dict of lists)
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:28
+  :ARCHIVE_FILE: ~/projects/thorns/TODO.org
+  :ARCHIVE_CATEGORY: thorns
+  :ARCHIVE_TODO: DONE
+  :END:
+<2014-08-20 Wed>
+
+
+Archived entries from file /home/marek/projects/thorns/TODO.org
+
+
+* DONE Implement a heads-up display for a progress bar in map()
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:28
+  :ARCHIVE_FILE: ~/projects/thorns/TODO.org
+  :ARCHIVE_CATEGORY: thorns
+  :ARCHIVE_TODO: DONE
+  :END:
+
+  - try with standard '\r' or some terminal commands
+  - try the package blessings
+
+<2014-08-23 Sat>
+
+It's quite messy to use the terminal as the output for the progress
+bar and the subprocesses at the same time.  I prefer to a clean output
+of the task processes.
+
+The progress bar is now displayed in the title of the terminal window
+(if possible).
+
+
+
+Archived entries from file /home/marek/projects/thorns/TODO.org
+
+
+* DONE loaddb() should load the last table by default
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:28
+  :ARCHIVE_FILE: ~/projects/thorns/TODO.org
+  :ARCHIVE_CATEGORY: thorns
+  :ARCHIVE_TODO: DONE
+  :END:
+
+  - add `load_all=True' parameter to load all tables (but drop
+    duplicates)
+
+<2014-08-23 Sat>
+
+
+Archived entries from file /home/marek/projects/thorns/TODO.org
+
+
+* DONE Allow nested map()
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:28
+  :ARCHIVE_FILE: ~/projects/thorns/TODO.org
+  :ARCHIVE_CATEGORY: thorns
+  :ARCHIVE_TODO: DONE
+  :END:
+
+  - force the serial backend in the nested maps
+  - inhibit _publish_status() in the nested maps
+  - possible communication channel: sys.environ (how's multiprocessing
+    doing it?)
+
+<2014-10-28 Tue>
+<2014-10-31 Fri>
+
+Using global variable: thorns.util.maps.is_inside_map
+
+
+Archived entries from file /home/marek/projects/thorns/TODO.org
+
+
+* CANCELED Implement make_brian_group(trains)
+  CLOSED: [2016-07-26 Tue 17:35]
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:28
+  :ARCHIVE_FILE: ~/projects/thorns/TODO.org
+  :ARCHIVE_CATEGORY: thorns
+  :ARCHIVE_TODO: CANCELED
+  :END:
+
+  Cancel: It's implemented in mrkrd/cochlea at the moment.
+
+
+Archived entries from file /home/marek/projects/thorns/TODO.org
+
+
+* CANCELED Implement kernel density estimation in the place of histograms
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:28
+  :ARCHIVE_FILE: ~/projects/thorns/TODO.org
+  :ARCHIVE_CATEGORY: thorns
+  :ARCHIVE_TODO: CANCELED
+  :END:
+
+  - PSTH
+  - ISIH
+  - period histogram
+
+
+#+BEGIN_SRC python
+h = scipy.stats.gaussian_kde(all_spikes, bin_size/np.std(all_spikes,ddof=1))
+
+bins = np.arange(0, duration, h.factor*np.std(all_spikes,ddof=1)/10)
+hist = h.evaluate(bins)
+#+END_SRC
+
+Archived entries from file /home/marek/projects/thorns/TODO.org
+
+
+* DONE PR #4: Updated IPython import in map
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:28
+  :ARCHIVE_FILE: ~/projects/thorns/TODO.org
+  :ARCHIVE_CATEGORY: thorns
+  :ARCHIVE_TODO: DONE
+  :END:
+
+https://github.com/mrkrd/thorns/pull/4
+
+<2015-08-26 Wed 14:15>
+
+Archived entries from file /home/marek/projects/thorns/TODO.org
+
+
+* DONE PR #7: compatibility with Python 3
+  CLOSED: [2016-11-02 Wed 17:03]
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:28
+  :ARCHIVE_FILE: ~/projects/thorns/TODO.org
+  :ARCHIVE_CATEGORY: thorns
+  :ARCHIVE_TODO: DONE
+  :END:
+
+  https://github.com/mrkrd/thorns/pull/7
+
+  https://docs.python.org/3/howto/pyporting.html#use-feature-detection-instead-of-version-detection
+
+Archived entries from file /home/marek/projects/thorns/TODO.org
+
+
+* DONE Add transit backend for dumpdb
+  CLOSED: [2016-11-16 Wed 00:07]
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2019-04-17 Wed 14:28
+  :ARCHIVE_FILE: ~/projects/thorns/TODO.org
+  :ARCHIVE_CATEGORY: thorns
+  :ARCHIVE_TODO: DONE
+  :END:
