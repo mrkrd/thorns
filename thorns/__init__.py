@@ -4,7 +4,7 @@
 
 from __future__ import division, print_function, absolute_import
 
-__version__ = "1"
+__version__ = "2"
 
 import os
 
